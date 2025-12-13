@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import { upload } from "./multer.js";
+import path from "path";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -17,6 +19,27 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
+
+app.use(
+  "/finished/images",
+  express.static(path.join(process.cwd(), "uploads/finished/images"))
+);
+
+app.use(
+  "/raw/images",
+  express.static(path.join(process.cwd(), "uploads/raw/images"))
+);
+
+app.use(
+  "/finished/videos",
+  express.static(path.join(process.cwd(), "uploads/finished/videos"))
+);
+
+app.use(
+  "/raw/videos",
+  express.static(path.join(process.cwd(), "uploads/raw/videos"))
+);
+
 
 
 // ============================
@@ -181,6 +204,35 @@ app.post("/seller/login", async (req, res) => {
 });
 
 /* =========================
+   GET USER BY EMAIL
+========================= */
+app.get("/user/:email", async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("GET USER ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
+
+
+/* =========================
    CREATE SELLER BUSINESS DETAILS
 ========================= */
 app.post("/seller/business-details", async (req, res) => {
@@ -269,50 +321,132 @@ app.get("/seller/:sellerId/business-details", async (req, res) => {
   }
 });
 
-/* ============================
-   ADD PRODUCT ROUTE
-============================ */
-app.post("/seller/product", async (req, res) => {
-  try {
-    const {
-      sellerId,
-      name,
-      price,
-      productType,
-      category,
-      description,
-      images,
-      video,
-    } = req.body;
-
-    if (!sellerId || !name || !price || !category || !images?.length) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const product = await prisma.product.create({
-      data: {
-        sellerId: Number(sellerId),
+/* =========================
+   ADD PRODUCT
+========================= */
+app.post(
+  "/seller/product",
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "video", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        sellerId,
         name,
-        price: Number(price),
+        price,
         productType,
         category,
         description,
-        images,
-        video,
+      } = req.body;
+
+      /* =========================
+         BASIC VALIDATION
+      ========================= */
+      if (!sellerId || !name || !price || !productType || !category) {
+        return res.status(400).json({
+          message: "Missing required fields",
+        });
+      }
+
+      if (!req.files?.images || req.files.images.length === 0) {
+        return res.status(400).json({
+          message: "At least one image is required",
+        });
+      }
+
+      /* =========================
+         IMAGE PATHS (1–5)
+      ========================= */
+      const imagePaths = req.files.images.map((file) => {
+        // normalize Windows paths
+        const normalizedPath = file.path.replace(/\\/g, "/");
+
+        // remove "uploads/" so it matches express.static
+        return normalizedPath.replace("uploads/", "");
+      });
+
+      /* =========================
+         VIDEO PATH (OPTIONAL)
+      ========================= */
+      let videoPath = null;
+
+      if (req.files.video && req.files.video.length > 0) {
+        videoPath = req.files.video[0].path
+          .replace(/\\/g, "/")
+          .replace("uploads/", "");
+      }
+
+      /* =========================
+         SAVE TO DATABASE
+      ========================= */
+      const product = await prisma.product.create({
+        data: {
+          sellerId: Number(sellerId),
+          name,
+          price: Number(price),
+          productType: productType.toLowerCase(), // IMPORTANT
+          category,
+          description,
+          images: imagePaths, // String[]
+          video: videoPath,   // String | null
+        },
+      });
+
+      return res.status(201).json({
+        message: "Product added successfully",
+        product,
+      });
+
+    } catch (err) {
+      console.error("ADD PRODUCT ERROR:", err);
+      return res.status(500).json({
+        message: "Server error while adding product",
+      });
+    }
+  }
+);
+
+
+
+
+// ============================
+// GET PRODUCTS BY TYPE
+// ============================
+app.get("/products", async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    const products = await prisma.product.findMany({
+      where: type ? { productType: type } : {},
+      include: {
+        seller: {
+          select: {
+            name: true,
+            business: {
+              select: {
+                city: true,
+                state: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
-    res.status(201).json(product);
+    res.json(products);
   } catch (err) {
-    console.error("ADD PRODUCT ERROR:", err);
-    res.status(500).json({ message: "Server error while adding product" });
+    console.error("FETCH PRODUCTS ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch products" });
   }
 });
 
-/* ============================
-   SERVER START
-============================ */
-const PORT = 3001;
+
+
 
 
 

@@ -25,15 +25,21 @@ const ProductInfo = () => {
     seller = "Reliable Seller",
     origin = "Pune, Maharashtra",
     price = 1000,
-    image,
+    images = [],
     description = "No description available.",
   } = product;
+
+
 
   /* =========================================
      IMAGE HANDLING (Frontend-safe)
   ========================================= */
-  const images = [image || sample];
-  const [activeImage, setActiveImage] = useState(images[0]);
+  const imageList =
+    images.length > 0
+      ? images
+      : [sample];
+
+  const [activeImage, setActiveImage] = useState(imageList[0]);
 
   /* =========================================
      DESCRIPTION LOGIC
@@ -55,21 +61,21 @@ const ProductInfo = () => {
   ========================================= */
   const handleAddToCart = () => {
     addToCart({
-      productId: id,
-      sellerId,
+      materialId: id,               // ✅ REQUIRED
+      supplierId: sellerId,         // ✅ REQUIRED
       name: title,
-      description,
-      pricePerUnit: price,
-      quantity,
-      amount: totalPrice,
+      supplier: seller,
+      amountPerTrip: price,         // ✅ REQUIRED
+      trips: quantity,              // ✅ REQUIRED
+      amount: price * quantity,     // ✅ REQUIRED
       image: activeImage,
-      seller,
       delivery: "Delivery in 1–2 days",
     });
 
     alert(`${quantity} item(s) of ${title} added to cart!`);
-    setQuantity(1);
   };
+
+
 
   /* =========================================
      FALLBACK
@@ -98,18 +104,17 @@ const ProductInfo = () => {
         {/* LEFT IMAGE */}
         <div className="pd-left">
           <div className="pd-thumbnails">
-            {images.map((img, index) => (
+            {imageList.map((img, index) => (
               <img
                 key={index}
                 src={img}
                 alt="thumb"
-                className={`pd-thumb ${
-                  activeImage === img ? "active" : ""
-                }`}
+                className={`pd-thumb ${activeImage === img ? "active" : ""}`}
                 onClick={() => setActiveImage(img)}
               />
             ))}
           </div>
+
 
           <div className="pd-image-box">
             <img

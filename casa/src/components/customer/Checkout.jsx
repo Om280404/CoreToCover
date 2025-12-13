@@ -19,7 +19,7 @@ const Checkout = () => {
   const userEmail = localStorage.getItem("userEmail") || "";
 
   /* ============================
-     FETCH USER DETAILS (NO AXIOS)
+     FETCH USER DETAILS
   ============================ */
   useEffect(() => {
     if (!userEmail) {
@@ -33,9 +33,7 @@ const Checkout = () => {
         const res = await fetch(
           `http://localhost:3001/user/${encodeURIComponent(userEmail)}`
         );
-
         if (!res.ok) return;
-
         const data = await res.json();
         setName(data.name || "");
         setAddress(data.address || "");
@@ -60,7 +58,10 @@ const Checkout = () => {
     let subtotal = 0;
 
     const calculatedOrders = products.map((p) => {
-      const itemTotal = (p.amountPerTrip || 0) * (p.trips || 1);
+      const unit = Number(p.amountPerTrip) || 0;
+      const qty = Number(p.trips) || 1;
+      const itemTotal = unit * qty;
+
       subtotal += itemTotal;
 
       return {
@@ -68,8 +69,9 @@ const Checkout = () => {
         supplierId: p.supplierId,
         materialName: p.name,
         supplierName: p.supplier,
-        trips: p.trips,
-        amountPerTrip: p.amountPerTrip,
+        trips: qty,
+        amountPerTrip: unit,
+        totalAmount: itemTotal,
       };
     });
 
@@ -103,7 +105,7 @@ const Checkout = () => {
   }
 
   /* ============================
-     PLACE ORDER (FETCH)
+     PLACE ORDER
   ============================ */
   const handlePlaceOrder = async () => {
     if (!name.trim() || !address.trim() || isSubmitting) {
@@ -121,6 +123,12 @@ const Checkout = () => {
         paymentMethod,
       },
       orders: calculatedOrders,
+      summary: {
+        subtotal,
+        casaCharge,
+        deliveryCharge,
+        grandTotal,
+      },
     };
 
     try {
@@ -176,6 +184,7 @@ const Checkout = () => {
             />
           </div>
 
+          {/* ✅ PAYMENT METHOD (RESTORED) */}
           <div className="checkout-card">
             <h3>Payment Method</h3>
             <div className="payment-options">
@@ -203,15 +212,15 @@ const Checkout = () => {
               ].map((opt) => (
                 <label
                   key={opt.id}
-                  className={`payment-option ${
-                    paymentMethod === opt.id ? "selected" : ""
-                  }`}
+                  className={`payment-option ${paymentMethod === opt.id ? "selected" : ""
+                    }`}
                 >
                   <input
                     type="radio"
                     value={opt.id}
                     checked={paymentMethod === opt.id}
                     onChange={(e) => setPaymentMethod(e.target.value)}
+                    disabled={isSubmitting}
                   />
                   <img src={opt.img} alt={opt.name} />
                   <span>{opt.name}</span>
@@ -230,12 +239,13 @@ const Checkout = () => {
               <div key={i} className="summary-list-item">
                 <img src={p.image || sample} alt={p.name} />
                 <div>
-                  <p>
-                    {p.name} ({p.trips})
+                  <p className="item-name">
+                    {p.name}
                   </p>
-                  <span>
+                  <span className="item-price">
                     ₹{(p.amountPerTrip * p.trips).toFixed(2)}
                   </span>
+
                 </div>
               </div>
             ))}

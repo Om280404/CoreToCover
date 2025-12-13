@@ -16,6 +16,7 @@ import Designers from './components/customer/Designers';
 import About from './components/customer/About';
 import Login from './components/customer/Login';
 import Signup from './components/customer/Signup';
+import Checkout from './components/customer/Checkout';
 
 {/* Seller Imports */}
 import NotificationButton from './components/seller/NotificationButton';
@@ -28,6 +29,7 @@ import SellerProfile from './components/seller/SellerProfile';
 import SellerLogin from './components/seller/SellerLogin';
 import SellerSignup from './components/seller/SellerSignup';
 import BusinessDetails from './components/seller/BusinessDetails';
+import SellerProducts from './components/seller/SellerProducts';
 
 {/*Designer Imports*/}
 import DesignerLogin from "./components/designer/DesignerLogin";
@@ -61,6 +63,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/checkout" element={<Checkout />} />
 
 
         {/* Routes for seller side */}
@@ -74,6 +77,7 @@ function App() {
         <Route path="/sellerlogin" element={<SellerLogin />} />
         <Route path="/sellersignup" element={<SellerSignup />} />
         <Route path="/businessdetails" element={<BusinessDetails />} />
+        <Route path="/sellerproducts" element={<SellerProducts />} />
         
         {/* Routes for designer side */}
         <Route path="/designerlogin" element={<DesignerLogin />} />

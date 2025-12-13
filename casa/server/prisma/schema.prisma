@@ -72,3 +72,4 @@ model Product {
 
   createdAt DateTime @default(now())
 }
+

@@ -1,18 +1,15 @@
-import axios from "axios";
+import api from "./axios";
 
-const api = axios.create({
-  baseURL: "http://localhost:3001",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("API ERROR:", error.response || error);
-    return Promise.reject(error);
+/* =========================
+   PLACE ORDER (CHECKOUT)
+========================= */
+export const placeOrder = async (orderData) => {
+  try {
+    const res = await api.post("/order/place", orderData);
+    return res.data;
+  } catch (err) {
+    console.error("Error placing order:", err.response?.data || err);
+    alert(err.response?.data?.message || "Error placing order");
+    throw err;
   }
-);
-
-export default api;
+};

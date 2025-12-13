@@ -6,25 +6,25 @@ import Sample from "../../assets/images/sample.jpg";
 const ProductCard = ({
   id,
   sellerId,
-  title = "Product Name",
-  category = "General",
-  description = "No description provided.",
-  price = 0,
-  unit = "per Unit",
+  title,
+  category,
+  description,
+  price,
   image,
-  seller = "Unknown Seller",
-  origin = "Unknown Location",
+  images = [],   // ✅ ADD THIS
+  seller,
+  origin,
 }) => {
   const navigate = useNavigate();
 
-  // Frontend-only image handling
+  // ✅ image already resolved in parent
   const finalImage = image || Sample;
 
   const priceDisplay =
     price > 0 ? price.toLocaleString() : "Contact for Price";
 
   const truncatedDescription =
-    description.length > 70
+    description?.length > 70
       ? description.substring(0, 70) + "..."
       : description;
 
@@ -59,7 +59,7 @@ const ProductCard = ({
           <span className="price-value">
             ₹{priceDisplay}
           </span>
-          <span className="price-unit">/{unit}</span>
+          <span className="price-unit">/unit</span>
         </div>
 
         <button
@@ -72,9 +72,9 @@ const ProductCard = ({
                   sellerId,
                   title,
                   seller,
-                  location: origin,
+                  origin,
                   price,
-                  image: finalImage,
+                  images,       // ✅ now defined
                   description,
                 },
               },
@@ -83,6 +83,8 @@ const ProductCard = ({
         >
           View Details
         </button>
+
+
       </div>
     </article>
   );

@@ -52,16 +52,13 @@ const SellerAddProduct = () => {
     };
 
     /* ===============================
-       IMAGE HANDLING
+       IMAGE HANDLING (1–5 IMAGES)
     =============================== */
     const handleImages = (e) => {
         const selectedFiles = Array.from(e.target.files);
-
         if (selectedFiles.length === 0) return;
 
-        // total images after adding
         const totalCount = images.length + selectedFiles.length;
-
         if (totalCount > 5) {
             alert("You can upload a maximum of 5 images.");
             return;
@@ -78,19 +75,18 @@ const SellerAddProduct = () => {
             }
         }
 
-        const newImages = [...images, ...selectedFiles];
-        const newPreviews = [
-            ...imagePreviews,
+        setImages((prev) => [...prev, ...selectedFiles]);
+        setImagePreviews((prev) => [
+            ...prev,
             ...selectedFiles.map((f) => URL.createObjectURL(f)),
-        ];
+        ]);
 
-        setImages(newImages);
-        setImagePreviews(newPreviews);
-
-        // reset input so user can select same file again if needed
         e.target.value = "";
     };
 
+    /* ===============================
+       VIDEO HANDLING
+    =============================== */
     const handleVideo = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -108,17 +104,6 @@ const SellerAddProduct = () => {
         setVideo(file);
         setVideoPreview(URL.createObjectURL(file));
     };
-
-    /* ===============================
-       UTILS
-    =============================== */
-    const fileToBase64 = (file) =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
 
     /* ===============================
        SUBMIT → BACKEND
@@ -149,17 +134,12 @@ const SellerAddProduct = () => {
             formData.append("category", category);
             formData.append("description", description);
 
-            images.forEach((img) => {
-                formData.append("images", img);
-            });
-
-            if (video) {
-                formData.append("video", video);
-            }
+            images.forEach((img) => formData.append("images", img));
+            if (video) formData.append("video", video);
 
             const res = await fetch("http://localhost:3001/seller/product", {
                 method: "POST",
-                body: formData, // 🔥 NO JSON
+                body: formData,
             });
 
             const data = await res.json();
@@ -170,8 +150,13 @@ const SellerAddProduct = () => {
             }
 
             alert("Product added successfully ✅");
-            navigate("/sellerProducts");
 
+            setImages([]);
+            setImagePreviews([]);
+            setVideo(null);
+            setVideoPreview(null);
+
+            navigate("/selleraddproduct");
         } catch (err) {
             console.error("ADD PRODUCT ERROR:", err);
             alert("Server error while adding product");
@@ -180,14 +165,17 @@ const SellerAddProduct = () => {
         }
     };
 
-
     return (
         <div className="sma-root">
             <Sidebar />
             <NotificationButton />
 
             <main className="sma-main">
-                <form className="sma-card" onSubmit={handleSubmit}>
+                <form
+                    className="sma-card"
+                    onSubmit={handleSubmit}
+                    encType="multipart/form-data"
+                >
                     <h2 className="sma-title">➕ Add New Product</h2>
 
                     <div className="sma-grid">
@@ -257,7 +245,9 @@ const SellerAddProduct = () => {
                         </label>
 
                         <label className="sma-field sma-full">
-                            <span className="sma-label">Upload Images (1–5 allowed)</span>
+                            <span className="sma-label">
+                                Upload Images (1–5 allowed)
+                            </span>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -285,7 +275,11 @@ const SellerAddProduct = () => {
                             />
 
                             {videoPreview && (
-                                <video src={videoPreview} controls className="sma-preview" />
+                                <video
+                                    src={videoPreview}
+                                    controls
+                                    className="sma-preview"
+                                />
                             )}
                         </label>
                     </div>
