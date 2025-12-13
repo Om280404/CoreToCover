@@ -1,0 +1,335 @@
+/* bs-prefix to avoid collisions
+   Theme: Casa Interior (soft green, warm neutral)
+*/
+
+/* ===============================
+   PALETTE & TOKENS (CASA THEME)
+=============================== */
+:root {
+  --bs-bg: #f3f7ec;
+  --bs-surface: #ffffff;
+
+  --bs-green-dark: #606e52;
+  --bs-green-mid: #91a56e;
+  --bs-green-light: #c0cca4;
+
+  --bs-ink: #474747;
+  --bs-muted: #8f8b84;
+
+  --bs-shadow: 0 16px 40px rgba(96, 110, 82, 0.14);
+  --bs-radius: 14px;
+  --bs-gap: 16px;
+  --bs-max: 1100px;
+
+  /* must match sidebar width */
+  --ms-sidebar-w: 220px;
+
+  font-family: "Helvetica", Arial, sans-serif;
+}
+
+/* ===============================
+   LAYOUT ROOT
+=============================== */
+.bs-layout-root {
+  min-height: 100vh;
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(180deg, #f3f7ec, #e8efdc);
+  box-sizing: border-box;
+}
+
+/* ===============================
+   CONTENT SHELL
+=============================== */
+.bs-profile-shell {
+  flex: 1 1 auto;
+  max-width: var(--bs-max);
+  width: 100%;
+  margin: 0 auto;
+  margin-left: calc(var(--ms-sidebar-w) + 20px);
+
+  padding: 22px;
+  border-radius: var(--bs-radius);
+  box-shadow: var(--bs-shadow);
+  box-sizing: border-box;
+}
+
+/* ===============================
+   HEADINGS
+=============================== */
+.bs-heading {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+  color: var(--bs-green-dark);
+  letter-spacing: -0.2px;
+  font-weight: 600;
+}
+
+.bs-subheading {
+  margin: 18px 0 10px;
+  font-size: 1.1rem;
+  color: var(--bs-green-dark);
+  font-weight: 600;
+}
+
+/* ===============================
+   RATING ROW
+=============================== */
+.bs-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.bs-rating-label {
+  color: var(--bs-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bs-rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bs-star {
+  color: #f2b01e;
+  font-size: 1rem;
+}
+
+.bs-rating-value {
+  color: var(--bs-muted);
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+/* ===============================
+   DETAILS GRID
+=============================== */
+.bs-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 18px;
+  align-items: start;
+}
+
+/* ===============================
+   CARD
+=============================== */
+.bs-card {
+  background: var(--bs-surface);
+  border-radius: var(--bs-radius);
+  padding: 16px;
+  box-shadow: 0 10px 26px rgba(96, 110, 82, 0.12);
+  border: 1px solid rgba(96, 110, 82, 0.12);
+  box-sizing: border-box;
+}
+
+/* Main card fields */
+.bs-card--main .bs-field {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bs-field-key {
+  min-width: 92px;
+  color: var(--bs-muted);
+  font-weight: 700;
+}
+
+.bs-field-val {
+  font-weight: 700;
+  color: var(--bs-ink);
+}
+
+/* ===============================
+   ACTION BUTTONS
+=============================== */
+.bs-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.bs-btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.bs-btn--primary {
+  background: linear-gradient(
+    90deg,
+    var(--bs-green-dark),
+    var(--bs-green-mid)
+  );
+  color: #ffffff;
+  box-shadow: 0 10px 26px rgba(96, 110, 82, 0.22);
+}
+
+.bs-btn--primary:hover {
+  transform: translateY(-2px);
+}
+
+.bs-btn--ghost {
+  background: transparent;
+  color: var(--bs-green-dark);
+  border: 1px solid rgba(96, 110, 82, 0.2);
+}
+
+.bs-btn--outline {
+  background: transparent;
+  color: var(--bs-green-dark);
+  border: 1px solid rgba(96, 110, 82, 0.2);
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+/* ===============================
+   EDIT FORM
+=============================== */
+.bs-edit-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bs-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bs-form-label {
+  color: var(--bs-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.bs-input {
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(96, 110, 82, 0.2);
+  background: #ffffff;
+  color: var(--bs-ink);
+  font-weight: 600;
+}
+
+.bs-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ===============================
+   MATERIALS GRID
+=============================== */
+.bs-materials-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.bs-material-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #f9fbf6);
+  border: 1px solid rgba(96, 110, 82, 0.12);
+  box-shadow: 0 8px 22px rgba(96, 110, 82, 0.1);
+}
+
+.bs-material-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bs-green-light);
+  flex-shrink: 0;
+}
+
+.bs-material-title {
+  font-weight: 700;
+  color: var(--bs-ink);
+}
+
+.bs-material-meta {
+  color: var(--bs-muted);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.bs-material-stock {
+  font-weight: 700;
+}
+
+/* ===============================
+   VIEW ALL
+=============================== */
+.bs-viewall-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.bs-empty-state {
+  color: var(--bs-muted);
+  padding: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+}
+
+/* ===============================
+   RESPONSIVE
+=============================== */
+@media (max-width: 960px) {
+  .bs-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bs-materials-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .bs-materials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bs-profile-shell {
+    margin-top: 90px;
+    margin-left: 0;
+    padding: 14px;
+  }
+
+  .bs-btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+}
+
+/* ===============================
+   REDUCED MOTION
+=============================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

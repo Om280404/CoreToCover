@@ -1,0 +1,98 @@
+import React, { useState, useEffect } from "react";
+import {
+  FiHome,
+  FiShoppingCart,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiPackage,
+} from "react-icons/fi";
+import { AiOutlineProduct } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import "./Sidebar.css";
+
+const Sidebar = ({ notificationCount = 0 }) => {
+  const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 618);
+      if (window.innerWidth > 618) setMenuOpen(false);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const navItems = [
+    { icon: <FiHome />, label: "Home", path: "/sellerdashboard" },
+    { icon: <FiShoppingCart />, label: "Orders", path: "/orders" },
+    { icon: <FiUser />, label: "Profile", path: "/sellerprofile" },
+    { icon: <FiPackage />, label: "Add Product", path: "/selleraddproduct" },
+    { icon: <AiOutlineProduct />, label: "My Products", path: "/supplierMaterials" },
+  ];
+
+  return (
+    <div className="sidebar-wrapper">
+      {isMobile ? (
+        <>
+          {/* Mobile nav */}
+          <div className="nav">
+            <button className="nav-hamburger" onClick={() => setMenuOpen(true)}>
+              <FiMenu />
+            </button>
+            <div className="nav-logo">Logo</div>
+            <div className="nav-placeholder" />
+          </div>
+
+          {/* Slide-out Menu */}
+          <div className={`nav-menu ${menuOpen ? "active" : ""}`}>
+            <button className="nav-close" onClick={() => setMenuOpen(false)}>
+              <FiX />
+            </button>
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                className="nav-menu-item"
+                onClick={() => {
+                  navigate(item.path);
+                  setMenuOpen(false);
+                }}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Overlay */}
+          {menuOpen && (
+            <div className="nav-overlay" onClick={() => setMenuOpen(false)} />
+          )}
+        </>
+      ) : (
+        // Desktop Sidebar
+        <div className="sidebar-panel">
+          <div className="sidebar-logo">Logo</div>
+          <nav className="sidebar-nav">
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                className="sidebar-nav-item"
+                onClick={() => navigate(item.path)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Sidebar;

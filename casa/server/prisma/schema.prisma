@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+}
+
+/// =========================
+/// SELLER (ACCOUNT)
+/// =========================
+model Seller {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String
+  password  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  business SellerBusinessDetails?
+  products Product[]
+}
+
+/// =========================
+/// SELLER BUSINESS DETAILS
+/// =========================
+model SellerBusinessDetails {
+  id           Int     @id @default(autoincrement())
+  businessName String
+  sellerType   String
+  address      String?
+  city         String?
+  state        String?
+  pincode      String?
+  gst          String?
+
+  // Relation
+  sellerId Int    @unique
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+/// =========================
+/// PRODUCT
+/// =========================
+model Product {
+  id          Int     @id @default(autoincrement())
+  name        String
+  price       Float
+  productType String
+  category    String
+  description String?
+
+  images String[]
+  video  String?
+
+  sellerId Int
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
