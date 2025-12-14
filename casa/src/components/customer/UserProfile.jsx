@@ -1,6 +1,6 @@
 // File: src/components/UserProfile.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserProfile.css";
 import Navbar from "./Navbar";
@@ -9,12 +9,13 @@ import MyOrders from "./MyOrders";
 const UserProfile = () => {
   const navigate = useNavigate();
 
+  const userEmail = localStorage.getItem("userEmail");
+
   /* ==============================
      LOGOUT & NAVIGATION
   ============================== */
   const handleLogout = () => {
     localStorage.removeItem("userEmail");
-    localStorage.removeItem("userProfile");
     alert("You have been logged out.");
     navigate("/");
   };
@@ -24,24 +25,37 @@ const UserProfile = () => {
   };
 
   /* ==============================
-     LOAD USER (FRONTEND ONLY)
+     USER STATE
   ============================== */
-  const storedProfile = JSON.parse(
-    localStorage.getItem("userProfile")
-  );
-
   const [user, setUser] = useState({
-    name: storedProfile?.name || "Guest User",
-    email:
-      storedProfile?.email ||
-      localStorage.getItem("userEmail") ||
-      "",
-    phone: storedProfile?.phone || "",
-    address: storedProfile?.address || "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
+
+  /* ==============================
+     FETCH USER FROM DB
+  ============================== */
+  useEffect(() => {
+    if (!userEmail) {
+      navigate("/login");
+      return;
+    }
+
+    fetch(`http://localhost:3001/user/${encodeURIComponent(userEmail)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data);
+        setFormData(data);
+      })
+      .catch(() => {
+        alert("Failed to load user profile");
+      });
+  }, [userEmail, navigate]);
 
   /* ==============================
      HANDLERS
@@ -54,14 +68,11 @@ const UserProfile = () => {
     }));
   };
 
+  // ⚠️ For now this is frontend-only save
   const handleSave = () => {
     setUser(formData);
-    localStorage.setItem(
-      "userProfile",
-      JSON.stringify(formData)
-    );
     setIsEditing(false);
-    alert("Profile saved locally.");
+    alert("Profile updated (frontend only)");
   };
 
   return (
@@ -151,6 +162,7 @@ const UserProfile = () => {
         </div>
       </div>
 
+      {/* ✅ REAL ORDERS FROM DB */}
       <div className="orders">
         <MyOrders />
       </div>

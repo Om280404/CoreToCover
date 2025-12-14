@@ -15,29 +15,30 @@ model User {
   phone     String?
   address   String?
   createdAt DateTime @default(now())
+
+  orders Order[] // ✅ ADD THIS LINE
 }
 
 /// =========================
 /// SELLER (ACCOUNT)
 /// =========================
 model Seller {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  phone     String
-  password  String
-  createdAt DateTime @default(now())
-
-  // Relations
-  business SellerBusinessDetails?
-  products Product[]
+  id         Int                    @id @default(autoincrement())
+  name       String
+  email      String                 @unique
+  phone      String
+  password   String
+  createdAt  DateTime               @default(now())
+  orderItems OrderItem[]
+  products   Product[]
+  business   SellerBusinessDetails?
 }
 
 /// =========================
 /// SELLER BUSINESS DETAILS
 /// =========================
 model SellerBusinessDetails {
-  id           Int     @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   businessName String
   sellerType   String
   address      String?
@@ -45,31 +46,77 @@ model SellerBusinessDetails {
   state        String?
   pincode      String?
   gst          String?
-
-  // Relation
-  sellerId Int    @unique
-  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
+  sellerId     Int      @unique
+  createdAt    DateTime @default(now())
+  seller       Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 }
 
 /// =========================
 /// PRODUCT
 /// =========================
 model Product {
-  id          Int     @id @default(autoincrement())
-  name        String
-  price       Float
-  productType String
-  category    String
-  description String?
+  id           Int      @id @default(autoincrement())
+  name         String
+  price        Float
+  productType  String
+  category     String
+  description  String?
+  images       String[]
+  video        String?
+  availability String   @default("available") 
+  sellerId     Int
+  createdAt    DateTime @default(now())
+  seller       Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+}
 
-  images String[]
-  video  String?
 
-  sellerId Int
-  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+/// =========================
+/// ORDER (CUSTOMER LEVEL)
+/// =========================
+model Order {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  customerEmail String
+  customerName  String
+  address       String
+  paymentMethod String
+
+  subtotal       Float
+  casaCharge     Float
+  deliveryCharge Float
+  grandTotal     Float
+
+  items OrderItem[]
 
   createdAt DateTime @default(now())
 }
+
+/// =========================
+/// ORDER ITEM (SELLER LEVEL)
+/// =========================
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  order        Order    @relation(fields: [orderId], references: [id])
+
+  sellerId     Int
+  seller       Seller   @relation(fields: [sellerId], references: [id])
+
+  materialId   Int
+  materialName String
+  supplierName String
+  imageUrl     String?
+
+  quantity     Int
+  pricePerUnit Float
+  totalAmount  Float
+
+  status       String   @default("pending") // ✅ ADD THIS
+
+  createdAt    DateTime @default(now())
+}
+
 

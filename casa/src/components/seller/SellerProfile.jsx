@@ -1,64 +1,80 @@
 // File: src/components/seller/SellerProfile.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SellerProfile.css";
-import Sample from "../../assets/images/sample.jpg";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
-
-/* =========================================
-   MOCK DATA (FRONTEND ONLY)
-========================================= */
-const initialProfile = {
-  name: "Demo Seller",
-  email: localStorage.getItem("SellerEmail") || "seller@casa.com",
-  phone: "9876543210",
-  location: "Sangli, Maharashtra",
-};
-
 
 const SellerProfile = () => {
   const navigate = useNavigate();
 
-  /* =========================================
-     STATE
-  ========================================= */
-  const [profile, setProfile] = useState(
-    JSON.parse(localStorage.getItem("sellerProfile")) || initialProfile
-  );
+  const sellerId = localStorage.getItem("sellerId");
 
-  const [formData, setFormData] = useState(profile);
+  const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  /* =========================================
+  /* =========================
+     FETCH SELLER PROFILE
+  ========================= */
+  useEffect(() => {
+    if (!sellerId) {
+      navigate("/sellerlogin");
+      return;
+    }
+
+    fetch(`http://localhost:3001/seller/profile/${sellerId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProfile(data);
+        setFormData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [sellerId, navigate]);
+
+  /* =========================
      HANDLERS
-  ========================================= */
+  ========================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
+    // 🔒 For now UI-only save
     setProfile(formData);
-    localStorage.setItem(
-      "sellerProfile",
-      JSON.stringify(formData)
-    );
     setIsEditing(false);
-    alert("Profile saved locally.");
+    alert("Profile updated (DB update can be added next).");
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("SellerEmail");
+    localStorage.removeItem("sellerId");
+    localStorage.removeItem("sellerEmail");
     localStorage.removeItem("sellerProfile");
-    alert("Logged out successfully.");
     navigate("/sellerlogin");
   };
 
-  /* =========================================
+  if (loading) {
+    return (
+      <div className="bs-layout-root">
+        <Sidebar />
+        <NotificationButton />
+        <div className="bs-profile-shell">
+          <h2>Loading profile…</h2>
+        </div>
+      </div>
+    );
+  }
+
+  /* =========================
      RENDER
-  ========================================= */
+  ========================= */
   return (
     <div className="bs-layout-root">
       <Sidebar />
@@ -76,7 +92,6 @@ const SellerProfile = () => {
           </div>
         </div>
 
-        {/* PROFILE SECTION */}
         {!isEditing ? (
           <section className="bs-details-grid">
             <div className="bs-card bs-card--main">

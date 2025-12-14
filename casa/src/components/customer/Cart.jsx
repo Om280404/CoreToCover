@@ -1,276 +1,138 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-import "./Checkout.css";
-import { clearCart } from "../../utils/cart";
+import "./Cart.css";
 import sample from "../../assets/images/sample.jpg";
+import {
+  loadCart,
+  updateCartItemQuantity,
+  removeFromCart,
+} from "../../utils/cart";
 
-const Checkout = () => {
-  const location = useLocation();
+const Cart = () => {
   const navigate = useNavigate();
+  const [basketItems, setBasketItems] = useState([]);
 
-  const products = location.state?.products || [];
-
-  const [paymentMethod, setPaymentMethod] = useState("gpay");
-  const [address, setAddress] = useState("");
-  const [name, setName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const userEmail = localStorage.getItem("userEmail") || "";
-
-  /* ============================
-     FETCH USER DETAILS (NO AXIOS)
-  ============================ */
   useEffect(() => {
-    if (!userEmail) {
-      alert("Please log in to continue");
-      navigate("/login");
+    setBasketItems(loadCart());
+  }, []);
+
+  const handleQuantityChange = (id, value) => {
+    if (value === "") {
+      setBasketItems(prev =>
+        prev.map(item =>
+          item.materialId === id ? { ...item, trips: "" } : item
+        )
+      );
       return;
     }
 
-    const fetchUser = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3001/user/${encodeURIComponent(userEmail)}`
-        );
+    const qty = Number(value);
+    if (isNaN(qty) || qty < 1) return;
 
-        if (!res.ok) return;
-
-        const data = await res.json();
-        setName(data.name || "");
-        setAddress(data.address || "");
-      } catch (err) {
-        console.error("User fetch failed", err);
-      }
-    };
-
-    fetchUser();
-  }, [userEmail, navigate]);
-
-  /* ============================
-     CALCULATE TOTALS
-  ============================ */
-  const {
-    subtotal,
-    casaCharge,
-    deliveryCharge,
-    grandTotal,
-    calculatedOrders,
-  } = useMemo(() => {
-    let subtotal = 0;
-
-    const calculatedOrders = products.map((p) => {
-      const itemTotal = (p.amountPerTrip || 0) * (p.trips || 1);
-      subtotal += itemTotal;
-
-      return {
-        materialId: p.materialId,
-        supplierId: p.supplierId,
-        materialName: p.name,
-        supplierName: p.supplier,
-        trips: p.trips,
-        amountPerTrip: p.amountPerTrip,
-      };
-    });
-
-    const casaCharge = +(subtotal * 0.05).toFixed(2); // 5%
-    const deliveryCharge = subtotal >= 5000 ? 0 : 150;
-    const grandTotal = subtotal + casaCharge + deliveryCharge;
-
-    return {
-      subtotal,
-      casaCharge,
-      deliveryCharge,
-      grandTotal,
-      calculatedOrders,
-    };
-  }, [products]);
-
-  /* ============================
-     EMPTY STATE
-  ============================ */
-  if (products.length === 0) {
-    return (
-      <>
-        <Navbar />
-        <main className="checkout-page">
-          <div className="checkout-empty">
-            <h2>No items selected for checkout 🚫</h2>
-          </div>
-        </main>
-      </>
-    );
-  }
-
-  /* ============================
-     PLACE ORDER (FETCH)
-  ============================ */
-  const handlePlaceOrder = async () => {
-    if (!name.trim() || !address.trim() || isSubmitting) {
-      alert("Please fill name & address");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const payload = {
-      customerEmail: userEmail,
-      checkoutDetails: {
-        name,
-        address,
-        paymentMethod,
-      },
-      orders: calculatedOrders,
-    };
-
-    try {
-      const res = await fetch("http://localhost:3001/order/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error("Order failed");
-
-      alert("Order placed successfully ✅");
-      clearCart();
-      navigate("/home");
-    } catch (err) {
-      console.error("Order error:", err);
-      alert("Failed to place order");
-    } finally {
-      setIsSubmitting(false);
-    }
+    setBasketItems(updateCartItemQuantity(id, qty));
   };
 
-  /* ============================
-     UI
-  ============================ */
+  const handleQuantityBlur = (id, value) => {
+    const qty = Number(value);
+    setBasketItems(updateCartItemQuantity(id, qty >= 1 ? qty : 1));
+  };
+
+  const subtotal = basketItems.reduce(
+    (sum, item) =>
+      sum + (Number(item.amountPerTrip) || 0) * (Number(item.trips) || 1),
+    0
+  );
+
   return (
     <>
       <Navbar />
 
-      <main className="checkout-page">
-        {/* LEFT */}
-        <div className="checkout-left">
-          <h2 className="section-title">Customer Details</h2>
+      <main className="cart-page">
+        <h1 className="cart-heading">Your Shopping Cart</h1>
 
-          <div className="checkout-card">
-            <h3>Customer Name</h3>
-            <input
-              className="checkout-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isSubmitting}
-            />
+        <section className="cart-layout">
+          <div className="cart-list">
+            {basketItems.length === 0 ? (
+              <p className="cart-empty">Your cart is empty.</p>
+            ) : (
+              basketItems.map(item => (
+                <article key={item.materialId} className="cart-card">
+                  {/* IMAGE */}
+                  <div className="cart-img-box">
+                    <img
+                      src={item.image || sample}
+                      className="cart-img"
+                      alt={item.name}
+                    />
+                  </div>
+
+                  {/* DETAILS */}
+                  <div className="cart-details">
+                    <h3>{item.name}</h3>
+
+                    <p className="cart-price">
+                      ₹{item.amountPerTrip * (item.trips || 1)}
+                    </p>
+
+                    <div className="cart-actions">
+                      <label>Qty</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.trips}
+                        onChange={e =>
+                          handleQuantityChange(
+                            item.materialId,
+                            e.target.value
+                          )
+                        }
+                        onBlur={e =>
+                          handleQuantityBlur(
+                            item.materialId,
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <button
+                        className="cart-remove-btn"
+                        onClick={() =>
+                          setBasketItems(
+                            removeFromCart(item.materialId)
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
 
-          <div className="checkout-card">
-            <h3>Delivery Address</h3>
-            <textarea
-              className="checkout-textarea"
-              rows="3"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
+          {/* ✅ SUMMARY NOW VISIBLE */}
+          <aside className="cart-summary">
+            <h2>Order Summary</h2>
 
-          <div className="checkout-card">
-            <h3>Payment Method</h3>
-            <div className="payment-options">
-              {[
-                {
-                  id: "gpay",
-                  name: "Google Pay",
-                  img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/2560px-Google_Pay_Logo.svg.png",
-                },
-                {
-                  id: "phonepe",
-                  name: "PhonePe",
-                  img: "https://img.icons8.com/color/1200/phone-pe.jpg",
-                },
-                {
-                  id: "paytm",
-                  name: "Paytm",
-                  img: "https://upload.wikimedia.org/wikipedia/commons/4/42/Paytm_logo.png",
-                },
-                {
-                  id: "cod",
-                  name: "Cash on Delivery",
-                  img: "https://cdn-icons-png.flaticon.com/512/3856/3856330.png",
-                },
-              ].map((opt) => (
-                <label
-                  key={opt.id}
-                  className={`payment-option ${
-                    paymentMethod === opt.id ? "selected" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    value={opt.id}
-                    checked={paymentMethod === opt.id}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <img src={opt.img} alt={opt.name} />
-                  <span>{opt.name}</span>
-                </label>
-              ))}
+            <div className="summary-row total">
+              <span>Total</span>
+              <span>₹{subtotal}</span>
             </div>
-          </div>
-        </div>
 
-        {/* RIGHT */}
-        <aside className="checkout-right">
-          <h2>Order Summary</h2>
-
-          <div className="summary-item-list">
-            {products.map((p, i) => (
-              <div key={i} className="summary-list-item">
-                <img src={p.image || sample} alt={p.name} />
-                <div>
-                  <p>
-                    {p.name} ({p.trips})
-                  </p>
-                  <span>
-                    ₹{(p.amountPerTrip * p.trips).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="summary-pricing">
-            <div>
-              <span>Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
-            </div>
-            <div>
-              <span>Casa Charges</span>
-              <span>₹{casaCharge.toFixed(2)}</span>
-            </div>
-            <div>
-              <span>Delivery</span>
-              <span>{deliveryCharge === 0 ? "Free" : `₹${deliveryCharge}`}</span>
-            </div>
-            <div className="summary-total">
-              <span>Total Payable</span>
-              <span>₹{grandTotal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <button
-            className="place-btn"
-            onClick={handlePlaceOrder}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Placing Order..." : "Place Order"}
-          </button>
-        </aside>
+            <button
+              className="checkout-btn"
+              disabled={!basketItems.length}
+              onClick={() => navigate("/checkout")}
+            >
+              Proceed to Checkout
+            </button>
+          </aside>
+        </section>
       </main>
     </>
   );
 };
 
-export default Checkout;
+export default Cart;

@@ -1,66 +1,160 @@
 // File: src/components/SupplierOrders.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./Orders.css";
 
-/*
-  SupplierOrders.jsx
-  - Frontend-only mock data
-  - Content aligned with Home Interior / Furniture sellers
-  - Class names & layout unchanged
-*/
+const SellerOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [confirmingAll, setConfirmingAll] = useState(false);
+  const [deliveringAll, setDeliveringAll] = useState(false);
+  const sellerId = localStorage.getItem("sellerId");
 
-const initialOrders = [
-  {
-    id: 1,
-    customer: "Aarav Mehta",
-    material: "Luxury Velvet Sofa",
-    quantity: "1 Piece",
-    time: "2 hrs ago",
-    status: "pending",
-    siteLocation: "Baner, Pune, Maharashtra",
-  },
-  {
-    id: 2,
-    customer: "Neha Kulkarni",
-    material: "Royal Accent Chair",
-    quantity: "2 Pieces",
-    time: "5 hrs ago",
-    status: "confirmed",
-    siteLocation: "Vishrambag, Sangli, Maharashtra",
-  },
-  {
-    id: 3,
-    customer: "Rohan Patil",
-    material: "Modern Leather Sofa Set",
-    quantity: "1 Set",
-    time: "1 day ago",
-    status: "fulfilled",
-    siteLocation: "Kolhapur, Maharashtra",
-  },
-  {
-    id: 4,
-    customer: "Sneha Deshmukh",
-    material: "Designer Lounge Chair",
-    quantity: "1 Piece",
-    time: "2 days ago",
-    status: "rejected",
-    siteLocation: "Satara, Maharashtra",
-  },
-];
+  /* =========================
+     FETCH SELLER ORDERS
+  ========================= */
+  useEffect(() => {
+    if (!sellerId) return;
 
-const SupplierOrders = () => {
-  const [orders, setOrders] = useState(initialOrders);
+    fetch(`http://localhost:3001/seller/${sellerId}/orders`)
+      .then((res) => res.json())
+      .then((data) => {
+        setOrders(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [sellerId]);
 
-  const updateStatus = (id, newStatus) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === id ? { ...order, status: newStatus } : order
-      )
-    );
+  /* =========================
+     UPDATE SINGLE ORDER STATUS
+  ========================= */
+  const updateStatus = async (orderItemId, newStatus) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3001/seller/order/${orderItemId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (!res.ok) {
+        alert("Failed to update order status");
+        return;
+      }
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderItemId ? { ...o, status: newStatus } : o
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
+  /* =========================
+     ACCEPT ALL PENDING
+  ========================= */
+  const confirmAllOrders = async () => {
+    const pendingOrders = orders.filter(
+      (o) => o.status === "pending"
+    );
+
+    if (pendingOrders.length === 0) return;
+
+    if (
+      !window.confirm(
+        `Accept all ${pendingOrders.length} pending orders?`
+      )
+    )
+      return;
+
+    try {
+      setConfirmingAll(true);
+
+      await Promise.all(
+        pendingOrders.map((order) =>
+          fetch(
+            `http://localhost:3001/seller/order/${order.id}/status`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "confirmed" }),
+            }
+          )
+        )
+      );
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.status === "pending"
+            ? { ...o, status: "confirmed" }
+            : o
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to accept all orders");
+    } finally {
+      setConfirmingAll(false);
+    }
+  };
+
+  /* =========================
+     MARK ALL AS DELIVERED
+  ========================= */
+  const deliverAllOrders = async () => {
+    const confirmedOrders = orders.filter(
+      (o) => o.status === "confirmed"
+    );
+
+    if (confirmedOrders.length === 0) return;
+
+    if (
+      !window.confirm(
+        `Mark all ${confirmedOrders.length} confirmed orders as delivered?`
+      )
+    )
+      return;
+
+    try {
+      setDeliveringAll(true);
+
+      await Promise.all(
+        confirmedOrders.map((order) =>
+          fetch(
+            `http://localhost:3001/seller/order/${order.id}/status`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "fulfilled" }),
+            }
+          )
+        )
+      );
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.status === "confirmed"
+            ? { ...o, status: "fulfilled" }
+            : o
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to mark all as delivered");
+    } finally {
+      setDeliveringAll(false);
+    }
+  };
+
+  /* =========================
+     HELPERS
+  ========================= */
   const openMaps = (location) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       location
@@ -82,12 +176,20 @@ const SupplierOrders = () => {
             o.id === id ? { ...o, copied: false } : o
           )
         );
-      }, 1400);
-    } catch {
-      // silent fail
-    }
+      }, 1200);
+    } catch {}
   };
 
+  const hasPendingOrders = orders.some(
+    (o) => o.status === "pending"
+  );
+  const hasConfirmedOrders = orders.some(
+    (o) => o.status === "confirmed"
+  );
+
+  /* =========================
+     UI
+  ========================= */
   return (
     <div className="orders-layout">
       <Sidebar />
@@ -95,25 +197,75 @@ const SupplierOrders = () => {
       <div className="notification-scrollable"></div>
 
       <div className="orders-content">
-        <h1>Customer Orders</h1>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <h1>Customer Orders</h1>
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            {hasPendingOrders && (
+              <button
+                className="confirm-btn"
+                onClick={confirmAllOrders}
+                disabled={confirmingAll}
+              >
+                {confirmingAll ? "Accepting..." : "Accept All"}
+              </button>
+            )}
+
+            {hasConfirmedOrders && (
+              <button
+                className="fulfill-btn"
+                onClick={deliverAllOrders}
+                disabled={deliveringAll}
+              >
+                {deliveringAll
+                  ? "Delivering..."
+                  : "Mark All Delivered"}
+              </button>
+            )}
+          </div>
+        </div>
 
         {orders.length === 0 ? (
           <p className="no-orders">No orders received yet.</p>
         ) : (
           <ul className="orders-list">
             {orders.map((order) => (
-              <li key={order.id} className={`order-item ${order.status}`}>
+              <li
+                key={order.id}
+                className={`order-item ${order.status}`}
+              >
                 <div className="order-top">
                   <div className="order-header">
-                    <strong>{order.material}</strong> — {order.quantity}
+                    <strong>{order.material}</strong> —{" "}
+                    {order.quantity}
                   </div>
 
                   <div className="order-meta">
                     <span className="meta-item">
-                      Customer: <strong>{order.customer}</strong>
+                      Customer:{" "}
+                      <strong>{order.customer}</strong>
                     </span>
                     <span className="meta-item">
-                      Order Placed: <strong>{order.time}</strong>
+                      Order Placed:{" "}
+                      <strong>
+                        {new Date(order.time).toLocaleString(
+                          "en-IN",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </strong>
                     </span>
                   </div>
                 </div>
@@ -122,7 +274,9 @@ const SupplierOrders = () => {
                   <div className="order-left">
                     <div className="order-status">
                       Status:{" "}
-                      <span className={`status-label ${order.status}`}>
+                      <span
+                        className={`status-label ${order.status}`}
+                      >
                         {order.status}
                       </span>
                     </div>
@@ -131,8 +285,9 @@ const SupplierOrders = () => {
                       <button
                         type="button"
                         className="site-button"
-                        onClick={() => openMaps(order.siteLocation)}
-                        title={`Open delivery location in Google Maps`}
+                        onClick={() =>
+                          openMaps(order.siteLocation)
+                        }
                       >
                         📍 {order.siteLocation}
                       </button>
@@ -141,7 +296,10 @@ const SupplierOrders = () => {
                         type="button"
                         className="site-copy"
                         onClick={() =>
-                          copyLocation(order.siteLocation, order.id)
+                          copyLocation(
+                            order.siteLocation,
+                            order.id
+                          )
                         }
                       >
                         {order.copied ? "Copied" : "Copy"}
@@ -204,4 +362,4 @@ const SupplierOrders = () => {
   );
 };
 
-export default SupplierOrders;
+export default SellerOrders;

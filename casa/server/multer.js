@@ -2,32 +2,34 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
+const ensureDir = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { productType } = req.body;
+    let uploadPath = "uploads/raw/images";
 
-    const base =
-      productType === "material" ? "raw" : "finished";
+    if (file.mimetype.startsWith("video")) {
+      uploadPath = "uploads/raw/videos";
+    }
 
-    const folder =
-      file.fieldname === "images"
-        ? `uploads/${base}/images`
-        : `uploads/${base}/videos`;
-
-    fs.mkdirSync(folder, { recursive: true });
-    cb(null, folder);
+    ensureDir(uploadPath);
+    cb(null, uploadPath);
   },
 
   filename: (req, file, cb) => {
-    const unique =
+    const uniqueName =
       Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
+    cb(null, uniqueName + path.extname(file.originalname));
   },
 });
 
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 30 * 1024 * 1024, // 30MB
+    fileSize: 100 * 1024 * 1024, // 100MB
   },
 });

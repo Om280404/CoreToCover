@@ -3,6 +3,21 @@ import "./ProductCard.css";
 import { useNavigate } from "react-router-dom";
 import Sample from "../../assets/images/sample.jpg";
 
+const formatAvailability = (value) => {
+  switch (value) {
+    case "available":
+      return "Available";
+    case "out_of_stock":
+      return "Out of Stock";
+    case "low_stock":
+      return "Low Stock";
+    case "discontinued":
+      return "Discontinued";
+    default:
+      return "Available";
+  }
+};
+
 const ProductCard = ({
   id,
   sellerId,
@@ -11,13 +26,13 @@ const ProductCard = ({
   description,
   price,
   image,
-  images = [],   // ✅ ADD THIS
+  images = [],
   seller,
   origin,
+  availability = "available", // ✅ NEW
 }) => {
   const navigate = useNavigate();
 
-  // ✅ image already resolved in parent
   const finalImage = image || Sample;
 
   const priceDisplay =
@@ -55,6 +70,13 @@ const ProductCard = ({
           </span>
         </div>
 
+        {/* ✅ Availability shown using existing meta */}
+        <div className="product-meta-row">
+          <span className="product-meta">
+            Status: <strong>{formatAvailability(availability)}</strong>
+          </span>
+        </div>
+
         <div className="product-price">
           <span className="price-value">
             ₹{priceDisplay}
@@ -74,8 +96,9 @@ const ProductCard = ({
                   seller,
                   origin,
                   price,
-                  images,       // ✅ now defined
+                  images,
                   description,
+                  availability, // ✅ PASS TO DETAILS PAGE
                 },
               },
             })
@@ -83,8 +106,6 @@ const ProductCard = ({
         >
           View Details
         </button>
-
-
       </div>
     </article>
   );

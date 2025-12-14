@@ -125,6 +125,7 @@ const ProductListing = () => {
                 category={product.category}
                 description={product.description}
                 price={product.price}
+                availability={product.availability}   // ✅ ADD THIS
 
                 image={
                   product.images?.length
@@ -145,6 +146,7 @@ const ProductListing = () => {
                     : "Location not available"
                 }
               />
+
 
             ))
 

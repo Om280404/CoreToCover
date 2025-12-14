@@ -193,10 +193,11 @@ app.post("/seller/login", async (req, res) => {
     res.json({
       seller: {
         id: seller.id,
+        name: seller.name,   // ✅ correct field
         email: seller.email,
-        ownerName: seller.ownerName,
       },
     });
+
   } catch (err) {
     console.error("SELLER LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error during login" });
@@ -339,74 +340,62 @@ app.post(
         productType,
         category,
         description,
+        availability = "available", // ✅ DEFAULT
       } = req.body;
 
-      /* =========================
-         BASIC VALIDATION
-      ========================= */
       if (!sellerId || !name || !price || !productType || !category) {
-        return res.status(400).json({
-          message: "Missing required fields",
-        });
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
       if (!req.files?.images || req.files.images.length === 0) {
-        return res.status(400).json({
-          message: "At least one image is required",
-        });
+        return res.status(400).json({ message: "At least one image is required" });
       }
 
-      /* =========================
-         IMAGE PATHS (1–5)
-      ========================= */
-      const imagePaths = req.files.images.map((file) => {
-        // normalize Windows paths
-        const normalizedPath = file.path.replace(/\\/g, "/");
-
-        // remove "uploads/" so it matches express.static
-        return normalizedPath.replace("uploads/", "");
+      const seller = await prisma.seller.findUnique({
+        where: { id: Number(sellerId) },
       });
 
-      /* =========================
-         VIDEO PATH (OPTIONAL)
-      ========================= */
-      let videoPath = null;
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
 
-      if (req.files.video && req.files.video.length > 0) {
+      const imagePaths = req.files.images.map((file) =>
+        file.path.replace(/\\/g, "/").replace("uploads/", "")
+      );
+
+      let videoPath = null;
+      if (req.files.video?.length > 0) {
         videoPath = req.files.video[0].path
           .replace(/\\/g, "/")
           .replace("uploads/", "");
       }
 
-      /* =========================
-         SAVE TO DATABASE
-      ========================= */
       const product = await prisma.product.create({
         data: {
           sellerId: Number(sellerId),
-          name,
+          name: name.trim(),
           price: Number(price),
-          productType: productType.toLowerCase(), // IMPORTANT
-          category,
-          description,
-          images: imagePaths, // String[]
-          video: videoPath,   // String | null
+          productType: productType.toLowerCase(),
+          category: category.trim(),
+          description: description?.trim() || null,
+          images: imagePaths,
+          video: videoPath,
+          availability, // ✅ STORED
         },
       });
 
-      return res.status(201).json({
+      res.status(201).json({
         message: "Product added successfully",
         product,
       });
-
     } catch (err) {
       console.error("ADD PRODUCT ERROR:", err);
-      return res.status(500).json({
-        message: "Server error while adding product",
-      });
+      res.status(500).json({ message: "Server error while adding product" });
     }
   }
 );
+
+
 
 
 
@@ -444,6 +433,437 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
+
+
+app.post("/order/place", async (req, res) => {
+  try {
+    const { customerEmail, checkoutDetails, orders, summary } = req.body;
+
+    if (!customerEmail || !orders?.length) {
+      return res.status(400).json({ message: "Invalid order data" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: customerEmail },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    /* =========================
+       CREATE ORDER
+    ========================= */
+    const order = await prisma.order.create({
+      data: {
+        userId: user.id,
+        customerEmail,
+        customerName: checkoutDetails.name,
+        address: checkoutDetails.address,
+        paymentMethod: checkoutDetails.paymentMethod,
+        subtotal: summary.subtotal,
+        casaCharge: summary.casaCharge,
+        deliveryCharge: summary.deliveryCharge,
+        grandTotal: summary.grandTotal,
+      },
+    });
+
+    /* =========================
+       CREATE ORDER ITEMS
+       (STORE GRAND TOTAL)
+    ========================= */
+    const orderItemsData = await Promise.all(
+      orders.map(async (item) => {
+        const product = await prisma.product.findUnique({
+          where: { id: item.materialId },
+        });
+
+        return {
+          orderId: order.id,
+
+          materialId: item.materialId,
+          materialName: item.materialName,
+          supplierName: item.supplierName,
+
+          sellerId: item.supplierId,
+          quantity: item.trips,
+          pricePerUnit: item.amountPerTrip,
+
+          // 🔥 THIS IS THE KEY CHANGE
+          totalAmount: summary.grandTotal, // ✅ 63000
+
+          imageUrl: product?.images?.[0] || null,
+        };
+      })
+    );
+
+    await prisma.orderItem.createMany({
+      data: orderItemsData,
+    });
+
+    return res.status(201).json({
+      message: "Order placed successfully",
+      orderId: order.id,
+    });
+  } catch (error) {
+    console.error("ORDER PLACE ERROR:", error);
+    return res.status(500).json({
+      message: "Failed to place order",
+    });
+  }
+});
+
+
+// ============================
+// GET USER ORDERS
+// ============================
+app.get("/orders/user/:email", async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.json([]);
+    }
+
+    const orders = await prisma.order.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        items: {
+          include: {
+            seller: { select: { name: true } },
+          },
+        },
+      },
+    });
+
+    /* =========================
+       FLATTEN FOR UI
+    ========================= */
+    const formatted = orders.flatMap((order) =>
+      order.items.map((item) => {
+        let uiStatus = "PROCESSING";
+
+        if (item.status === "fulfilled") uiStatus = "DELIVERED";
+        else if (item.status === "confirmed") uiStatus = "PROCESSING";
+        else if (item.status === "rejected") uiStatus = "CANCELLED";
+        else if (item.status === "pending") uiStatus = "PROCESSING";
+
+        return {
+          id: `ORD-${order.id}`,
+          productName: item.materialName,
+          sellerName: item.seller.name,
+          quantity: item.quantity,
+          totalAmount: item.totalAmount,
+          orderStatus: uiStatus,          // ✅ REAL STATUS
+          createdAt: order.createdAt,
+          imageUrl: item.imageUrl,
+          grandTotal: order.grandTotal,
+        };
+      })
+    );
+
+
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("FETCH ORDERS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
+
+
+// ============================
+// GET PRODUCTS OF A SELLER
+// ============================
+app.get("/seller/:sellerId/products", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+
+    if (!sellerId || isNaN(sellerId)) {
+      return res.json([]);
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        sellerId: sellerId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(products);
+  } catch (err) {
+    console.error("FETCH SELLER PRODUCTS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
+
+// ============================
+// DELETE PRODUCT (SELLER)
+// ============================
+app.delete("/seller/product/:id", async (req, res) => {
+  console.log("🔥 DELETE PRODUCT ROUTE HIT");
+
+  try {
+    const productId = Number(req.params.id);
+
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    res.json({ message: "Product deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to delete product" });
+  }
+});
+
+
+// ============================
+// UPDATE PRODUCT (EDIT)
+// ============================*/
+app.put(
+  "/seller/product/:id",
+  upload.fields([{ name: "images", maxCount: 5 }]),
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+
+      const {
+        name,
+        category,
+        productType,
+        price,
+        description,
+        existingImages,
+        availability, // ✅ NEW
+      } = req.body;
+
+      const keptImages = existingImages ? JSON.parse(existingImages) : [];
+
+      const newImages =
+        req.files?.images?.map((file) =>
+          file.path.replace(/\\/g, "/").replace("uploads/", "")
+        ) || [];
+
+      const finalImages = [...keptImages, ...newImages];
+
+      const updated = await prisma.product.update({
+        where: { id: productId },
+        data: {
+          name,
+          category,
+          productType,
+          price: Number(price),
+          description,
+          images: finalImages,
+          availability, // ✅ UPDATED
+        },
+      });
+
+      res.json({
+        message: "Product updated successfully",
+        product: updated,
+      });
+    } catch (err) {
+      console.error("UPDATE PRODUCT ERROR:", err);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  }
+);
+
+
+// ============================
+// GET SELLER PROFILE
+// ============================
+app.get("/seller/profile/:id", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.id);
+
+    const seller = await prisma.seller.findUnique({
+      where: { id: sellerId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        business: {
+          select: {
+            city: true,
+            state: true,
+          },
+        },
+      },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    res.json({
+      name: seller.name,
+      email: seller.email,
+      phone: seller.phone,
+      location: seller.business
+        ? `${seller.business.city}, ${seller.business.state}`
+        : "Not set",
+    });
+  } catch (err) {
+    console.error("FETCH SELLER PROFILE ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch seller profile" });
+  }
+});
+
+// ============================
+// GET SELLER ORDERS
+// ============================
+app.get("/seller/:sellerId/orders", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+
+    const items = await prisma.orderItem.findMany({
+      where: { sellerId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        order: {
+          select: {
+            createdAt: true,
+            address: true,
+            customerName: true,
+          },
+        },
+      },
+    });
+
+    const formatted = items.map((item) => ({
+      id: item.id,
+      customer: item.order.customerName,
+      material: item.materialName,
+      quantity: `${item.quantity} Unit`,
+      time: item.order.createdAt,   // ✅ RAW DATE
+      status: item.status,
+      siteLocation: item.order.address,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("SELLER ORDERS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
+
+
+// ============================
+// UPDATE ORDER ITEM STATUS
+// ============================
+app.patch("/seller/order/:orderItemId/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const orderItemId = Number(req.params.orderItemId);
+
+    // 🔒 Validate allowed statuses
+    const allowed = ["pending", "confirmed", "rejected", "fulfilled"];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    await prisma.orderItem.update({
+      where: { id: orderItemId },
+      data: { status },
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("UPDATE STATUS ERROR:", err);
+    res.status(500).json({ ok: false });
+  }
+});
+
+
+// ============================
+// USER CANCEL ORDER (WITH RULES)
+// ============================
+app.patch("/order/:orderId/cancel", async (req, res) => {
+  try {
+    const orderId = Number(req.params.orderId);
+
+    if (isNaN(orderId)) {
+      return res.status(400).json({ message: "Invalid order id" });
+    }
+
+    /* =========================
+       FETCH ORDER
+    ========================= */
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: true, // order items
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    /* =========================
+       STATUS VALIDATION
+    ========================= */
+    const nonCancelableStatuses = [
+      "fulfilled",
+      "rejected",
+      "cancelled",
+    ];
+
+    const hasNonCancelableItem = order.items.some((item) =>
+      nonCancelableStatuses.includes(item.status)
+    );
+
+    if (hasNonCancelableItem) {
+      return res.status(400).json({
+        message:
+          "This order cannot be cancelled because it is already processed",
+      });
+    }
+
+    /* =========================
+       2-DAY TIME LIMIT CHECK
+    ========================= */
+    const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const orderTime = new Date(order.createdAt).getTime();
+
+    if (now - orderTime > TWO_DAYS) {
+      return res.status(400).json({
+        message: "Order can only be cancelled within 2 days of placing",
+      });
+    }
+
+    /* =========================
+       CANCEL ALL ORDER ITEMS
+    ========================= */
+    await prisma.orderItem.updateMany({
+      where: { orderId },
+      data: { status: "rejected" }, // unified cancel state
+    });
+
+  } catch (err) {
+    console.error("❌ CANCEL ORDER ERROR:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Failed to cancel order",
+    });
+  }
+});
+
 
 
 

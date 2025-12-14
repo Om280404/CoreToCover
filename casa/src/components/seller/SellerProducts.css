@@ -247,3 +247,19 @@
     padding: 14px;
   }
 }
+
+.stock-available strong {
+  color: #16a34a; 
+}
+
+.stock-out_of_stock strong {
+  color: #dc2626
+}
+
+.low-stock strong {
+  color: #ca8a04; 
+}
+
+.stock-discontinued strong {
+  color: #6b7280;
+}

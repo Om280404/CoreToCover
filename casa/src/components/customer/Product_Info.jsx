@@ -4,14 +4,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./Product_Info.css";
 import sample from "../../assets/images/sample.jpg";
-import { addToCart } from "../../utils/cart"; // ✅ KEEP cart backend
+import { addToCart } from "../../utils/cart";
+
+const formatAvailability = (value) => {
+  switch (value) {
+    case "available":
+      return "Available";
+    case "out_of_stock":
+      return "Out of Stock";
+    case "low_stock":
+      return "Low Stock";
+    case "discontinued":
+      return "Discontinued";
+    default:
+      return "Available";
+  }
+};
 
 const ProductInfo = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [quantity, setQuantity] = useState(1);
-  const [expanded, setExpanded] = useState(false);
 
   /* =========================================
      PRODUCT DATA FROM NAVIGATION
@@ -23,59 +35,84 @@ const ProductInfo = () => {
     sellerId,
     title = "Product Detail",
     seller = "Reliable Seller",
-    origin = "Pune, Maharashtra",
-    price = 1000,
+    origin = "India",
+    price = 0,
     images = [],
     description = "No description available.",
+    availability = "available", // ✅ NEW
   } = product;
 
-
+  const [quantity, setQuantity] = useState(1);
+  const [expanded, setExpanded] = useState(false);
 
   /* =========================================
-     IMAGE HANDLING (Frontend-safe)
+     IMAGE HANDLING
   ========================================= */
-  const imageList =
-    images.length > 0
-      ? images
-      : [sample];
-
+  const imageList = images.length > 0 ? images : [sample];
   const [activeImage, setActiveImage] = useState(imageList[0]);
 
   /* =========================================
-     DESCRIPTION LOGIC
-  ========================================= */
-  const maxLength = 180;
-  const isLong = description.length > maxLength;
-  const shortText = description.slice(0, maxLength);
-
-  /* =========================================
-     PRICE CALCULATION
+     PRICE
   ========================================= */
   const totalPrice = useMemo(
     () => price * quantity,
     [price, quantity]
   );
 
+  const isUnavailable =
+    availability === "out_of_stock" ||
+    availability === "discontinued";
+
   /* =========================================
-     CART HANDLER (BACKEND KEPT)
+     ADD TO CART
   ========================================= */
   const handleAddToCart = () => {
+    if (isUnavailable) {
+      alert("This product is currently unavailable");
+      return;
+    }
+
     addToCart({
-      materialId: id,               // ✅ REQUIRED
-      supplierId: sellerId,         // ✅ REQUIRED
+      materialId: id,
+      supplierId: sellerId,
       name: title,
       supplier: seller,
-      amountPerTrip: price,         // ✅ REQUIRED
-      trips: quantity,              // ✅ REQUIRED
-      amount: price * quantity,     // ✅ REQUIRED
+      amountPerTrip: price,
+      trips: quantity,
+      amount: price * quantity,
       image: activeImage,
-      delivery: "Delivery in 1–2 days",
     });
 
-    alert(`${quantity} item(s) of ${title} added to cart!`);
+    alert("Product added to cart");
   };
 
+  /* =========================================
+     BUY NOW
+  ========================================= */
+  const handleBuyNow = () => {
+    if (isUnavailable) {
+      alert("This product is currently unavailable");
+      return;
+    }
 
+    const singleItem = {
+      materialId: id,
+      supplierId: sellerId,
+      name: title,
+      supplier: seller,
+      amountPerTrip: price,
+      trips: quantity,
+      amount: price * quantity,
+      image: activeImage,
+    };
+
+    localStorage.setItem(
+      "singleCheckoutItem",
+      JSON.stringify(singleItem)
+    );
+
+    navigate("/checkout");
+  };
 
   /* =========================================
      FALLBACK
@@ -87,9 +124,9 @@ const ProductInfo = () => {
         <div className="pd-container">
           <h1
             className="pd-title"
-            style={{ padding: "80px 5vw", textAlign: "center" }}
+            style={{ padding: "80px", textAlign: "center" }}
           >
-            Product details missing. Please go back and try again.
+            Product details missing
           </h1>
         </div>
       </>
@@ -109,12 +146,13 @@ const ProductInfo = () => {
                 key={index}
                 src={img}
                 alt="thumb"
-                className={`pd-thumb ${activeImage === img ? "active" : ""}`}
+                className={`pd-thumb ${
+                  activeImage === img ? "active" : ""
+                }`}
                 onClick={() => setActiveImage(img)}
               />
             ))}
           </div>
-
 
           <div className="pd-image-box">
             <img
@@ -130,10 +168,8 @@ const ProductInfo = () => {
           <h1 className="pd-title">{title}</h1>
 
           <p className="pd-description">
-            {expanded || !isLong
-              ? description
-              : `${shortText}...`}
-            {isLong && (
+            {expanded ? description : `${description.slice(0, 180)}...`}
+            {description.length > 180 && (
               <span
                 className="pd-see-more"
                 onClick={() => setExpanded(!expanded)}
@@ -149,9 +185,7 @@ const ProductInfo = () => {
                 <FaStar key={i} className="pd-star" />
               ))}
             </div>
-            <span className="pd-rating-count">
-              5.0 ★ | 235 Ratings
-            </span>
+            <span className="pd-rating-count">5.0 ★</span>
           </div>
 
           <hr className="pd-divider" />
@@ -159,6 +193,10 @@ const ProductInfo = () => {
           <div className="pd-key-details">
             <p><strong>Seller:</strong> {seller}</p>
             <p><strong>Origin:</strong> {origin}</p>
+            <p>
+              <strong>Status:</strong>{" "}
+              {formatAvailability(availability)}
+            </p>
           </div>
 
           <hr className="pd-divider" />
@@ -167,9 +205,7 @@ const ProductInfo = () => {
             <p className="pd-final-price">
               ₹{totalPrice.toLocaleString()}
             </p>
-            <p className="pd-tax-info">
-              Inclusive of all taxes
-            </p>
+            <p className="pd-tax-info">Inclusive of all taxes</p>
           </div>
 
           <div className="pd-trips">
@@ -177,9 +213,7 @@ const ProductInfo = () => {
             <button onClick={() => setQuantity(quantity + 1)}>+</button>
             <span className="pd-trip-count">{quantity}</span>
             <button
-              onClick={() =>
-                quantity > 1 && setQuantity(quantity - 1)
-              }
+              onClick={() => quantity > 1 && setQuantity(quantity - 1)}
             >
               -
             </button>
@@ -197,23 +231,8 @@ const ProductInfo = () => {
 
             <button
               className="pd-btn pd-btn-buy"
-              onClick={() =>
-                navigate("/checkout", {
-                  state: {
-                    products: [
-                      {
-                        id,
-                        sellerId,
-                        title,
-                        price,
-                        quantity,
-                        amount: totalPrice,
-                        image: activeImage,
-                      },
-                    ],
-                  },
-                })
-              }
+              onClick={handleBuyNow}
+              disabled={isUnavailable}
             >
               🛒 Buy Now
             </button>
@@ -221,6 +240,7 @@ const ProductInfo = () => {
             <button
               className="pd-btn pd-btn-cart"
               onClick={handleAddToCart}
+              disabled={isUnavailable}
             >
               ➕ Add to Cart
             </button>

@@ -3,92 +3,81 @@ import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./SellerProducts.css";
 
-/*
-  SellerProducts.jsx (Frontend Only)
-  - No backend / no API
-  - Uses localStorage
-  - Mock data based on Add New Product form
-  - Keeps ms- class names unchanged
-*/
-
-const STORAGE_KEY = "materials";
-
-/* MOCK PRODUCTS (Sofas & Fancy Chairs) */
-const DEMO_MATERIALS = [
-  {
-    id: 1,
-    name: "Luxury Velvet Sofa",
-    category: "Sofa",
-    productType: "Finished Product",
-    price: "45000",
-    quantity: 8,
-    description:
-      "Premium velvet sofa with solid wooden frame. Designed for modern living rooms with superior comfort.",
-    image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed",
-  },
-  {
-    id: 2,
-    name: "Royal Accent Chair",
-    category: "Chair",
-    productType: "Finished Product",
-    price: "18500",
-    quantity: 3,
-    description:
-      "Elegant accent chair with cushioned seating and premium fabric. Ideal for bedrooms and lounges.",
-    image: "https://images.pexels.com/photos/3965520/pexels-photo-3965520.jpeg"
-  },
-  {
-    id: 3,
-    name: "Modern Leather Sofa Set",
-    category: "Sofa",
-    productType: "Finished Product",
-    price: "72000",
-    quantity: 0,
-    description:
-      "Contemporary leather sofa set with high-density foam and durable upholstery.",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
-  },
-];
-
-const getStockStatus = (qty) => {
-  if (qty === 0) return "Out of Stock";
-  if (qty <= 5) return "Low Stock";
-  return "Available";
+const formatAvailability = (value) => {
+  switch (value) {
+    case "available":
+      return "Available";
+    case "out_of_stock":
+      return "Out of Stock";
+    case "low_stock":
+      return "Low Stock";
+    case "discontinued":
+      return "Discontinued";
+    default:
+      return "Available";
+  }
 };
 
 const SellerProducts = () => {
   const [materials, setMaterials] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [slideIndex, setSlideIndex] = useState({});
 
   const [editForm, setEditForm] = useState({
     name: "",
     category: "",
     productType: "",
     price: "",
-    unit: "",
-    quantity: "",
     description: "",
-    imageFile: null,
-    imagePreview: "",
+    availability: "available", // ✅ NEW
+    existingImages: [],
+    removedImages: [],
+    newImageFiles: [],
+    newImagePreviews: [],
   });
 
-  /* Load from localStorage */
+
+  /* =========================
+     FETCH SELLER PRODUCTS
+  ========================= */
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      setMaterials(Array.isArray(stored) && stored.length ? stored : DEMO_MATERIALS);
-    } catch {
-      setMaterials(DEMO_MATERIALS);
+    const sellerId = localStorage.getItem("sellerId");
+    if (!sellerId) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    fetch(`http://localhost:3001/seller/${sellerId}/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        setMaterials(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  /* Persist to localStorage */
+  /* =========================
+     IMAGE SLIDESHOW
+  ========================= */
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(materials));
+    const interval = setInterval(() => {
+      setSlideIndex((prev) => {
+        const updated = { ...prev };
+        materials.forEach((m) => {
+          const len = m.images?.length || 1;
+          updated[m.id] = ((updated[m.id] || 0) + 1) % len;
+        });
+        return updated;
+      });
+    }, 2500);
+
+    return () => clearInterval(interval);
   }, [materials]);
 
+  /* =========================
+     EDIT START
+  ========================= */
   const startEdit = (m) => {
     setEditingId(m.id);
     setEditForm({
@@ -96,69 +85,144 @@ const SellerProducts = () => {
       category: m.category,
       productType: m.productType,
       price: m.price,
-      unit: m.unit,
-      quantity: m.quantity,
-      description: m.description,
-      imageFile: null,
-      imagePreview: m.image,
+      description: m.description || "",
+      availability: m.availability || "available", // ✅ FIX
+
+      existingImages: (m.images || []).map(
+        (img) => `http://localhost:3001/${img}`
+      ),
+      removedImages: [],
+      newImageFiles: [],
+      newImagePreviews: [],
     });
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({
-      name: "",
-      category: "",
-      productType: "",
-      price: "",
-      unit: "",
-      quantity: "",
-      description: "",
-      imageFile: null,
-      imagePreview: "",
-    });
   };
 
+  /* =========================
+     FORM HANDLERS
+  ========================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleImageSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setEditForm((p) => ({ ...p, imageFile: file, imagePreview: preview }));
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const previews = files.map((f) => URL.createObjectURL(f));
+
+    setEditForm((p) => ({
+      ...p,
+      newImageFiles: [...p.newImageFiles, ...files],
+      newImagePreviews: [...p.newImagePreviews, ...previews],
+    }));
   };
 
-  const saveEdit = () => {
-    if (!editForm.name || !editForm.price) {
-      alert("Product name and price are required");
-      return;
+  const removeExistingImage = (img) => {
+    setEditForm((p) => ({
+      ...p,
+      existingImages: p.existingImages.filter((i) => i !== img),
+      removedImages: [...p.removedImages, img],
+    }));
+  };
+
+  const removeNewImage = (index) => {
+    setEditForm((p) => ({
+      ...p,
+      newImageFiles: p.newImageFiles.filter((_, i) => i !== index),
+      newImagePreviews: p.newImagePreviews.filter((_, i) => i !== index),
+    }));
+  };
+
+  const saveEdit = async () => {
+    try {
+      const formData = new FormData();
+
+      formData.append("name", editForm.name);
+      formData.append("category", editForm.category);
+      formData.append("productType", editForm.productType);
+      formData.append("price", editForm.price);
+      formData.append("description", editForm.description);
+      formData.append("availability", editForm.availability);
+
+
+      // Keep only remaining images (strip server URL)
+      const keptImages = editForm.existingImages.map((img) =>
+        img.replace("http://localhost:3001/", "")
+      );
+
+      formData.append("existingImages", JSON.stringify(keptImages));
+
+      // Add new images
+      editForm.newImageFiles.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const res = await fetch(
+        `http://localhost:3001/seller/product/${editingId}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        alert("Failed to update product");
+        return;
+      }
+
+      const data = await res.json();
+
+      // ✅ Update UI instantly
+      setMaterials((prev) =>
+        prev.map((p) => (p.id === editingId ? data.product : p))
+      );
+
+      cancelEdit();
+    } catch (err) {
+      console.error(err);
+      alert("Server error while updating product");
     }
+  };
 
-    setMaterials((prev) =>
-      prev.map((m) =>
-        m.id === editingId
-          ? {
-              ...m,
-              ...editForm,
-              quantity: Number(editForm.quantity),
-              image: editForm.imagePreview || m.image,
-            }
-          : m
-      )
+  /* =========================
+     REMOVE PRODUCT (🔥 FIX)
+  ========================= */
+  const removeMaterial = async (productId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?"
     );
+    if (!confirmDelete) return;
 
-    cancelEdit();
+    try {
+      const res = await fetch(
+        `http://localhost:3001/seller/product/${productId}`,
+        { method: "DELETE" }
+      );
+
+      if (!res.ok) {
+        alert("Failed to delete product");
+        return;
+      }
+
+      // ✅ Update UI instantly
+      setMaterials((prev) => prev.filter((p) => p.id !== productId));
+    } catch (err) {
+      console.error(err);
+      alert("Server error while deleting product");
+    }
   };
 
-  const removeMaterial = (id) => {
-    if (!window.confirm("Remove this product?")) return;
-    setMaterials((prev) => prev.filter((m) => m.id !== id));
-  };
 
+  /* =========================
+     UI
+  ========================= */
   return (
     <div className="ms-root">
       <Sidebar />
@@ -179,43 +243,59 @@ const SellerProducts = () => {
             <div className="ms-edit-grid">
               <label className="ms-field">
                 <span className="ms-label">Product Name</span>
-                <input name="name" className="ms-input" value={editForm.name} onChange={handleChange} />
+                <input
+                  name="name"
+                  className="ms-input"
+                  value={editForm.name}
+                  onChange={handleChange}
+                />
               </label>
 
               <label className="ms-field">
                 <span className="ms-label">Product Type</span>
-                <input name="productType" className="ms-input" value={editForm.productType} onChange={handleChange} />
+                <input
+                  name="productType"
+                  className="ms-input"
+                  value={editForm.productType}
+                  onChange={handleChange}
+                />
               </label>
 
               <label className="ms-field">
                 <span className="ms-label">Category</span>
-                <input name="category" className="ms-input" value={editForm.category} onChange={handleChange} />
+                <input
+                  name="category"
+                  className="ms-input"
+                  value={editForm.category}
+                  onChange={handleChange}
+                />
               </label>
 
               <label className="ms-field">
                 <span className="ms-label">Price</span>
-                <input name="price" className="ms-input" value={editForm.price} onChange={handleChange} />
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Unit</span>
-                <select name="unit" className="ms-input" value={editForm.unit} onChange={handleChange}>
-                  <option value="">Select</option>
-                  <option value="Piece">Piece</option>
-                  <option value="Set">Set</option>
-                </select>
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Quantity</span>
                 <input
-                  type="number"
-                  name="quantity"
+                  name="price"
                   className="ms-input"
-                  value={editForm.quantity}
+                  value={editForm.price}
                   onChange={handleChange}
                 />
               </label>
+
+              <label className="ms-field">
+                <span className="ms-label">Availability</span>
+                <select
+                  name="availability"
+                  className="ms-input"
+                  value={editForm.availability}
+                  onChange={handleChange}
+                >
+                  <option value="available">Available</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                  <option value="low_stock">Low Stock</option>
+                  <option value="discontinued">Discontinued</option>
+                </select>
+              </label>
+
 
               <label className="ms-field ms-full">
                 <span className="ms-label">Description</span>
@@ -228,11 +308,32 @@ const SellerProducts = () => {
               </label>
 
               <label className="ms-field ms-full">
-                <span className="ms-label">Product Image</span>
-                <input type="file" accept="image/*" className="ms-file" onChange={handleImageSelect} />
-                {editForm.imagePreview && (
-                  <img src={editForm.imagePreview} className="ms-preview" alt="preview" />
-                )}
+                <span className="ms-label">Product Images</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="ms-file"
+                  onChange={handleImageSelect}
+                />
+
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {editForm.existingImages.map((img, i) => (
+                    <div key={i}>
+                      <img src={img} className="ms-preview" alt="" />
+                      <button className="ms-btn ms-btn--ghost" onClick={() => removeExistingImage(img)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+
+                  {editForm.newImagePreviews.map((img, i) => (
+                    <div key={i}>
+                      <img src={img} className="ms-preview" alt="" />
+                      <button onClick={() => removeNewImage(i)}>Remove</button>
+                    </div>
+                  ))}
+                </div>
               </label>
             </div>
 
@@ -253,24 +354,41 @@ const SellerProducts = () => {
           ) : (
             materials.map((m) => (
               <article key={m.id} className="ms-card">
-                <img src={m.image} alt={m.name} className="ms-thumb" />
+                <img
+                  src={
+                    m.images?.length
+                      ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]
+                      }`
+                      : ""
+                  }
+                  className="ms-thumb"
+                  alt={m.name}
+                />
 
                 <div className="ms-body">
-                  <h3 className="ms-name">Product Name: {m.name}</h3>
+                  <h3 className="ms-name">{m.name}</h3>
                   <div className="ms-price">
-                    Price: ₹{m.price} 
+                    ₹{Number(m.price).toLocaleString()}
                   </div>
-                  <div className="ms-desc">Description: {m.description}</div>
-                  <div className="ms-meta">
-                    Status: <strong>{getStockStatus(m.quantity)}</strong>
+                  <div className="ms-desc">{m.description || "—"}</div>
+                  <div className={`ms-meta stock-${m.availability}`}>
+                    Status: <strong>{formatAvailability(m.availability)}</strong>
                   </div>
+
+
                 </div>
 
                 <div className="ms-actions">
-                  <button className="ms-btn ms-btn--outline" onClick={() => startEdit(m)}>
+                  <button
+                    className="ms-btn ms-btn--outline"
+                    onClick={() => startEdit(m)}
+                  >
                     Edit
                   </button>
-                  <button className="ms-btn ms-btn--ghost" onClick={() => removeMaterial(m.id)}>
+                  <button
+                    className="ms-btn ms-btn--ghost"
+                    onClick={() => removeMaterial(m.id)}
+                  >
                     Remove
                   </button>
                 </div>

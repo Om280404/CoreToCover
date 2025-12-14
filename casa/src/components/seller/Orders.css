@@ -33,6 +33,7 @@
   min-height: 100vh;
   box-sizing: border-box;
   margin-left: 260px; 
+  margin-top: 50px;
 }
 
 .orders-content h1 {

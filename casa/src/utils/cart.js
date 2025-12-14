@@ -4,7 +4,6 @@ export const loadCart = () => {
   try {
     const raw = JSON.parse(localStorage.getItem(CART_KEY)) || [];
 
-    // ✅ REMOVE INVALID ITEMS
     return raw.filter(
       item =>
         item.materialId !== undefined &&
@@ -15,12 +14,13 @@ export const loadCart = () => {
   }
 };
 
-
 export const saveCart = (cart) => {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 };
 
 export const addToCart = (product) => {
+  if (!product?.materialId || !product?.supplierId) return loadCart();
+
   const cart = loadCart();
 
   const index = cart.findIndex(
@@ -48,7 +48,7 @@ export const updateCartItemQuantity = (materialId, qty) => {
     (item) => item.materialId === materialId
   );
 
-  if (index > -1) {
+  if (index > -1 && qty > 0) {
     cart[index].trips = qty;
     cart[index].amount =
       cart[index].amountPerTrip * qty;

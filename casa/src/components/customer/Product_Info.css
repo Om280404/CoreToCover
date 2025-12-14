@@ -25,7 +25,8 @@
   grid-template-columns: 1fr 1.4fr 0.8fr;
   gap: 32px;
   padding: 100px 5vw 50px;
-  background: var(--green-light);
+  background: radial-gradient(1200px 400px at top center, rgba(192,204,164,0.35), transparent 60%),
+    linear-gradient(180deg, #f4f7ef, var(--green-light));;
   color: var(--text-dark);
   font-family: var(--font-ui);
 }

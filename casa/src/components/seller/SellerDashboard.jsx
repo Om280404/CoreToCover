@@ -10,23 +10,30 @@ import { FaShoppingCart, FaRupeeSign } from "react-icons/fa";
 const SellerDashboard = () => {
   const navigate = useNavigate();
 
+  const sellerId = localStorage.getItem("sellerId");
+
   /* ===============================
-     SELLER DATA (FRONTEND ONLY)
+     STATE
   =============================== */
   const [seller, setSeller] = useState({
     name: "Seller",
   });
 
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+
+  /* ===============================
+     LOAD SELLER PROFILE (LOCAL)
+  =============================== */
   useEffect(() => {
     const sellerEmail = localStorage.getItem("SellerEmail");
 
-    if (!sellerEmail) {
+    if (!sellerEmail || !sellerId) {
       alert("Please log in as a seller.");
-    //   navigate("/sellerlogin");
+      // navigate("/sellerlogin");
       return;
     }
 
-    // Frontend-only local profile
     const storedProfile = JSON.parse(
       localStorage.getItem("sellerProfile")
     );
@@ -34,7 +41,36 @@ const SellerDashboard = () => {
     setSeller({
       name: storedProfile?.name || "Seller",
     });
-  }, [navigate]);
+  }, [navigate, sellerId]);
+
+  /* ===============================
+     FETCH DASHBOARD STATS
+  =============================== */
+  useEffect(() => {
+    if (!sellerId) return;
+
+    fetch(`http://localhost:3001/seller/${sellerId}/orders`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!Array.isArray(data)) return;
+
+        // ✅ Orders received
+        setOrdersCount(data.length);
+
+        // ✅ Earnings from fulfilled orders only
+        const earnings = data
+          .filter((o) => o.status === "fulfilled")
+          .reduce((sum, o) => {
+            const amount = Number(o.totalAmount || 0);
+            return sum + amount;
+          }, 0);
+
+        setTotalEarnings(earnings);
+      })
+      .catch((err) => {
+        console.error("DASHBOARD FETCH ERROR:", err);
+      });
+  }, [sellerId]);
 
   return (
     <div className="dashboard-wrapper">
@@ -43,20 +79,24 @@ const SellerDashboard = () => {
 
       <div className="dashboard-main">
         <h1 className="dashboard-title">
-          Welcome, {seller.name} 
+          Welcome, {seller.name}
         </h1>
 
         <div className="dashboard-cards">
           <div className="dashboard-card">
             <FaShoppingCart className="dashboard-icon" />
             <p className="dashboard-label">Orders Received</p>
-            <h2 className="dashboard-value">50</h2>
+            <h2 className="dashboard-value">
+              {ordersCount}
+            </h2>
           </div>
 
           <div className="dashboard-card">
             <FaRupeeSign className="dashboard-icon" />
             <p className="dashboard-label">Total Earnings</p>
-            <h2 className="dashboard-value">₹50,000</h2>
+            <h2 className="dashboard-value">
+              ₹{totalEarnings.toLocaleString()}
+            </h2>
           </div>
         </div>
       </div>
