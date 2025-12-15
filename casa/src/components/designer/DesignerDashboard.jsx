@@ -80,7 +80,7 @@ const DesignerDashboard = () => {
           </div>
 
           {/* Work Received */}
-          <div className="dash-card reveal delay-2" onClick={() => navigate("/designerworkrecieved")}>
+          <div className="dash-card reveal delay-2" onClick={() => navigate("/designerworkreceived")}>
             <div className="dash-icon"><FaHandshake /></div>
             <h3>Work Received</h3>
             <p>See customers who hired you & manage their projects.</p>
