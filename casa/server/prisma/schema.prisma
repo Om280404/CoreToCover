@@ -16,7 +16,8 @@ model User {
   address   String?
   createdAt DateTime @default(now())
 
-  orders Order[] // ✅ ADD THIS LINE
+  orders  Order[]
+  ratings Rating[]
 }
 
 /// =========================
@@ -63,12 +64,12 @@ model Product {
   description  String?
   images       String[]
   video        String?
-  availability String   @default("available") 
+  availability String   @default("available")
   sellerId     Int
   createdAt    DateTime @default(now())
   seller       Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  ratings      Rating[]
 }
-
 
 /// =========================
 /// ORDER (CUSTOMER LEVEL)
@@ -98,12 +99,12 @@ model Order {
 /// ORDER ITEM (SELLER LEVEL)
 /// =========================
 model OrderItem {
-  id           Int      @id @default(autoincrement())
-  orderId      Int
-  order        Order    @relation(fields: [orderId], references: [id])
+  id      Int   @id @default(autoincrement())
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id])
 
-  sellerId     Int
-  seller       Seller   @relation(fields: [sellerId], references: [id])
+  sellerId Int
+  seller   Seller @relation(fields: [sellerId], references: [id])
 
   materialId   Int
   materialName String
@@ -114,9 +115,24 @@ model OrderItem {
   pricePerUnit Float
   totalAmount  Float
 
-  status       String   @default("pending") // ✅ ADD THIS
+  status String @default("pending") // ✅ ADD THIS
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  rating    Rating?
 }
 
+model Rating {
+  id        Int      @id @default(autoincrement())
+  stars     Int
+  comment   String?
+  createdAt DateTime @default(now())
 
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  orderItemId Int       @unique
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+}

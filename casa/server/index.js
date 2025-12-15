@@ -414,25 +414,37 @@ app.get("/products", async (req, res) => {
           select: {
             name: true,
             business: {
-              select: {
-                city: true,
-                state: true,
-              },
+              select: { city: true, state: true },
             },
           },
         },
+        ratings: {
+          select: { stars: true },
+        },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    res.json(products);
+    // 🔥 CALCULATE AVG RATING
+    const formatted = products.map((p) => {
+      const total = p.ratings.reduce((sum, r) => sum + r.stars, 0);
+      const count = p.ratings.length;
+      const avgRating = count ? total / count : 0;
+
+      return {
+        ...p,
+        avgRating: Number(avgRating.toFixed(1)),
+        ratingCount: count,
+      };
+    });
+
+    res.json(formatted);
   } catch (err) {
     console.error("FETCH PRODUCTS ERROR:", err);
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
+
 
 
 app.post("/order/place", async (req, res) => {
@@ -514,9 +526,6 @@ app.post("/order/place", async (req, res) => {
 });
 
 
-// ============================
-// GET USER ORDERS
-// ============================
 app.get("/orders/user/:email", async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
@@ -541,33 +550,24 @@ app.get("/orders/user/:email", async (req, res) => {
       },
     });
 
-    /* =========================
-       FLATTEN FOR UI
-    ========================= */
     const formatted = orders.flatMap((order) =>
-      order.items.map((item) => {
-        let uiStatus = "PROCESSING";
+      order.items.map((item) => ({
+        id: `ORD-${order.id}`,
+        orderItemId: item.id,
+        materialId: item.materialId,
 
-        if (item.status === "fulfilled") uiStatus = "DELIVERED";
-        else if (item.status === "confirmed") uiStatus = "PROCESSING";
-        else if (item.status === "rejected") uiStatus = "CANCELLED";
-        else if (item.status === "pending") uiStatus = "PROCESSING";
+        productName: item.materialName,
+        sellerName: item.seller.name,
+        quantity: item.quantity,
+        totalAmount: item.totalAmount,
+        imageUrl: item.imageUrl,
 
-        return {
-          id: `ORD-${order.id}`,
-          productName: item.materialName,
-          sellerName: item.seller.name,
-          quantity: item.quantity,
-          totalAmount: item.totalAmount,
-          orderStatus: uiStatus,          // ✅ REAL STATUS
-          createdAt: order.createdAt,
-          imageUrl: item.imageUrl,
-          grandTotal: order.grandTotal,
-        };
-      })
+        // 🔥 THIS IS THE FIX
+        orderStatus: item.status, // fulfilled | pending | confirmed | rejected
+
+        createdAt: order.createdAt,
+      }))
     );
-
-
 
     res.json(formatted);
   } catch (err) {
@@ -575,6 +575,8 @@ app.get("/orders/user/:email", async (req, res) => {
     res.status(500).json([]);
   }
 });
+
+
 
 
 
@@ -863,6 +865,99 @@ app.patch("/order/:orderId/cancel", async (req, res) => {
     });
   }
 });
+
+// ============================
+// RATE ORDER ITEM
+// ============================
+app.post("/order/item/:orderItemId/rate", async (req, res) => {
+  try {
+    const orderItemId = Number(req.params.orderItemId);
+    const { stars, comment, userEmail } = req.body;
+
+    if (!stars || !userEmail) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const orderItem = await prisma.orderItem.findUnique({
+      where: { id: orderItemId },
+      include: { rating: true },
+    });
+
+    if (!orderItem) {
+      return res.status(404).json({ message: "Order item not found" });
+    }
+
+    if (orderItem.status !== "fulfilled") {
+      return res
+        .status(400)
+        .json({ message: "You can only rate delivered orders" });
+    }
+
+    if (orderItem.rating) {
+      return res.status(409).json({ message: "Already rated" });
+    }
+
+    const rating = await prisma.rating.create({
+      data: {
+        stars,
+        comment: comment || null,
+        userId: user.id,
+        productId: orderItem.materialId,
+        orderItemId: orderItem.id,
+      },
+    });
+
+    res.status(201).json({ message: "Rating submitted", rating });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to submit rating" });
+  }
+});
+
+// ============================
+// GET PRODUCT RATINGS & REVIEWS
+// ============================
+// GET PRODUCT RATINGS + REVIEWS
+app.get("/product/:productId/ratings", async (req, res) => {
+  try {
+    const productId = Number(req.params.productId);
+
+    const ratings = await prisma.rating.findMany({
+      where: { productId },
+      include: {
+        user: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const avg =
+      ratings.reduce((s, r) => s + r.stars, 0) /
+      (ratings.length || 1);
+
+    res.json({
+      avgRating: Number(avg.toFixed(1)),
+      count: ratings.length,
+      reviews: ratings.map((r) => ({
+        id: r.id,
+        stars: r.stars,
+        comment: r.comment,
+        user: r.user.name,
+      })),
+    });
+  } catch {
+    res.json({ avgRating: 0, count: 0, reviews: [] });
+  }
+});
+
+
 
 
 

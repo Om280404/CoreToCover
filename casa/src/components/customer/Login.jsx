@@ -27,7 +27,7 @@ export default function Login() {
 
     // ✅ FIX HERE
     localStorage.setItem("userEmail", data.user.email);
-    navigate("/home");
+    navigate("/");
   };
 
   return (

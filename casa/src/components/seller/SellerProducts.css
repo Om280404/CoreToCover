@@ -1,39 +1,34 @@
-/* File: src/components/SupplierMaterials.css
-   Theme: CASA – Natural Interior (Olive / Sage)
+/* =========================================
+   CASA – Natural Interior (Olive / Sage)
    Prefix: ms-
-*/
+========================================= */
 
 :root {
-  /* Layout */
   --ms-sidebar-w: 220px;
 
-  /* Colors */
-  --ms-bg: #f4f6f1;                /* warm background */
+  --ms-bg: #f4f6f1;
   --ms-surface: #ffffff;
-  --ms-primary: #6b7c5c;           /* olive */
+  --ms-primary: #6b7c5c;
   --ms-primary-dark: #4f5e44;
-  --ms-accent: #a8b79c;            /* sage */
-  --ms-ink: #2f332b;               /* charcoal */
+  --ms-accent: #a8b79c;
+  --ms-ink: #2f332b;
   --ms-muted: #7a7f75;
 
-  /* UI */
   --ms-radius: 14px;
   --ms-shadow: 0 14px 34px rgba(79, 94, 68, 0.12);
   --ms-border: rgba(79, 94, 68, 0.12);
 }
 
 /* ===============================
-   ROOT LAYOUT
+   ROOT
 ================================ */
-.ms-root,
-.sma-root,
-.bm-add-root {
+.ms-root {
   min-height: 100vh;
   background: var(--ms-bg);
 }
 
 /* ===============================
-   FIXED SIDEBAR
+   SIDEBAR
 ================================ */
 .sidebar-panel {
   position: fixed;
@@ -44,32 +39,36 @@
 }
 
 /* ===============================
-   MAIN CONTENT
+   MAIN LAYOUT
 ================================ */
 .ms-main {
   margin-left: var(--ms-sidebar-w);
   padding: 22px;
-  max-width: 1200px;
+  max-width: 1440px;
+  margin-right: auto;
+
+  display: grid;
+  grid-template-columns: 1fr 0px;
+  gap: 22px;
   box-sizing: border-box;
-  min-height: auto; /* FIX */
 }
 
 /* ===============================
    HEADER
 ================================ */
 .ms-header {
-  margin-bottom: 16px;
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
 }
 
 .ms-title {
-  margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--ms-ink);
 }
 
 .ms-sub {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--ms-muted);
   font-weight: 700;
 }
@@ -78,36 +77,427 @@
    EDIT PANEL
 ================================ */
 .ms-edit-panel {
+  grid-column: 1 / -1;
   background: var(--ms-surface);
   border-radius: var(--ms-radius);
-  padding: 16px;
+  padding: 18px;
   box-shadow: var(--ms-shadow);
   border: 1px solid var(--ms-border);
-  margin-bottom: 18px;
 }
 
-.ms-edit-title {
-  margin-bottom: 10px;
+/* ===============================
+   PRODUCT GRID
+================================ */
+.ms-grid {
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+/* ===============================
+   PRODUCT CARD
+================================ */
+.ms-card {
+  background: var(--ms-surface);
+  border-radius: var(--ms-radius);
+  box-shadow: var(--ms-shadow);
+  border: 1px solid var(--ms-border);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ms-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(79, 94, 68, 0.18);
+}
+
+.ms-thumb {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.ms-body {
+  margin-top: 12px;
+}
+
+.ms-name {
+  font-size: 1.05rem;
   font-weight: 900;
   color: var(--ms-ink);
 }
 
-.ms-edit-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+.ms-price {
+  margin-top: 4px;
+  font-weight: 800;
+  color: var(--ms-muted);
+}
+
+.ms-desc {
+  font-size: 0.9rem;
+  color: var(--ms-muted);
+  line-height: 1.5;
+
+  /* 🔥 CRITICAL */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;   /* show only 3 lines */
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  word-break: break-all;   /* handles long strings */
+}
+
+
+.ms-meta {
+  margin-top: 6px;
+  font-weight: 800;
+}
+
+/* ===============================
+   CARD ACTIONS
+================================ */
+.ms-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.ms-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+}
+
+.ms-btn--outline {
+  background: transparent;
+  border: 1px solid var(--ms-border);
+  color: var(--ms-ink);
+}
+
+.ms-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--ms-border);
+  color: var(--ms-muted);
+}
+
+.ms-btn--primary {
+  background: linear-gradient(
+    90deg,
+    var(--ms-primary),
+    var(--ms-primary-dark)
+  );
+  color: #fff;
+}
+
+/* ===============================
+   REVIEWS PANEL
+================================ */
+.ms-reviews-panel {
+  grid-column: 1;
+  background: var(--ms-surface);
+  border-radius: var(--ms-radius);
+  border: 1px solid var(--ms-border);
+  box-shadow: var(--ms-shadow);
+  padding: 18px;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+.ms-reviews-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.ms-rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ms-stars svg {
+  color: #facc15;
+}
+
+.ms-rating-number {
+  font-weight: 900;
+}
+
+.ms-rating-count {
+  font-size: 0.85rem;
+  color: var(--ms-muted);
+}
+
+/* ===============================
+   REVIEWS LIST
+================================ */
+.ms-reviews-list {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
+.ms-review-card {
+  padding-top: 10px;
+  border-top: 1px solid var(--ms-border);
+}
+
+.ms-review-user {
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.ms-review-text {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--ms-muted);
+}
+
+.ms-no-reviews {
+  color: var(--ms-muted);
+  font-size: 0.9rem;
+}
+
+/* ===============================
+   STOCK COLORS
+================================ */
+.stock-available strong { color: #16a34a; }
+.stock-out_of_stock strong { color: #dc2626; }
+.stock-low_stock strong { color: #ca8a04; }
+.stock-discontinued strong { color: #6b7280; }
+
+/* ===============================
+   EMPTY STATE
+================================ */
+.ms-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--ms-muted);
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+}
+
+/* =========================================
+   RESPONSIVE – TABLETS (≤ 1024px)
+========================================= */
+@media (max-width: 1024px) {
+
+  .ms-main {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .ms-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .ms-reviews-panel {
+    position: static;
+    margin-top: 20px;
+  }
+
+  .ms-actions {
+    gap: 10px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE – MOBILE (≤ 768px)
+========================================= */
+@media (max-width: 768px) {
+
+  /* MAIN LAYOUT */
+  .ms-main {
+    margin-left: 0;
+    padding: 14px;
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-panel {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  /* HEADER */
+  .ms-title {
+    font-size: 1.35rem;
+  }
+
+  .ms-sub {
+    font-size: 0.9rem;
+  }
+
+  /* PRODUCT GRID */
+  .ms-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  /* PRODUCT CARD */
+  .ms-card {
+    padding: 12px;
+  }
+
+  .ms-thumb {
+    height: 180px;
+  }
+
+  .ms-name {
+    font-size: 1rem;
+  }
+
+  .ms-desc {
+    font-size: 0.88rem;
+  }
+
+  /* CARD ACTIONS */
+  .ms-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ms-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* EDIT PANEL */
+  .ms-edit-panel {
+    padding: 14px;
+  }
+
+  .ms-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ms-edit-title {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .ms-edit-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* IMAGE PREVIEWS */
+  .ms-preview {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* REVIEWS PANEL */
+  .ms-reviews-panel {
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  .ms-reviews-title {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .ms-rating-summary {
+    justify-content: center;
+  }
+
+  .ms-review-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================================
+   EXTRA SMALL DEVICES (≤ 480px)
+========================================= */
+@media (max-width: 480px) {
+
+  .ms-title {
+    font-size: 1.2rem;
+  }
+
+  .ms-sub {
+    font-size: 0.85rem;
+  }
+
+  .ms-thumb {
+    height: 160px;
+  }
+
+  .ms-desc {
+    font-size: 0.85rem;
+  }
+
+  .ms-btn {
+    font-size: 0.85rem;
+  }
+
+  .ms-review-user {
+    font-size: 0.85rem;
+  }
+
+  .ms-review-text {
+    font-size: 0.8rem;
+  }
+}
+
+
+/* ===============================
+   EDIT PRODUCT PANEL – CASA
+================================ */
+
+/* Panel container */
+.ms-edit-panel {
+  background: var(--ms-surface);
+  border-radius: var(--ms-radius);
+  padding: 20px;
+  box-shadow: var(--ms-shadow);
+  border: 1px solid var(--ms-border);
+  margin-bottom: 24px;
+}
+
+/* Title */
+.ms-edit-title {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--ms-ink);
+  margin-bottom: 14px;
+}
+
+/* Grid layout */
+.ms-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+/* Field wrapper */
 .ms-field {
   display: flex;
   flex-direction: column;
 }
 
+/* Full width fields */
 .ms-full {
   grid-column: 1 / -1;
 }
 
+/* Labels */
 .ms-label {
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--ms-muted);
   margin-bottom: 6px;
@@ -115,39 +505,62 @@
 
 /* Inputs */
 .ms-input,
-.ms-select,
+.ms-textarea,
 .ms-file,
-.ms-textarea {
+.ms-select {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--ms-border);
+  background: #fff;
   font-weight: 800;
   color: var(--ms-ink);
-  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.ms-input:focus,
+.ms-textarea:focus,
+.ms-select:focus {
+  outline: none;
+  border-color: var(--ms-primary);
+  box-shadow: 0 0 0 3px rgba(107, 124, 92, 0.15);
+}
+
+/* Textarea */
 .ms-textarea {
-  min-height: 100px;
+  min-height: 110px;
   resize: vertical;
 }
 
-/* ===============================
-   BUTTONS
-================================ */
-.ms-edit-actions,
-.ms-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 14px;
+/* Image preview */
+.ms-preview {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--ms-border);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
+/* Image remove buttons */
+.ms-preview + .ms-btn {
+  margin-top: 6px;
+  width: 100%;
+}
+
+/* Action buttons */
+.ms-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+/* Buttons */
 .ms-btn {
-  padding: 9px 16px;
   border-radius: 10px;
-  border: none;
   font-weight: 900;
   cursor: pointer;
+  border: none;
 }
 
 .ms-btn--primary {
@@ -160,106 +573,40 @@
   box-shadow: 0 10px 26px rgba(79, 94, 68, 0.25);
 }
 
+.ms-btn--primary:hover {
+  filter: brightness(1.05);
+}
+
 .ms-btn--ghost {
   background: transparent;
   border: 1px solid var(--ms-border);
   color: var(--ms-ink);
+  width: 90%;
+}
+
+.ms-btn--ghost:hover {
+  background: rgba(107, 124, 92, 0.08);
 }
 
 /* ===============================
-   MATERIAL GRID
+   MOBILE OPTIMIZATION
 ================================ */
-.ms-grid {
-  display: grid;
-  gap: 22px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  align-items: start; /* OPTIONAL FIX */
-}
-
-/* ===============================
-   MATERIAL CARD
-================================ */
-.ms-card {
-  background: var(--ms-surface);
-  border-radius: var(--ms-radius);
-  box-shadow: var(--ms-shadow);
-  border: 1px solid var(--ms-border);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  height: auto; /* FIX */
-}
-
-.ms-thumb {
-  width: 100%;
-  height: 200px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: linear-gradient(180deg, #e9ede3, #f7f9f4);
-}
-
-.ms-body {
-  margin-top: 14px;
-}
-
-.ms-name {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: var(--ms-ink);
-}
-
-.ms-price {
-  margin-top: 6px;
-  font-weight: 800;
-  color: var(--ms-muted);
-}
-
-.ms-desc {
-  margin-top: 6px;
-  font-size: 0.92rem;
-  color: var(--ms-muted);
-}
-
-.ms-meta {
-  margin-top: 4px;
-  font-weight: 800;
-  color: var(--ms-muted);
-}
-
-/* ===============================
-   EMPTY STATE
-================================ */
-.ms-empty {
-  padding: 20px;
-  text-align: center;
-  color: var(--ms-muted);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-}
-
-/* ===============================
-   MOBILE
-================================ */
-@media (max-width: 600px) {
-  .ms-main {
-    margin-left: 0;
-    margin-top: 80px;
-    padding: 14px;
+@media (max-width: 768px) {
+  .ms-edit-panel {
+    padding: 16px;
   }
-}
 
-.stock-available strong {
-  color: #16a34a; 
-}
+  .ms-edit-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.stock-out_of_stock strong {
-  color: #dc2626
-}
+  .ms-btn {
+    width: 100%;
+  }
 
-.low-stock strong {
-  color: #ca8a04; 
-}
-
-.stock-discontinued strong {
-  color: #6b7280;
+  .ms-preview {
+    width: 80px;
+    height: 80px;
+  }
 }

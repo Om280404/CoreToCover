@@ -1,5 +1,5 @@
 /* =========================================
-   GLOBAL THEME COLORS & FONTS
+   GLOBAL THEME COLORS & FONTS — CASA
 ========================================= */
 :root {
   --green-dark: #606E52;
@@ -10,7 +10,7 @@
   --text-muted: #8F8B84;
 
   --radius: 14px;
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   --transition: all 0.25s ease;
 
   --font-ui: "Helvetica", Arial, sans-serif;
@@ -18,43 +18,42 @@
 }
 
 /* =========================================
-   PAGE LAYOUT (3 COLUMN)
+   PAGE LAYOUT
 ========================================= */
 .pd-container {
   display: grid;
-  grid-template-columns: 1fr 1.4fr 0.8fr;
-  gap: 32px;
-  padding: 100px 5vw 50px;
-  background: radial-gradient(1200px 400px at top center, rgba(192,204,164,0.35), transparent 60%),
-    linear-gradient(180deg, #f4f7ef, var(--green-light));;
+  grid-template-columns: 1.1fr 1.6fr 0.9fr;
+  gap: 36px;
+  padding: 110px 6vw 60px;
+  background:
+    radial-gradient(1200px 420px at top center,
+      rgba(192,204,164,0.35),
+      transparent 60%),
+    linear-gradient(180deg, #f4f7ef, var(--green-light));
   color: var(--text-dark);
   font-family: var(--font-ui);
 }
 
 /* =========================================
-   LEFT IMAGE SECTION (Amazon Style)
+   LEFT IMAGE SECTION
 ========================================= */
 .pd-left {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
   gap: 18px;
-
-  /* FIX: prevents thumbnails from drifting upward */
-  padding-top: 20px;  
+  padding-top: 24px;
 }
 
-/* Thumbnail list */
 .pd-thumbnails {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .pd-thumb {
-  width: 62px;
-  height: 62px;
-  border-radius: 8px;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
   object-fit: cover;
   cursor: pointer;
   border: 2px solid transparent;
@@ -63,86 +62,109 @@
 }
 
 .pd-thumb:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .pd-thumb.active {
-  border: 2px solid var(--green-mid);
-  box-shadow: 0 0 6px rgba(96, 110, 82, 0.3);
+  border-color: var(--green-mid);
+  box-shadow: 0 0 8px rgba(96,110,82,0.35);
 }
 
-/* Main large image */
+/* Main Image */
 .pd-image-box {
-  width: 450px;
-  height: 450px;
+  width: 460px;
+  max-width: 100%;
+  height: auto;        
+  padding: 20px;             
   background: var(--white);
   border-radius: var(--radius);
-  overflow: hidden;
   border: 1px solid #dbe6c6;
   box-shadow: var(--shadow);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 .pd-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition);
+  object-fit: cover; 
+  background: #fff;
 }
 
+
 .pd-image:hover {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 /* =========================================
-   CENTER DETAILS CARD
+   CENTER DETAILS
 ========================================= */
 .pd-center {
   background: var(--white);
-  padding: 28px;
+  padding: 32px;
   border-radius: var(--radius);
   border: 1px solid #dbe6c6;
   box-shadow: var(--shadow);
 }
 
-/* Title */
 .pd-title {
-  font-size: 2rem;
+  font-size: 2.1rem;
   font-family: var(--font-heading);
   font-weight: 500;
   color: var(--green-dark);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-/* Description + See More */
+/* =========================
+   DESCRIPTION CONTROL 
+========================= */
+
 .pd-description {
   color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.7;
-  margin-bottom: 14px;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+
+  transition: max-height 0.35s ease;
 }
 
-.pd-see-more {
-  color: var(--green-dark);
-  font-weight: 600;
-  cursor: pointer;
-  margin-left: 6px;
+/* Collapsed preview (4 lines) */
+.pd-description.collapsed {
+  max-height: 6.8em;
+  overflow: hidden;
 }
 
-.pd-see-more:hover {
-  color: var(--green-mid);
+/* Expanded = FULL CONTENT (no limit) */
+.pd-description.expanded {
+  max-height: none;     /* ✅ KEY FIX */
+  overflow: visible;    /* ✅ KEY FIX */
 }
+
+/* Mobile tuning */
+@media (max-width: 768px) {
+  .pd-description {
+    font-size: 0.95rem;
+  }
+}
+
 
 /* Ratings */
 .pd-rating-line {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .pd-stars {
   color: #facc15;
+  font-size: 1.05rem;
 }
 
 .pd-rating-count {
@@ -154,13 +176,18 @@
 .pd-divider {
   border: none;
   height: 1px;
-  background: #e6e6e6;
-  margin: 14px 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #dbe6c6,
+    transparent
+  );
+  margin: 18px 0;
 }
 
-/* Supplier / Origin */
+/* Meta */
 .pd-key-details {
-  line-height: 1.9;
+  line-height: 2;
   font-size: 1rem;
 }
 
@@ -172,12 +199,11 @@
    PRICE
 ========================================= */
 .pd-price-block {
-  margin: 14px 0 20px;
+  margin: 20px 0 24px;
 }
 
 .pd-final-price {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.2rem;
   font-family: var(--font-heading);
   color: var(--green-dark);
 }
@@ -188,18 +214,16 @@
 }
 
 /* =========================================
-   TRIPS / QUANTITY
+   QUANTITY
 ========================================= */
 .pd-trips {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
-
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
   background: var(--white);
   border: 1px solid #dbe6c6;
-  padding: 12px 14px;
-  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
@@ -212,10 +236,10 @@
   background: var(--green-dark);
   color: var(--white);
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   font-size: 18px;
-  border-radius: 8px;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -234,158 +258,384 @@
 
 .pd-buybox {
   background: var(--white);
-  padding: 24px 20px;
+  padding: 26px 22px;
   border-radius: var(--radius);
   border: 1px solid #dbe6c6;
   box-shadow: var(--shadow);
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
   text-align: center;
+  position: sticky;
+  top: 110px;
 }
 
 .pd-buybox-title {
   font-size: 1rem;
-  color: var(--green-dark);
   font-weight: 600;
+  color: var(--green-dark);
 }
 
 .pd-price {
-  font-size: 1.7rem;
-  color: var(--green-dark);
+  font-size: 1.8rem;
   font-weight: 700;
+  color: var(--green-dark);
   margin-top: 6px;
 }
 
 .pd-tax {
   color: var(--text-muted);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 /* Buttons */
 .pd-btn {
   width: 100%;
-  padding: 12px 16px;
-  margin-top: 8px;
+  padding: 13px;
+  margin-top: 10px;
   border-radius: var(--radius);
   font-weight: 600;
-  cursor: pointer;
   border: none;
+  cursor: pointer;
   transition: var(--transition);
 }
 
-/* Buy Now */
 .pd-btn-buy {
   background: var(--green-dark);
   color: var(--white);
 }
+
 .pd-btn-buy:hover {
   background: var(--green-mid);
 }
 
-/* Add to Cart */
 .pd-btn-cart {
   background: var(--green-mid);
   color: var(--white);
 }
+
 .pd-btn-cart:hover {
   background: var(--green-dark);
 }
 
-/* Back */
 .pd-btn-back {
   background: var(--white);
   border: 1px solid #dbe6c6;
-  color: var(--text-dark);
 }
+
 .pd-btn-back:hover {
   background: var(--green-light);
 }
 
 /* =========================================
-   RESPONSIVE — TABLETS
+   REVIEWS – FULL WIDTH PREMIUM
+========================================= */
+.pd-reviews-section {
+  max-width: 1400px;
+  margin: 80px auto;
+  padding: 0 6vw;
+}
+
+.pd-reviews-title {
+  font-size: 26px;
+  font-family: var(--font-heading);
+  color: var(--green-dark);
+  margin-bottom: 28px;
+}
+
+.pd-reviews-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 26px;
+}
+
+.pd-review-card {
+  background: var(--white);
+  padding: 22px;
+  border-radius: var(--radius);
+  border: 1px solid #dbe6c6;
+  box-shadow: var(--shadow);
+}
+
+.pd-review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pd-review-user {
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.pd-review-comment {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  line-height: 1.65;
+}
+
+/* =========================================
+   RESPONSIVE
 ========================================= */
 @media (max-width: 1100px) {
   .pd-container {
     grid-template-columns: 1fr;
-    padding: 80px 5vw;
+    padding: 90px 6vw;
   }
 
   .pd-image-box {
-    width: 100%;
-    height: auto;
     max-width: 420px;
-    aspect-ratio: 1 / 1;
+    margin: auto;
   }
 
-  .pd-center,
-  .pd-right {
-    max-width: 700px;
-    margin: 20px auto;
-  }
-
-  .pd-left {
-    justify-content: center;
+  .pd-buybox {
+    position: static;
+    max-width: 100%;
+    margin-top: 30px;
   }
 }
 
-/* =========================================
-   RESPONSIVE — MOBILE
-========================================= */
 @media (max-width: 750px) {
-  .pd-container {
-    padding: 70px 4vw;
-  }
-
-  /* Thumbnails become horizontal scroll */
   .pd-thumbnails {
     flex-direction: row;
     overflow-x: auto;
-    width: 100%;
-    padding-bottom: 10px;
   }
 
-  .pd-thumb {
-    width: 58px;
-    height: 58px;
-  }
-
-  /* Layout stacked neatly */
   .pd-left {
     flex-direction: column-reverse;
     align-items: center;
   }
 
   .pd-image-box {
-    width: 100%;
     max-width: 360px;
-    aspect-ratio: 1 / 1;
   }
 
-  .pd-title {
-    font-size: 1.6rem;
-  }
-
-  .pd-final-price {
-    font-size: 1.6rem;
-  }
-
-  /* Buy box becomes full width */
-  .pd-buybox {
-    max-width: 100%;
+  .pd-reviews-list {
+    grid-template-columns: 1fr;
   }
 }
 
 /* =========================================
-   EXTRA SMALL DEVICES
+   MOBILE RESPONSIVENESS – CASA
 ========================================= */
-@media (max-width: 450px) {
+@media (max-width: 768px) {
+
+  /* Page container */
+  .pd-container {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    padding: 78px 4vw 40px;
+  }
+
+  /* LEFT IMAGE AREA */
+  .pd-left {
+    flex-direction: column-reverse;
+    align-items: center;
+    padding-top: 0;
+  }
+
+  .pd-thumbnails {
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    width: 100%;
+    padding: 10px 2px;
+    justify-content: flex-start;
+  }
+
+  .pd-thumb {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .pd-image-box {
+    width: 100%;
+    max-width: 340px;
+    margin: auto;
+  }
+
+  /* CENTER DETAILS */
+  .pd-center {
+    padding: 22px;
+  }
+
   .pd-title {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
+    text-align: center;
   }
+
+  .pd-rating-line {
+    justify-content: center;
+  }
+
   .pd-description {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
   }
+
+  .pd-key-details {
+    font-size: 0.95rem;
+  }
+
+  /* QUANTITY */
+  .pd-trips {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  /* BUY BOX */
+  .pd-right {
+    justify-content: center;
+  }
+
+  .pd-buybox {
+    position: static;
+    max-width: 100%;
+    padding: 22px;
+  }
+
+  .pd-btn {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+
+  /* REVIEWS */
+  .pd-reviews-section {
+    margin: 50px auto;
+    padding: 0 4vw;
+  }
+
+  .pd-reviews-title {
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
+  .pd-reviews-list {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .pd-review-card {
+    padding: 18px;
+  }
+  .pd-image {
+    max-height: 320px;
+  }
+}
+
+/* =========================================
+   EXTRA SMALL DEVICES (≤ 420px)
+========================================= */
+@media (max-width: 420px) {
+
+  .pd-title {
+    font-size: 1.35rem;
+  }
+
   .pd-final-price {
     font-size: 1.4rem;
   }
+
+  .pd-thumb {
+    width: 52px;
+    height: 52px;
+  }
+
+  .pd-btn {
+    font-size: 0.9rem;
+  }
+
+  .pd-review-comment {
+    font-size: 0.9rem;
+  }
 }
+
+/* =========================
+   DESCRIPTION – HARD FIX
+========================= */
+
+.pd-description {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+
+  /* 🔥 CRITICAL FOR LONG STRINGS */
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  white-space: normal;
+
+  transition: max-height 0.3s ease;
+}
+
+/* Collapsed preview */
+.pd-description.collapsed {
+  max-height: 6.8em; /* ~4 lines */
+  overflow: hidden;
+}
+
+/* FULL EXPANDED */
+.pd-description.expanded {
+  max-height: none;     /* 🔥 NO LIMIT */
+  overflow: visible;    /* 🔥 SHOW EVERYTHING */
+}
+
+/* See more button */
+.pd-see-more {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+  color: var(--green-dark);
+  cursor: pointer;
+}
+
+.pd-see-more:hover {
+  color: var(--green-mid);
+  text-decoration: underline;
+}
+
+/* =========================
+   DESCRIPTION – FINAL FIX
+========================= */
+
+.pd-center {
+  overflow: visible; /* 🔥 REQUIRED */
+}
+
+.pd-description {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  white-space: normal;
+
+  transition: max-height 0.3s ease;
+}
+
+/* Preview */
+.pd-description.collapsed {
+  max-height: 6.8em;
+  overflow: hidden;
+}
+
+/* FULL CONTENT */
+.pd-description.expanded {
+  max-height: none;
+  overflow: visible;
+}
+
+/* See more */
+.pd-see-more {
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--green-dark);
+  cursor: pointer;
+}
+
+.pd-see-more:hover {
+  color: var(--green-mid);
+  text-decoration: underline;
+}
+
+

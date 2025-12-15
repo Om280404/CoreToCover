@@ -127,7 +127,7 @@ const Checkout = () => {
         clearCart();
       }
 
-      navigate("/home");
+      navigate("/");
     } catch {
       alert("Failed to place order");
     } finally {

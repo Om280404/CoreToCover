@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { FaStar } from "react-icons/fa";
+import React, { useState, useMemo, useEffect } from "react";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./Product_Info.css";
@@ -8,26 +8,31 @@ import { addToCart } from "../../utils/cart";
 
 const formatAvailability = (value) => {
   switch (value) {
-    case "available":
-      return "Available";
-    case "out_of_stock":
-      return "Out of Stock";
-    case "low_stock":
-      return "Low Stock";
-    case "discontinued":
-      return "Discontinued";
-    default:
-      return "Available";
+    case "available": return "Available";
+    case "out_of_stock": return "Out of Stock";
+    case "low_stock": return "Low Stock";
+    case "discontinued": return "Discontinued";
+    default: return "Available";
   }
+};
+
+const renderStars = (rating) => {
+  const stars = [];
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+
+  for (let i = 1; i <= 5; i++) {
+    if (i <= full) stars.push(<FaStar key={i} />);
+    else if (i === full + 1 && half)
+      stars.push(<FaStarHalfAlt key={i} />);
+    else stars.push(<FaRegStar key={i} />);
+  }
+  return stars;
 };
 
 const ProductInfo = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  /* =========================================
-     PRODUCT DATA FROM NAVIGATION
-  ========================================= */
   const product = location.state?.product || {};
 
   const {
@@ -39,38 +44,48 @@ const ProductInfo = () => {
     price = 0,
     images = [],
     description = "No description available.",
-    availability = "available", // ✅ NEW
+    availability = "available",
   } = product;
 
   const [quantity, setQuantity] = useState(1);
   const [expanded, setExpanded] = useState(false);
 
-  /* =========================================
-     IMAGE HANDLING
-  ========================================= */
-  const imageList = images.length > 0 ? images : [sample];
+  /* ⭐ RATING STATE */
+  const [avgRating, setAvgRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
+  const [reviews, setReviews] = useState([]);
+
+  /* =========================
+     FETCH RATINGS
+  ========================= */
+  useEffect(() => {
+    if (!id) return;
+
+    fetch(`http://localhost:3001/product/${id}/ratings`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAvgRating(data.avgRating || 0);
+        setRatingCount(data.count || 0);
+        setReviews(data.reviews || []);
+      })
+      .catch(() => {
+        setAvgRating(0);
+        setRatingCount(0);
+        setReviews([]);
+      });
+  }, [id]);
+
+  const imageList = images.length ? images : [sample];
   const [activeImage, setActiveImage] = useState(imageList[0]);
 
-  /* =========================================
-     PRICE
-  ========================================= */
-  const totalPrice = useMemo(
-    () => price * quantity,
-    [price, quantity]
-  );
+  const totalPrice = useMemo(() => price * quantity, [price, quantity]);
 
   const isUnavailable =
     availability === "out_of_stock" ||
     availability === "discontinued";
 
-  /* =========================================
-     ADD TO CART
-  ========================================= */
   const handleAddToCart = () => {
-    if (isUnavailable) {
-      alert("This product is currently unavailable");
-      return;
-    }
+    if (isUnavailable) return alert("Unavailable");
 
     addToCart({
       materialId: id,
@@ -79,53 +94,37 @@ const ProductInfo = () => {
       supplier: seller,
       amountPerTrip: price,
       trips: quantity,
-      amount: price * quantity,
       image: activeImage,
     });
 
-    alert("Product added to cart");
+    alert("Added to cart");
   };
 
-  /* =========================================
-     BUY NOW
-  ========================================= */
   const handleBuyNow = () => {
-    if (isUnavailable) {
-      alert("This product is currently unavailable");
-      return;
-    }
-
-    const singleItem = {
-      materialId: id,
-      supplierId: sellerId,
-      name: title,
-      supplier: seller,
-      amountPerTrip: price,
-      trips: quantity,
-      amount: price * quantity,
-      image: activeImage,
-    };
+    if (isUnavailable) return alert("Unavailable");
 
     localStorage.setItem(
       "singleCheckoutItem",
-      JSON.stringify(singleItem)
+      JSON.stringify({
+        materialId: id,
+        supplierId: sellerId,
+        name: title,
+        supplier: seller,
+        amountPerTrip: price,
+        trips: quantity,
+        image: activeImage,
+      })
     );
 
     navigate("/checkout");
   };
 
-  /* =========================================
-     FALLBACK
-  ========================================= */
   if (!id || !sellerId) {
     return (
       <>
         <Navbar />
         <div className="pd-container">
-          <h1
-            className="pd-title"
-            style={{ padding: "80px", textAlign: "center" }}
-          >
+          <h1 className="pd-title" style={{ padding: 80 }}>
             Product details missing
           </h1>
         </div>
@@ -138,28 +137,21 @@ const ProductInfo = () => {
       <Navbar />
 
       <div className="pd-container">
-        {/* LEFT IMAGE */}
+        {/* LEFT */}
         <div className="pd-left">
           <div className="pd-thumbnails">
-            {imageList.map((img, index) => (
+            {imageList.map((img, i) => (
               <img
-                key={index}
+                key={i}
                 src={img}
-                alt="thumb"
-                className={`pd-thumb ${
-                  activeImage === img ? "active" : ""
-                }`}
+                className={`pd-thumb ${activeImage === img ? "active" : ""}`}
                 onClick={() => setActiveImage(img)}
               />
             ))}
           </div>
 
           <div className="pd-image-box">
-            <img
-              src={activeImage}
-              alt={title}
-              className="pd-image"
-            />
+            <img src={activeImage} className="pd-image" />
           </div>
         </div>
 
@@ -167,67 +159,47 @@ const ProductInfo = () => {
         <div className="pd-center">
           <h1 className="pd-title">{title}</h1>
 
-          <p className="pd-description">
-            {expanded ? description : `${description.slice(0, 180)}...`}
-            {description.length > 180 && (
-              <span
-                className="pd-see-more"
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? " See less" : " See more"}
-              </span>
-            )}
-          </p>
-
           <div className="pd-rating-line">
-            <div className="pd-stars">
-              {[...Array(5)].map((_, i) => (
-                <FaStar key={i} className="pd-star" />
-              ))}
-            </div>
-            <span className="pd-rating-count">5.0 ★</span>
+            <div className="pd-stars">{renderStars(avgRating)}</div>
+            <span className="pd-rating-count">
+              {avgRating || "No ratings"} {ratingCount > 0 && `(${ratingCount})`}
+            </span>
           </div>
+
+          <div
+            className={`pd-description ${expanded ? "expanded" : "collapsed"}`}
+          >
+            {description}
+          </div>
+
+          {description.length > 120 && (
+            <span
+              className="pd-see-more"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "See less" : "See more"}
+            </span>
+          )}
+
+
 
           <hr className="pd-divider" />
 
           <div className="pd-key-details">
             <p><strong>Seller:</strong> {seller}</p>
             <p><strong>Origin:</strong> {origin}</p>
-            <p>
-              <strong>Status:</strong>{" "}
-              {formatAvailability(availability)}
-            </p>
+            <p><strong>Status:</strong> {formatAvailability(availability)}</p>
           </div>
 
           <hr className="pd-divider" />
 
-          <div className="pd-price-block">
-            <p className="pd-final-price">
-              ₹{totalPrice.toLocaleString()}
-            </p>
-            <p className="pd-tax-info">Inclusive of all taxes</p>
-          </div>
-
-          <div className="pd-trips">
-            <span className="pd-trips-label">Quantity:</span>
-            <button onClick={() => setQuantity(quantity + 1)}>+</button>
-            <span className="pd-trip-count">{quantity}</span>
-            <button
-              onClick={() => quantity > 1 && setQuantity(quantity - 1)}
-            >
-              -
-            </button>
-          </div>
         </div>
 
-        {/* RIGHT BUY BOX */}
+        {/* RIGHT */}
         <div className="pd-right">
           <div className="pd-buybox">
             <p className="pd-buybox-title">{title}</p>
-            <p className="pd-price">
-              ₹{totalPrice.toLocaleString()}
-            </p>
-            <p className="pd-tax">Inclusive of all taxes</p>
+            <p className="pd-price">₹{totalPrice.toLocaleString()}</p>
 
             <button
               className="pd-btn pd-btn-buy"
@@ -254,6 +226,43 @@ const ProductInfo = () => {
           </div>
         </div>
       </div>
+      {/* =========================
+     REVIEWS SECTION (BOTTOM)
+========================= */}
+      <section className="pd-reviews-section">
+        <h2 className="pd-reviews-title">
+          Customer Reviews
+          {ratingCount > 0 && (
+            <span className="pd-reviews-count">
+              ({ratingCount})
+            </span>
+          )}
+        </h2>
+
+        {reviews.length === 0 ? (
+          <p className="pd-no-reviews">
+            No reviews yet. Be the first to review this product.
+          </p>
+        ) : (
+          <div className="pd-reviews-list">
+            {reviews.map((r) => (
+              <div key={r.id} className="pd-review-card">
+                <div className="pd-review-header">
+                  <strong className="pd-review-user">{r.user}</strong>
+                  <div className="pd-stars">
+                    {renderStars(r.stars)}
+                  </div>
+                </div>
+
+                {r.comment && (
+                  <p className="pd-review-comment">{r.comment}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
     </>
   );
 };

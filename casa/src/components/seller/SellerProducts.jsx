@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./SellerProducts.css";
+import { FaStar, FaRegStar } from "react-icons/fa";
+
 
 const formatAvailability = (value) => {
   switch (value) {
@@ -36,6 +38,22 @@ const SellerProducts = () => {
     newImageFiles: [],
     newImagePreviews: [],
   });
+  // ⭐ Reviews state 
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [ratingData, setRatingData] = useState({
+    avgRating: 0,
+    count: 0,
+    reviews: [],
+  });
+
+  const renderStars = (rating = 0) => {
+    const rounded = Math.round(rating);
+    return [...Array(5)].map((_, i) =>
+      i < rounded ? <FaStar key={i} /> : <FaRegStar key={i} />
+    );
+  };
+
+
 
 
   /* =========================
@@ -219,10 +237,26 @@ const SellerProducts = () => {
     }
   };
 
+  const loadReviews = async (product) => {
+    setSelectedProduct(product);
 
-  /* =========================
-     UI
-  ========================= */
+    try {
+      const res = await fetch(
+        `http://localhost:3001/product/${product.id}/ratings`
+      );
+      const data = await res.json();
+
+      setRatingData({
+        avgRating: data.avgRating || 0,
+        count: data.count || 0,
+        reviews: data.reviews || [],
+      });
+    } catch {
+      setRatingData({ avgRating: 0, count: 0, reviews: [] });
+    }
+  };
+
+
   return (
     <div className="ms-root">
       <Sidebar />
@@ -348,6 +382,44 @@ const SellerProducts = () => {
           </section>
         )}
 
+        {selectedProduct && (
+          <aside className="ms-reviews-panel">
+            <h3 className="ms-reviews-title">
+              Reviews – {selectedProduct.name}
+            </h3>
+
+            <div className="ms-rating-summary">
+              <div className="ms-stars">
+                {renderStars(ratingData.avgRating)}
+              </div>
+              <span className="ms-rating-number">
+                {ratingData.avgRating.toFixed(1)}
+              </span>
+              <span className="ms-rating-count">
+                ({ratingData.count} ratings)
+              </span>
+            </div>
+
+            <div className="ms-reviews-list">
+              {ratingData.reviews.length === 0 ? (
+                <p className="ms-no-reviews">No reviews yet</p>
+              ) : (
+                ratingData.reviews.map((r) => (
+                  <div key={r.id} className="ms-review-card">
+                    <div className="ms-stars">
+                      {renderStars(r.stars)}
+                    </div>
+                    <p className="ms-review-user">{r.user}</p>
+                    <p className="ms-review-text">
+                      {r.comment || "No comment"}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </aside>
+        )}
+
         <section className="ms-grid">
           {materials.length === 0 ? (
             <div className="ms-empty">No products added</div>
@@ -370,7 +442,10 @@ const SellerProducts = () => {
                   <div className="ms-price">
                     ₹{Number(m.price).toLocaleString()}
                   </div>
-                  <div className="ms-desc">{m.description || "—"}</div>
+                  <div className="ms-desc" title={m.description}>
+                    {m.description}
+                  </div>
+
                   <div className={`ms-meta stock-${m.availability}`}>
                     Status: <strong>{formatAvailability(m.availability)}</strong>
                   </div>
@@ -391,11 +466,18 @@ const SellerProducts = () => {
                   >
                     Remove
                   </button>
+                  <button
+                    className="ms-btn ms-btn--ghost"
+                    onClick={() => loadReviews(m)}
+                  >
+                    View Reviews
+                  </button>
                 </div>
               </article>
             ))
           )}
         </section>
+
       </main>
     </div>
   );
