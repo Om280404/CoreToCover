@@ -107,6 +107,7 @@
   /* 🔥 MULTI-LINE ELLIPSIS */
   display: -webkit-box;
   -webkit-line-clamp: 1;       /* show 3 lines */
+  line-clamp: 1;  
   -webkit-box-orient: vertical;
 
   overflow: hidden;

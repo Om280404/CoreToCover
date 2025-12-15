@@ -146,6 +146,7 @@
   /* 🔥 CRITICAL */
   display: -webkit-box;
   -webkit-line-clamp: 1;   /* show only 3 lines */
+  line-clamp: 1;  
   -webkit-box-orient: vertical;
 
   overflow: hidden;
