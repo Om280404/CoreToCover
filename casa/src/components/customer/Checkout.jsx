@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./Checkout.css";
 import { loadCart, clearCart } from "../../utils/cart";
-import sample from "../../assets/images/sample.jpg";
+// import sample from "../../assets/images/sample.jpg";
+import GooGlePay from "../../assets/images/GooglePay.png";
+import Paytm from "../../assets/images/Paytm.png";
+import PhonePe from "../../assets/images/PhonePe.jpg";
+import COD from "../../assets/images/COD.png";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -182,10 +186,10 @@ const Checkout = () => {
             <h3>Payment Method</h3>
             <div className="payment-options">
               {[
-                ["gpay", "Google Pay", "https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg"],
-                ["phonepe", "PhonePe", "https://upload.wikimedia.org/wikipedia/commons/0/09/PhonePe_Logo.svg"],
-                ["paytm", "Paytm", "https://upload.wikimedia.org/wikipedia/commons/4/42/Paytm_logo.png"],
-                ["cod", "Cash on Delivery", "https://cdn-icons-png.flaticon.com/512/3856/3856330.png"],
+                ["gpay", "Google Pay", GooGlePay],
+                ["phonepe", "PhonePe", PhonePe],
+                ["paytm", "Paytm", Paytm],
+                ["cod", "Cash on Delivery", COD],
               ].map(([id, label, img]) => (
                 <label
                   key={id}

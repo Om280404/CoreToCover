@@ -396,7 +396,122 @@ app.post(
 );
 
 
+// ============================
+// ADD / UPDATE SELLER BANK DETAILS
+// ============================
+app.post("/seller/bank-details", async (req, res) => {
+  try {
+    const {
+      sellerId,
+      accountHolder,
+      bankName,
+      accountNumber,
+      ifsc,
+    } = req.body;
 
+    if (
+      !sellerId ||
+      !accountHolder ||
+      !bankName ||
+      !accountNumber ||
+      !ifsc
+    ) {
+      return res.status(400).json({
+        message: "All bank fields are required",
+      });
+    }
+
+    const seller = await prisma.seller.findUnique({
+      where: { id: Number(sellerId) },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    const bank = await prisma.sellerBankDetails.upsert({
+      where: { sellerId: Number(sellerId) },
+      update: {
+        accountHolder,
+        bankName,
+        accountNumber,
+        ifsc,
+      },
+      create: {
+        sellerId: Number(sellerId),
+        accountHolder,
+        bankName,
+        accountNumber,
+        ifsc,
+      },
+    });
+
+    res.json({
+      message: "Bank details saved successfully",
+      bank,
+    });
+  } catch (err) {
+    console.error("BANK DETAILS ERROR:", err);
+    res.status(500).json({ message: "Failed to save bank details" });
+  }
+});
+
+// ============================
+// GET SELLER BANK DETAILS
+// ============================
+app.get("/seller/:sellerId/bank-details", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+
+    const bank = await prisma.sellerBankDetails.findUnique({
+      where: { sellerId },
+      select: {
+        accountHolder: true,
+        bankName: true,
+        accountNumber: true,
+        ifsc: true,
+      },
+    });
+
+    if (!bank) {
+      return res.json(null);
+    }
+
+    res.json(bank);
+  } catch (err) {
+    console.error("FETCH BANK DETAILS ERROR:", err);
+    res.status(500).json(null);
+  }
+});
+
+// ============================
+// CHECK SELLER ONBOARDING STATUS
+// ============================
+app.get("/seller/:sellerId/onboarding-status", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+
+    const seller = await prisma.seller.findUnique({
+      where: { id: sellerId },
+      include: {
+        business: true,
+        bank: true,
+      },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    res.json({
+      hasBusinessDetails: !!seller.business,
+      hasBankDetails: !!seller.bank,
+    });
+  } catch (err) {
+    console.error("ONBOARDING STATUS ERROR:", err);
+    res.status(500).json({ message: "Failed to check status" });
+  }
+});
 
 
 
@@ -719,10 +834,47 @@ app.get("/seller/profile/:id", async (req, res) => {
         : "Not set",
     });
   } catch (err) {
-    console.error("FETCH SELLER PROFILE ERROR:", err);
+    console.error("GET SELLER PROFILE ERROR:", err);
     res.status(500).json({ message: "Failed to fetch seller profile" });
   }
 });
+
+// ============================
+// UPDATE SELLER PROFILE
+// ============================
+app.put("/seller/profile/:id", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.id);
+    const { name, phone } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({ message: "Name and phone are required" });
+    }
+
+    const updatedSeller = await prisma.seller.update({
+      where: { id: sellerId },
+      data: {
+        name: name.trim(),
+        phone: phone.trim(),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      },
+    });
+
+    res.json({
+      message: "Profile updated successfully",
+      seller: updatedSeller,
+    });
+  } catch (err) {
+    console.error("UPDATE SELLER PROFILE ERROR:", err);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+});
+
 
 // ============================
 // GET SELLER ORDERS

@@ -1,179 +1,101 @@
-/* bs-prefix to avoid collisions
-   Theme: Casa Interior (soft green, warm neutral)
-*/
-
 /* ===============================
-   PALETTE & TOKENS (CASA THEME)
+   CASA THEME VARIABLES
 =============================== */
 :root {
-  --bs-bg: #f3f7ec;
-  --bs-surface: #ffffff;
+  --bg-main: #f4f7ee;
+  --bg-card: #ffffff;
 
-  --bs-green-dark: #606e52;
-  --bs-green-mid: #91a56e;
-  --bs-green-light: #c0cca4;
+  --green-dark: #5f6d52;
+  --green-mid: #8fa070;
+  --green-light: #d9e2c7;
 
-  --bs-ink: #474747;
-  --bs-muted: #8f8b84;
+  --text-dark: #2f2f2f;
+  --text-muted: #7b7b74;
 
-  --bs-shadow: 0 16px 40px rgba(96, 110, 82, 0.14);
-  --bs-radius: 14px;
-  --bs-gap: 16px;
-  --bs-max: 1100px;
+  --shadow-sm: 0 8px 22px rgba(95, 109, 82, 0.14);
+  --shadow-lg: 0 20px 45px rgba(95, 109, 82, 0.22);
 
-  /* must match sidebar width */
-  --ms-sidebar-w: 220px;
+  --radius: 16px;
+
+  /* must match sidebar */
+  --sidebar-w: 220px;
 
   font-family: "Helvetica", Arial, sans-serif;
 }
 
 /* ===============================
-   LAYOUT ROOT
+   ROOT LAYOUT
 =============================== */
 .bs-layout-root {
   min-height: 100vh;
   display: flex;
-  gap: 20px;
-  background: linear-gradient(180deg, #f3f7ec, #e8efdc);
-  box-sizing: border-box;
+  background: linear-gradient(180deg, #f4f7ee, #e8efdc);
 }
 
 /* ===============================
-   CONTENT SHELL
+   PROFILE CONTAINER
 =============================== */
 .bs-profile-shell {
-  flex: 1 1 auto;
-  max-width: var(--bs-max);
-  width: 100%;
-  margin: 0 auto;
-  margin-left: calc(var(--ms-sidebar-w) + 20px);
-
-  padding: 22px;
-  border-radius: var(--bs-radius);
-  box-shadow: var(--bs-shadow);
-  box-sizing: border-box;
+  flex: 1;
+  max-width: 900px;
+  margin: 40px auto;
+  margin-left: calc(var(--sidebar-w) + 32px);
+  padding: 24px;
 }
 
 /* ===============================
-   HEADINGS
+   HEADING
 =============================== */
 .bs-heading {
-  margin: 0 0 8px;
-  font-size: 1.6rem;
-  color: var(--bs-green-dark);
-  letter-spacing: -0.2px;
+  font-size: 1.7rem;
   font-weight: 600;
-}
-
-.bs-subheading {
-  margin: 18px 0 10px;
-  font-size: 1.1rem;
-  color: var(--bs-green-dark);
-  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: 20px;
 }
 
 /* ===============================
-   RATING ROW
-=============================== */
-.bs-rating-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.bs-rating-label {
-  color: var(--bs-muted);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.bs-rating-stars {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bs-star {
-  color: #f2b01e;
-  font-size: 1rem;
-}
-
-.bs-rating-value {
-  color: var(--bs-muted);
-  font-weight: 700;
-  margin-left: 6px;
-}
-
-/* ===============================
-   DETAILS GRID
-=============================== */
-.bs-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 18px;
-  align-items: start;
-}
-
-/* ===============================
-   CARD
+   PROFILE CARD
 =============================== */
 .bs-card {
-  background: var(--bs-surface);
-  border-radius: var(--bs-radius);
-  padding: 16px;
-  box-shadow: 0 10px 26px rgba(96, 110, 82, 0.12);
-  border: 1px solid rgba(96, 110, 82, 0.12);
-  box-sizing: border-box;
-}
+  background: var(--bg-card);
+  padding: 22px 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(95, 109, 82, 0.12);
 
-/* Main card fields */
-.bs-card--main .bs-field {
-  margin: 8px 0;
-  font-size: 0.95rem;
   display: flex;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.bs-field-key {
-  min-width: 92px;
-  color: var(--bs-muted);
-  font-weight: 700;
+.bs-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-dark);
 }
 
-.bs-field-val {
-  font-weight: 700;
-  color: var(--bs-ink);
+.bs-card strong {
+  color: var(--green-dark);
 }
 
 /* ===============================
-   ACTION BUTTONS
+   BUTTONS
 =============================== */
-.bs-actions-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
 .bs-btn {
-  border: none;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
+  margin-top: 14px;
+  padding: 10px 18px;
+  border-radius: 12px;
   font-size: 0.95rem;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 220ms ease;
 }
 
 .bs-btn--primary {
-  background: linear-gradient(
-    90deg,
-    var(--bs-green-dark),
-    var(--bs-green-mid)
-  );
+  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
   color: #ffffff;
-  box-shadow: 0 10px 26px rgba(96, 110, 82, 0.22);
+  box-shadow: var(--shadow-lg);
 }
 
 .bs-btn--primary:hover {
@@ -182,154 +104,93 @@
 
 .bs-btn--ghost {
   background: transparent;
-  color: var(--bs-green-dark);
-  border: 1px solid rgba(96, 110, 82, 0.2);
+  color: var(--green-dark);
+  border: 1px solid rgba(95, 109, 82, 0.3);
 }
 
-.bs-btn--outline {
-  background: transparent;
-  color: var(--bs-green-dark);
-  border: 1px solid rgba(96, 110, 82, 0.2);
-  padding: 6px 12px;
-  border-radius: 8px;
+.bs-btn--ghost:hover {
+  background: rgba(95, 109, 82, 0.08);
 }
 
 /* ===============================
    EDIT FORM
 =============================== */
 .bs-edit-form {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 
-.bs-form-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.bs-form-label {
-  color: var(--bs-muted);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.bs-input {
-  padding: 9px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(96, 110, 82, 0.2);
-  background: #ffffff;
-  color: var(--bs-ink);
-  font-weight: 600;
-}
-
-.bs-edit-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-/* ===============================
-   MATERIALS GRID
-=============================== */
-.bs-materials-grid {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
 }
 
-.bs-material-item {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #ffffff, #f9fbf6);
-  border: 1px solid rgba(96, 110, 82, 0.12);
-  box-shadow: 0 8px 22px rgba(96, 110, 82, 0.1);
+.bs-edit-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(95, 109, 82, 0.3);
+  font-size: 0.95rem;
+  color: var(--text-dark);
 }
 
-.bs-material-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: var(--bs-green-light);
-  flex-shrink: 0;
+.bs-edit-form input:focus {
+  outline: none;
+  border-color: var(--green-mid);
 }
 
-.bs-material-title {
-  font-weight: 700;
-  color: var(--bs-ink);
+.bs-edit-form button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
 }
 
-.bs-material-meta {
-  color: var(--bs-muted);
-  font-size: 0.9rem;
-  margin-top: 6px;
+.bs-edit-form button[type="submit"] {
+  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+  color: #fff;
 }
 
-.bs-material-stock {
-  font-weight: 700;
+.bs-edit-form button[type="button"] {
+  background: transparent;
+  color: var(--green-dark);
+  border: 1px solid rgba(95, 109, 82, 0.3);
 }
 
 /* ===============================
-   VIEW ALL
+   LOADING STATE
 =============================== */
-.bs-viewall-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 18px;
-}
-
-.bs-empty-state {
-  color: var(--bs-muted);
-  padding: 14px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
+.bs-profile-shell h2 {
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* ===============================
    RESPONSIVE
 =============================== */
-@media (max-width: 960px) {
-  .bs-details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .bs-materials-grid {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 900px) {
+  .bs-profile-shell {
+    margin-left: 0;
+    margin-top: 90px;
+    padding: 20px;
   }
 }
 
 @media (max-width: 520px) {
-  .bs-materials-grid {
-    grid-template-columns: 1fr;
+  .bs-heading {
+    font-size: 1.45rem;
+    text-align: center;
   }
 
-  .bs-profile-shell {
-    margin-top: 90px;
-    margin-left: 0;
-    padding: 14px;
+  .bs-card,
+  .bs-edit-form {
+    padding: 18px;
   }
 
-  .bs-btn {
-    font-size: 0.9rem;
-    padding: 8px 12px;
-  }
-}
-
-/* ===============================
-   REDUCED MOTION
-=============================== */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
+  .bs-btn,
+  .bs-edit-form button {
+    width: 100%;
   }
 }

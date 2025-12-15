@@ -21,7 +21,6 @@
   min-height: 100vh;
   background: #f4f7ef;
   font-family: "Helvetica", Arial, sans-serif;
-  margin-left: calc(var(--ms-sidebar-w) + 20px);
 }
 
 /* Scrollable area next to sidebar */

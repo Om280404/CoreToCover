@@ -26,7 +26,7 @@ const SellerDashboard = () => {
      LOAD SELLER PROFILE (LOCAL)
   =============================== */
   useEffect(() => {
-    const sellerEmail = localStorage.getItem("SellerEmail");
+    const sellerEmail = localStorage.getItem("sellerEmail");
 
     if (!sellerEmail || !sellerId) {
       alert("Please log in as a seller.");

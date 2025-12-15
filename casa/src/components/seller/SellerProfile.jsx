@@ -1,5 +1,3 @@
-// File: src/components/seller/SellerProfile.jsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SellerProfile.css";
@@ -8,13 +6,17 @@ import NotificationButton from "./NotificationButton";
 
 const SellerProfile = () => {
   const navigate = useNavigate();
-
   const sellerId = localStorage.getItem("sellerId");
 
   const [profile, setProfile] = useState(null);
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   /* =========================
      FETCH SELLER PROFILE
@@ -26,10 +28,17 @@ const SellerProfile = () => {
     }
 
     fetch(`http://localhost:3001/seller/profile/${sellerId}`)
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to load profile");
+        return res.json();
+      })
       .then((data) => {
         setProfile(data);
-        setFormData(data);
+        setFormData({
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        });
         setLoading(false);
       })
       .catch((err) => {
@@ -39,24 +48,50 @@ const SellerProfile = () => {
   }, [sellerId, navigate]);
 
   /* =========================
-     HANDLERS
+     SAVE PROFILE
   ========================= */
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleSave = async () => {
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      alert("Name and phone are required");
+      return;
+    }
 
-  const handleSave = () => {
-    // 🔒 For now UI-only save
-    setProfile(formData);
-    setIsEditing(false);
-    alert("Profile updated (DB update can be added next).");
+    setSaving(true);
+
+    try {
+      const res = await fetch(
+        `http://localhost:3001/seller/profile/${sellerId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: formData.phone,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      setProfile({
+        ...profile,
+        name: data.seller.name,
+        phone: data.seller.phone,
+      });
+
+      setIsEditing(false);
+      alert("Profile updated successfully ✅");
+    } catch {
+      alert("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("sellerId");
-    localStorage.removeItem("sellerEmail");
-    localStorage.removeItem("sellerProfile");
+    localStorage.clear();
     navigate("/sellerlogin");
   };
 
@@ -72,9 +107,6 @@ const SellerProfile = () => {
     );
   }
 
-  /* =========================
-     RENDER
-  ========================= */
   return (
     <div className="bs-layout-root">
       <Sidebar />
@@ -83,55 +115,20 @@ const SellerProfile = () => {
       <div className="bs-profile-shell">
         <h1 className="bs-heading">Seller Profile</h1>
 
-        {/* Rating */}
-        <div className="bs-rating-row">
-          <span className="bs-rating-label">Overall Rating</span>
-          <div className="bs-rating-stars">
-            {"★★★★★"}
-            <span className="bs-rating-value">5.0</span>
-          </div>
-        </div>
-
         {!isEditing ? (
-          <section className="bs-details-grid">
-            <div className="bs-card bs-card--main">
-              <div className="bs-field">
-                <span className="bs-field-key">Name:</span>
-                <span className="bs-field-val">{profile.name}</span>
-              </div>
+          <div className="bs-card">
+            <p><strong>Name:</strong> {profile.name}</p>
+            <p><strong>Email:</strong> {profile.email}</p>
+            <p><strong>Phone:</strong> {profile.phone}</p>
+            <p><strong>Location:</strong> {profile.location}</p>
 
-              <div className="bs-field">
-                <span className="bs-field-key">Email:</span>
-                <span className="bs-field-val">{profile.email}</span>
-              </div>
-
-              <div className="bs-field">
-                <span className="bs-field-key">Phone:</span>
-                <span className="bs-field-val">{profile.phone}</span>
-              </div>
-
-              <div className="bs-field">
-                <span className="bs-field-key">Location:</span>
-                <span className="bs-field-val">{profile.location}</span>
-              </div>
-
-              <div className="bs-actions-row">
-                <button
-                  className="bs-btn bs-btn--primary"
-                  onClick={() => setIsEditing(true)}
-                >
-                  Edit Profile
-                </button>
-
-                <button
-                  className="bs-btn bs-btn--ghost"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </section>
+            <button className="bs-btn bs-btn--primary" onClick={() => setIsEditing(true)}>
+              Edit Profile
+            </button>
+            <button className="bs-btn bs-btn--ghost" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         ) : (
           <form
             className="bs-edit-form"
@@ -140,33 +137,24 @@ const SellerProfile = () => {
               handleSave();
             }}
           >
-            {["name", "email", "phone", "location"].map((field) => (
-              <label key={field} className="bs-form-row">
-                <span className="bs-form-label">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </span>
-                <input
-                  className="bs-input"
-                  name={field}
-                  value={formData[field] || ""}
-                  onChange={handleChange}
-                  disabled={field === "email"}
-                />
-              </label>
+            {["name", "email", "phone"].map((field) => (
+              <input
+                key={field}
+                name={field}
+                value={formData[field]}
+                onChange={(e) =>
+                  setFormData({ ...formData, [field]: e.target.value })
+                }
+                disabled={field === "email"}
+              />
             ))}
 
-            <div className="bs-edit-actions">
-              <button type="submit" className="bs-btn bs-btn--primary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="bs-btn bs-btn--ghost"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </button>
-            </div>
+            <button type="submit" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={() => setIsEditing(false)}>
+              Cancel
+            </button>
           </form>
         )}
       </div>

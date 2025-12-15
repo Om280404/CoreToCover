@@ -69,7 +69,7 @@ const BusinessDetails = () => {
       }
 
       alert("Business details saved successfully");
-      navigate("/sellerdashboard");
+      navigate("/sellerbankdetails");
     } catch (error) {
       console.error("Business details error:", error);
       alert("Server error. Please try again.");

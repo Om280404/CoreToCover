@@ -33,6 +33,7 @@ model Seller {
   orderItems OrderItem[]
   products   Product[]
   business   SellerBusinessDetails?
+  bank       SellerBankDetails?
 }
 
 /// =========================
@@ -50,6 +51,23 @@ model SellerBusinessDetails {
   sellerId     Int      @unique
   createdAt    DateTime @default(now())
   seller       Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+}
+
+/// =========================
+/// SELLER BANK DETAILS
+/// =========================
+model SellerBankDetails {
+  id Int @id @default(autoincrement())
+
+  accountHolder String
+  bankName      String
+  accountNumber String
+  ifsc          String
+
+  sellerId Int    @unique
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 /// =========================

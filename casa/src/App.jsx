@@ -29,6 +29,7 @@ import SellerProfile from './components/seller/SellerProfile';
 import SellerLogin from './components/seller/SellerLogin';
 import SellerSignup from './components/seller/SellerSignup';
 import BusinessDetails from './components/seller/BusinessDetails';
+import SellerBankDetails from './components/seller/SellerBankDetails';  
 import SellerProducts from './components/seller/SellerProducts';
 
 {/*Designer Imports*/ }
@@ -96,6 +97,7 @@ function App() {
         <Route path="/sellerlogin" element={<SellerLogin />} />
         <Route path="/sellersignup" element={<SellerSignup />} />
         <Route path="/businessdetails" element={<BusinessDetails />} />
+        <Route path="/sellerbankdetails" element={<AuthRoute element={<SellerBankDetails/>}/>} />
         <Route path="/sellerproducts" element={<AuthRoute element={<SellerProducts/>}/>} />
 
         {/* Routes for designer side */}
