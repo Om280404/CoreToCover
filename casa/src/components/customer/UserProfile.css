@@ -2,7 +2,7 @@
    THEME ROOT — CONSTRUCTIFY (Premium Edition)
 ========================================= */
 :root {
-  --page-bg: #F3F7EC;
+  --page-bg: linear-gradient(180deg, #fafaf8, #f1f1ec);
   --surface: #FFFFFF;
 
   --green-dark: #606E52;
