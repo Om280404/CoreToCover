@@ -138,6 +138,7 @@ const ProductListing = () => {
                 images={product.images?.map(
                   (img) => `http://localhost:3001/${img}`
                 )}
+                video={product.video}
                 seller={product.seller?.name}
                 origin={
                   product.seller?.business

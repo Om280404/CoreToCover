@@ -257,7 +257,15 @@ app.get("/products/search", async (req, res) => {
         category: p.category,
         price: p.price,
         description: p.description,
-        images: p.images,
+
+        images: p.images.map(
+          (img) => `http://localhost:3001/${img}`
+        ),
+
+        video: p.video
+          ? `http://localhost:3001/${p.video}`
+          : null,
+
         availability: p.availability,
 
         sellerId: p.sellerId,
@@ -269,6 +277,7 @@ app.get("/products/search", async (req, res) => {
         avgRating: Number(avgRating.toFixed(1)),
         ratingCount: count,
       };
+
     });
 
     res.json(formatted);
@@ -817,11 +826,14 @@ app.delete("/seller/product/:id", async (req, res) => {
 
 
 // ============================
-// UPDATE PRODUCT (EDIT)
-// ============================*/
+// UPDATE PRODUCT (EDIT) 
+// ============================
 app.put(
   "/seller/product/:id",
-  upload.fields([{ name: "images", maxCount: 5 }]),
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "video", maxCount: 1 },
+  ]),
   async (req, res) => {
     try {
       const productId = Number(req.params.id);
@@ -832,18 +844,29 @@ app.put(
         productType,
         price,
         description,
+        availability,
         existingImages,
-        availability, // ✅ NEW
+        removeVideo,
       } = req.body;
 
-      const keptImages = existingImages ? JSON.parse(existingImages) : [];
+      let keptImages = existingImages ? JSON.parse(existingImages) : [];
 
       const newImages =
-        req.files?.images?.map((file) =>
-          file.path.replace(/\\/g, "/").replace("uploads/", "")
+        req.files?.images?.map((f) =>
+          f.path.replace(/\\/g, "/").replace("uploads/", "")
         ) || [];
 
       const finalImages = [...keptImages, ...newImages];
+
+      let videoPath = undefined;
+
+      if (req.files?.video?.length) {
+        videoPath = req.files.video[0].path
+          .replace(/\\/g, "/")
+          .replace("uploads/", "");
+      } else if (removeVideo === "true") {
+        videoPath = null;
+      }
 
       const updated = await prisma.product.update({
         where: { id: productId },
@@ -853,21 +876,21 @@ app.put(
           productType,
           price: Number(price),
           description,
+          availability,
           images: finalImages,
-          availability, // ✅ UPDATED
+          ...(videoPath !== undefined && { video: videoPath }),
         },
       });
 
-      res.json({
-        message: "Product updated successfully",
-        product: updated,
-      });
+      res.json({ product: updated });
     } catch (err) {
-      console.error("UPDATE PRODUCT ERROR:", err);
-      res.status(500).json({ message: "Failed to update product" });
+      console.error(err);
+      res.status(500).json({ message: "Update failed" });
     }
   }
 );
+
+
 
 
 // ============================
@@ -1149,7 +1172,6 @@ app.post("/order/item/:orderItemId/rate", async (req, res) => {
 // ============================
 // GET PRODUCT RATINGS & REVIEWS
 // ============================
-// GET PRODUCT RATINGS + REVIEWS
 app.get("/product/:productId/ratings", async (req, res) => {
   try {
     const productId = Number(req.params.productId);

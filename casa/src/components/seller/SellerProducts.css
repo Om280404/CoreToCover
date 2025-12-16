@@ -20,85 +20,35 @@
 }
 
 /* ===============================
-   ROOT
+   ROOT & LAYOUT
 ================================ */
 .ms-root {
   min-height: 100vh;
   background: var(--ms-bg);
 }
 
-/* ===============================
-   SIDEBAR
-================================ */
-.sidebar-panel {
-  position: fixed;
-  inset: 0 auto 0 0;
-  width: var(--ms-sidebar-w);
-  z-index: 1200;
-  overflow-y: auto;
-}
-
-/* ===============================
-   MAIN LAYOUT
-================================ */
 .ms-main {
   margin-left: var(--ms-sidebar-w);
   padding: 22px;
   max-width: 1440px;
-  margin-right: auto;
-
-  display: grid;
-  grid-template-columns: 1fr 0px;
-  gap: 22px;
-  box-sizing: border-box;
-}
-
-/* ===============================
-   HEADER
-================================ */
-.ms-header {
-  grid-column: 1 / -1;
-  margin-bottom: 10px;
 }
 
 .ms-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: var(--ms-ink);
-}
-
-.ms-sub {
-  margin-top: 4px;
-  color: var(--ms-muted);
-  font-weight: 700;
+  margin-bottom: 14px;
 }
 
 /* ===============================
-   EDIT PANEL
-================================ */
-.ms-edit-panel {
-  grid-column: 1 / -1;
-  background: var(--ms-surface);
-  border-radius: var(--ms-radius);
-  padding: 18px;
-  box-shadow: var(--ms-shadow);
-  border: 1px solid var(--ms-border);
-}
-
-/* ===============================
-   PRODUCT GRID
+   GRID & CARD
 ================================ */
 .ms-grid {
-  grid-column: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 22px;
-  align-items: start;
 }
 
-/* ===============================
-   PRODUCT CARD
-================================ */
 .ms-card {
   background: var(--ms-surface);
   border-radius: var(--ms-radius);
@@ -107,21 +57,24 @@
   padding: 14px;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: 0.25s ease;
 }
 
 .ms-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 38px rgba(79, 94, 68, 0.18);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 44px rgba(79, 94, 68, 0.18);
 }
 
 .ms-thumb {
   width: 100%;
   height: 200px;
-  border-radius: 12px;
   object-fit: cover;
+  border-radius: 12px;
 }
 
+/* ===============================
+   CARD BODY
+================================ */
 .ms-body {
   margin-top: 12px;
 }
@@ -135,140 +88,27 @@
 .ms-price {
   margin-top: 4px;
   font-weight: 800;
-  color: var(--ms-muted);
+  color: var(--ms-primary);
 }
 
 .ms-desc {
+  margin-top: 6px;
   font-size: 0.9rem;
   color: var(--ms-muted);
   line-height: 1.5;
 
-  /* 🔥 CRITICAL */
   display: -webkit-box;
-  -webkit-line-clamp: 1;   /* show only 3 lines */
-  line-clamp: 1;  
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 
   overflow: hidden;
   text-overflow: ellipsis;
-
-  word-break: break-all;   /* handles long strings */
 }
-
 
 .ms-meta {
   margin-top: 6px;
   font-weight: 800;
-}
-
-/* ===============================
-   CARD ACTIONS
-================================ */
-.ms-actions {
-  margin-top: auto;
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-}
-
-.ms-btn {
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 900;
-  cursor: pointer;
-  border: none;
-}
-
-.ms-btn--outline {
-  background: transparent;
-  border: 1px solid var(--ms-border);
-  color: var(--ms-ink);
-}
-
-.ms-btn--ghost {
-  background: transparent;
-  border: 1px solid var(--ms-border);
-  color: var(--ms-muted);
-}
-
-.ms-btn--primary {
-  background: linear-gradient(
-    90deg,
-    var(--ms-primary),
-    var(--ms-primary-dark)
-  );
-  color: #fff;
-}
-
-/* ===============================
-   REVIEWS PANEL
-================================ */
-.ms-reviews-panel {
-  grid-column: 1;
-  background: var(--ms-surface);
-  border-radius: var(--ms-radius);
-  border: 1px solid var(--ms-border);
-  box-shadow: var(--ms-shadow);
-  padding: 18px;
-  position: sticky;
-  top: 20px;
-  height: fit-content;
-}
-
-.ms-reviews-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  margin-bottom: 12px;
-}
-
-.ms-rating-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.ms-stars svg {
-  color: #facc15;
-}
-
-.ms-rating-number {
-  font-weight: 900;
-}
-
-.ms-rating-count {
   font-size: 0.85rem;
-  color: var(--ms-muted);
-}
-
-/* ===============================
-   REVIEWS LIST
-================================ */
-.ms-reviews-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.ms-review-card {
-  padding-top: 10px;
-  border-top: 1px solid var(--ms-border);
-}
-
-.ms-review-user {
-  font-weight: 900;
-  font-size: 0.9rem;
-}
-
-.ms-review-text {
-  margin-top: 4px;
-  font-size: 0.85rem;
-  color: var(--ms-muted);
-}
-
-.ms-no-reviews {
-  color: var(--ms-muted);
-  font-size: 0.9rem;
 }
 
 /* ===============================
@@ -280,223 +120,127 @@
 .stock-discontinued strong { color: #6b7280; }
 
 /* ===============================
-   EMPTY STATE
+   ACTION BUTTONS
 ================================ */
-.ms-empty {
-  padding: 20px;
-  text-align: center;
+.ms-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.ms-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+/* Primary */
+.ms-btn--primary {
+  background: linear-gradient(
+    90deg,
+    var(--ms-primary),
+    var(--ms-primary-dark)
+  );
+  color: #fff;
+}
+
+.ms-btn--primary:hover {
+  filter: brightness(1.08);
+}
+
+/* Outline */
+.ms-btn--outline {
+  background: transparent;
+  border: 1px solid var(--ms-border);
+  color: var(--ms-ink);
+}
+
+.ms-btn--outline:hover {
+  background: rgba(107, 124, 92, 0.08);
+}
+
+/* Ghost */
+.ms-btn--ghost {
+  background: transparent;
+  border: 1px dashed var(--ms-border);
   color: var(--ms-muted);
-  background: rgba(255,255,255,0.7);
-  border-radius: 12px;
 }
 
-/* =========================================
-   RESPONSIVE – TABLETS (≤ 1024px)
-========================================= */
-@media (max-width: 1024px) {
-
-  .ms-main {
-    grid-template-columns: 1fr;
-    padding: 18px;
-  }
-
-  .ms-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  }
-
-  .ms-reviews-panel {
-    position: static;
-    margin-top: 20px;
-  }
-
-  .ms-actions {
-    gap: 10px;
-  }
+.ms-btn--ghost:hover {
+  background: rgba(107, 124, 92, 0.06);
 }
 
-/* =========================================
-   RESPONSIVE – MOBILE (≤ 768px)
-========================================= */
-@media (max-width: 768px) {
-
-  /* MAIN LAYOUT */
-  .ms-main {
-    margin-left: 0;
-    padding: 14px;
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-panel {
-    position: relative;
-    width: 100%;
-    height: auto;
-  }
-
-  /* HEADER */
-  .ms-title {
-    font-size: 1.35rem;
-  }
-
-  .ms-sub {
-    font-size: 0.9rem;
-  }
-
-  /* PRODUCT GRID */
-  .ms-grid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  /* PRODUCT CARD */
-  .ms-card {
-    padding: 12px;
-  }
-
-  .ms-thumb {
-    height: 180px;
-  }
-
-  .ms-name {
-    font-size: 1rem;
-  }
-
-  .ms-desc {
-    font-size: 0.88rem;
-  }
-
-  /* CARD ACTIONS */
-  .ms-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .ms-btn {
-    width: 100%;
-    padding: 10px;
-    font-size: 0.9rem;
-  }
-
-  /* EDIT PANEL */
-  .ms-edit-panel {
-    padding: 14px;
-  }
-
-  .ms-edit-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .ms-edit-title {
-    font-size: 1.1rem;
-    text-align: center;
-  }
-
-  .ms-edit-actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* IMAGE PREVIEWS */
-  .ms-preview {
-    width: 72px;
-    height: 72px;
-  }
-
-  /* REVIEWS PANEL */
-  .ms-reviews-panel {
-    padding: 14px;
-    margin-top: 20px;
-  }
-
-  .ms-reviews-title {
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .ms-rating-summary {
-    justify-content: center;
-  }
-
-  .ms-review-text {
-    font-size: 0.85rem;
-  }
+/* Danger */
+.ms-btn--danger {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
-/* =========================================
-   EXTRA SMALL DEVICES (≤ 480px)
-========================================= */
-@media (max-width: 480px) {
-
-  .ms-title {
-    font-size: 1.2rem;
-  }
-
-  .ms-sub {
-    font-size: 0.85rem;
-  }
-
-  .ms-thumb {
-    height: 160px;
-  }
-
-  .ms-desc {
-    font-size: 0.85rem;
-  }
-
-  .ms-btn {
-    font-size: 0.85rem;
-  }
-
-  .ms-review-user {
-    font-size: 0.85rem;
-  }
-
-  .ms-review-text {
-    font-size: 0.8rem;
-  }
+.ms-btn--danger:hover {
+  background: #fecaca;
 }
-
 
 /* ===============================
-   EDIT PRODUCT PANEL – CASA
+   EDIT PANEL
 ================================ */
-
-/* Panel container */
 .ms-edit-panel {
   background: var(--ms-surface);
   border-radius: var(--ms-radius);
-  padding: 20px;
+  padding: 22px;
+  margin-bottom: 28px;
   box-shadow: var(--ms-shadow);
   border: 1px solid var(--ms-border);
-  margin-bottom: 24px;
 }
 
-/* Title */
+.ms-edit-header {
+  margin-bottom: 18px;
+}
+
 .ms-edit-title {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 900;
-  color: var(--ms-ink);
-  margin-bottom: 14px;
 }
 
-/* Grid layout */
+.ms-edit-sub {
+  font-size: 0.9rem;
+  color: var(--ms-muted);
+}
+
+/* ===============================
+   EDIT SECTIONS
+================================ */
+.ms-edit-section {
+  margin-top: 22px;
+}
+
+.ms-edit-section-title {
+  font-size: 1rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: var(--ms-ink);
+}
+
+/* ===============================
+   FORM GRID
+================================ */
 .ms-edit-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
 }
 
-/* Field wrapper */
 .ms-field {
   display: flex;
   flex-direction: column;
 }
 
-/* Full width fields */
 .ms-full {
   grid-column: 1 / -1;
 }
 
-/* Labels */
 .ms-label {
   font-size: 0.85rem;
   font-weight: 800;
@@ -506,108 +250,162 @@
 
 /* Inputs */
 .ms-input,
+.ms-select,
 .ms-textarea,
-.ms-file,
-.ms-select {
+.ms-file {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--ms-border);
-  background: #fff;
   font-weight: 800;
-  color: var(--ms-ink);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .ms-input:focus,
-.ms-textarea:focus,
-.ms-select:focus {
+.ms-select:focus,
+.ms-textarea:focus {
   outline: none;
   border-color: var(--ms-primary);
   box-shadow: 0 0 0 3px rgba(107, 124, 92, 0.15);
 }
 
-/* Textarea */
 .ms-textarea {
   min-height: 110px;
   resize: vertical;
 }
 
-/* Image preview */
+/* ===============================
+   MEDIA GRID
+================================ */
+.ms-media-grid {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ms-media-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .ms-preview {
   width: 90px;
   height: 90px;
+  border-radius: 10px;
   object-fit: cover;
-  border-radius: 10px;
   border: 1px solid var(--ms-border);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-/* Image remove buttons */
-.ms-preview + .ms-btn {
-  margin-top: 6px;
-  width: 100%;
-}
-
-/* Action buttons */
-.ms-edit-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-/* Buttons */
-.ms-btn {
-  border-radius: 10px;
-  font-weight: 900;
-  cursor: pointer;
-  border: none;
-}
-
-.ms-btn--primary {
-  background: linear-gradient(
-    90deg,
-    var(--ms-primary),
-    var(--ms-primary-dark)
-  );
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(79, 94, 68, 0.25);
-}
-
-.ms-btn--primary:hover {
-  filter: brightness(1.05);
-}
-
-.ms-btn--ghost {
-  background: transparent;
-  border: 1px solid var(--ms-border);
-  color: var(--ms-ink);
-  width: 90%;
-}
-
-.ms-btn--ghost:hover {
-  background: rgba(107, 124, 92, 0.08);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 /* ===============================
-   MOBILE OPTIMIZATION
+   EDIT ACTIONS
+================================ */
+.ms-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+/* ===============================
+   RESPONSIVE
 ================================ */
 @media (max-width: 768px) {
-  .ms-edit-panel {
+  .ms-main {
+    margin-left: 0;
     padding: 16px;
+  }
+
+  .ms-actions {
+    flex-direction: column;
   }
 
   .ms-edit-actions {
     flex-direction: column;
-    align-items: stretch;
   }
 
   .ms-btn {
     width: 100%;
   }
+}
 
-  .ms-preview {
-    width: 80px;
-    height: 80px;
-  }
+/* =========================================
+   RATINGS & REVIEWS – SELLER VIEW
+========================================= */
+
+.ms-reviews-panel {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(79, 94, 68, 0.15);
+  box-shadow: 0 14px 34px rgba(79, 94, 68, 0.12);
+  padding: 18px;
+  margin-bottom: 26px;
+}
+
+/* Title */
+.ms-reviews-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #2f332b;
+  margin-bottom: 12px;
+}
+
+/* Rating summary row */
+.ms-rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* Stars */
+.ms-stars svg {
+  color: #facc15; /* gold */
+  font-size: 1.05rem;
+}
+
+/* Rating number */
+.ms-rating-number {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #2f332b;
+}
+
+/* Rating count */
+.ms-rating-count {
+  font-size: 0.9rem;
+  color: #7a7f75;
+}
+
+/* Reviews list */
+.ms-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Single review */
+.ms-review-card {
+  padding-top: 12px;
+  border-top: 1px solid rgba(79, 94, 68, 0.15);
+}
+
+/* Review user */
+.ms-review-user {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #2f332b;
+}
+
+/* Review text */
+.ms-review-text {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #7a7f75;
+}
+
+/* Empty state */
+.ms-no-reviews {
+  font-size: 0.9rem;
+  color: #7a7f75;
 }

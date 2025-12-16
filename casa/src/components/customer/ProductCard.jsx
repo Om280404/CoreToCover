@@ -25,11 +25,9 @@ const renderStars = (rating = 0) => {
 
   for (let i = 1; i <= 5; i++) {
     if (i <= full) stars.push(<FaStar key={i} />);
-    else if (i === full + 1 && half)
-      stars.push(<FaStarHalfAlt key={i} />);
+    else if (i === full + 1 && half) stars.push(<FaStarHalfAlt key={i} />);
     else stars.push(<FaRegStar key={i} />);
   }
-
   return stars;
 };
 
@@ -40,23 +38,17 @@ const ProductCard = ({
   category,
   description,
   price,
-  image,
   images = [],
   seller,
   origin,
   availability = "available",
+  video,
 }) => {
   const navigate = useNavigate();
 
-  /* ===============================
-     RATING STATE (FROM API)
-  =============================== */
   const [avgRating, setAvgRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
 
-  /* ===============================
-     LOAD RATINGS
-  =============================== */
   useEffect(() => {
     if (!id) return;
 
@@ -71,34 +63,27 @@ const ProductCard = ({
       });
   }, [id]);
 
-  /* ===============================
-     IMAGE
-  =============================== */
-  const finalImage =
-    image || (images.length ? images[0] : Sample);
+  const coverImage = images.length ? images[0] : Sample;
 
   return (
     <article className="product-card">
       <div className="product-image-container">
-        <img src={finalImage} alt={title} className="product-image" />
+        <img src={coverImage} alt={title} className="product-image" />
         <span className="product-badge">{category}</span>
       </div>
 
       <div className="product-info">
         <h3 className="product-title">{title}</h3>
 
-        {/* ⭐ RATING */}
         <div className="product-rating">
           {renderStars(avgRating)}
           <span className="rating-text">
-            {avgRating > 0 ? avgRating.toFixed(1) : "No ratings"}
+            {avgRating ? avgRating.toFixed(1) : "No ratings"}
             {ratingCount > 0 && ` (${ratingCount})`}
           </span>
         </div>
 
-        <p className="product-description" title={description}>
-          {description}
-        </p>
+        <p className="product-description">{description}</p>
 
         <div className="product-meta-row">
           <span className="product-meta">Seller: {seller}</span>
@@ -106,16 +91,11 @@ const ProductCard = ({
         </div>
 
         <div className="product-meta-row">
-          <span className="product-meta">
-            Status: <strong>{formatAvailability(availability)}</strong>
-          </span>
+          Status: <strong>{formatAvailability(availability)}</strong>
         </div>
 
         <div className="product-price">
-          <span className="price-value">
-            ₹{price.toLocaleString()}
-          </span>
-          <span className="price-unit">/unit</span>
+          ₹{price.toLocaleString()}
         </div>
 
         <button
@@ -131,6 +111,7 @@ const ProductCard = ({
                   origin,
                   price,
                   images,
+                  video,
                   description,
                   availability,
                 },

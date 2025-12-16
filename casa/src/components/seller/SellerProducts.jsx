@@ -29,11 +29,50 @@ const formatAvailability = (value) => {
   }
 };
 
+
+
+
+/* ===============================
+   PRODUCT TYPE & CATEGORY
+================================ */
+const productCategories = {
+  finished: [
+    "Furniture",
+    "Modular Kitchen",
+    "Doors & Windows",
+    "Wardrobes",
+    "Lighting",
+    "Wall Panels",
+    "Decor Items",
+  ],
+  material: [
+    "Plywood & Boards",
+    "MDF / HDF",
+    "Laminates & Veneers",
+    "Hardware & Fittings",
+    "Glass & Mirrors",
+    "Marble & Stone",
+    "Fabrics & Upholstery",
+    "Paints & Finishes",
+  ],
+};
+
+
 const SellerProducts = () => {
   const [materials, setMaterials] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [slideIndex, setSlideIndex] = useState({});
+
+  /* ===============================
+     REVIEWS STATE ✅
+  ================================ */
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [ratingData, setRatingData] = useState({
+    avgRating: 0,
+    count: 0,
+    reviews: [],
+  });
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -43,21 +82,45 @@ const SellerProducts = () => {
     description: "",
     availability: "available",
     existingImages: [],
-    removedImages: [],
     newImageFiles: [],
     newImagePreviews: [],
+    existingVideo: null,
+    newVideoFile: null,
+    newVideoPreview: null,
   });
 
   /* =========================
-     REVIEWS STATE (🔥 KEPT)
+     FETCH PRODUCTS
   ========================= */
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [ratingData, setRatingData] = useState({
-    avgRating: 0,
-    count: 0,
-    reviews: [],
-  });
+  useEffect(() => {
+    const sellerId = localStorage.getItem("sellerId");
+    if (!sellerId) return;
 
+    getSellerProducts(sellerId)
+      .then((res) => setMaterials(res.data || []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  /* =========================
+     SLIDESHOW
+  ========================= */
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => {
+        const next = { ...prev };
+        materials.forEach((m) => {
+          const len = m.images?.length || 1;
+          next[m.id] = ((next[m.id] || 0) + 1) % len;
+        });
+        return next;
+      });
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [materials]);
+
+  /* =========================
+     STAR RENDER
+  ========================= */
   const renderStars = (rating = 0) => {
     const rounded = Math.round(rating);
     return [...Array(5)].map((_, i) =>
@@ -66,42 +129,28 @@ const SellerProducts = () => {
   };
 
   /* =========================
-     FETCH SELLER PRODUCTS
+     LOAD REVIEWS (🔥 CORE PART)
   ========================= */
-  useEffect(() => {
-    const sellerId = localStorage.getItem("sellerId");
-    if (!sellerId) {
-      setLoading(false);
-      return;
-    }
+  const viewReviews = async (product) => {
+    setSelectedProduct(product);
 
-    getSellerProducts(sellerId)
-      .then((res) => {
-        setMaterials(Array.isArray(res.data) ? res.data : []);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  /* =========================
-     IMAGE SLIDESHOW
-  ========================= */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSlideIndex((prev) => {
-        const updated = { ...prev };
-        materials.forEach((m) => {
-          const len = m.images?.length || 1;
-          updated[m.id] = ((updated[m.id] || 0) + 1) % len;
-        });
-        return updated;
+    try {
+      const res = await getProductRatings(product.id);
+      setRatingData({
+        avgRating: res.data.avgRating || 0,
+        count: res.data.count || 0,
+        reviews: res.data.reviews || [],
       });
-    }, 2500);
 
-    return () => clearInterval(interval);
-  }, [materials]);
+      // 👇 scroll to top when viewing reviews
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setRatingData({ avgRating: 0, count: 0, reviews: [] });
+    }
+  };
 
   /* =========================
-     EDIT START
+     START EDIT
   ========================= */
   const startEdit = (m) => {
     setEditingId(m.id);
@@ -115,9 +164,11 @@ const SellerProducts = () => {
       existingImages: (m.images || []).map(
         (img) => `http://localhost:3001/${img}`
       ),
-      removedImages: [],
       newImageFiles: [],
       newImagePreviews: [],
+      existingVideo: m.video ? `http://localhost:3001/${m.video}` : null,
+      newVideoFile: null,
+      newVideoPreview: null,
     });
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -135,8 +186,6 @@ const SellerProducts = () => {
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
-    if (!files.length) return;
-
     setEditForm((p) => ({
       ...p,
       newImageFiles: [...p.newImageFiles, ...files],
@@ -151,7 +200,6 @@ const SellerProducts = () => {
     setEditForm((p) => ({
       ...p,
       existingImages: p.existingImages.filter((i) => i !== img),
-      removedImages: [...p.removedImages, img],
     }));
   };
 
@@ -163,30 +211,54 @@ const SellerProducts = () => {
     }));
   };
 
+  const handleVideoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setEditForm((p) => ({
+      ...p,
+      newVideoFile: file,
+      newVideoPreview: URL.createObjectURL(file),
+    }));
+  };
+
+  const removeVideo = () => {
+    setEditForm((p) => ({
+      ...p,
+      existingVideo: null,
+      newVideoFile: null,
+      newVideoPreview: null,
+    }));
+  };
+
   /* =========================
-     SAVE EDIT (API)
+     SAVE EDIT
   ========================= */
   const saveEdit = async () => {
     try {
-      const formData = new FormData();
+      const fd = new FormData();
 
-      formData.append("name", editForm.name);
-      formData.append("category", editForm.category);
-      formData.append("productType", editForm.productType);
-      formData.append("price", editForm.price);
-      formData.append("description", editForm.description);
-      formData.append("availability", editForm.availability);
+      fd.append("name", editForm.name);
+      fd.append("category", editForm.category);
+      fd.append("productType", editForm.productType);
+      fd.append("price", editForm.price);
+      fd.append("description", editForm.description);
+      fd.append("availability", editForm.availability);
 
       const keptImages = editForm.existingImages.map((img) =>
         img.replace("http://localhost:3001/", "")
       );
-      formData.append("existingImages", JSON.stringify(keptImages));
+      fd.append("existingImages", JSON.stringify(keptImages));
 
-      editForm.newImageFiles.forEach((file) =>
-        formData.append("images", file)
-      );
+      editForm.newImageFiles.forEach((f) => fd.append("images", f));
 
-      const res = await updateSellerProduct(editingId, formData);
+      if (editForm.newVideoFile) {
+        fd.append("video", editForm.newVideoFile);
+      } else if (!editForm.existingVideo) {
+        fd.append("removeVideo", "true");
+      }
+
+      const res = await updateSellerProduct(editingId, fd);
 
       setMaterials((prev) =>
         prev.map((p) => (p.id === editingId ? res.data.product : p))
@@ -195,40 +267,17 @@ const SellerProducts = () => {
       cancelEdit();
     } catch (err) {
       console.error(err);
-      alert("Server error while updating product");
+      alert("Failed to update product");
     }
   };
 
   /* =========================
      DELETE PRODUCT
   ========================= */
-  const removeMaterial = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-
-    try {
-      await deleteSellerProduct(productId);
-      setMaterials((prev) => prev.filter((p) => p.id !== productId));
-    } catch {
-      alert("Failed to delete product");
-    }
-  };
-
-  /* =========================
-     LOAD REVIEWS (🔥 KEPT)
-  ========================= */
-  const loadReviews = async (product) => {
-    setSelectedProduct(product);
-
-    try {
-      const res = await getProductRatings(product.id);
-      setRatingData({
-        avgRating: res.data.avgRating || 0,
-        count: res.data.count || 0,
-        reviews: res.data.reviews || [],
-      });
-    } catch {
-      setRatingData({ avgRating: 0, count: 0, reviews: [] });
-    }
+  const removeMaterial = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
+    await deleteSellerProduct(id);
+    setMaterials((p) => p.filter((m) => m.id !== id));
   };
 
   return (
@@ -237,18 +286,13 @@ const SellerProducts = () => {
       <NotificationButton />
 
       <main className="ms-main">
-        <header className="ms-header">
-          <h1 className="ms-title">My Products</h1>
-          <p className="ms-sub">
-            {loading ? "Loading…" : "Manage your listed products"}
-          </p>
-        </header>
+        <h1 className="ms-title">My Products</h1>
 
-        {/* =========================
-            REVIEWS PANEL (🔥 KEPT)
-        ========================= */}
+        {/* ===============================
+            REVIEWS PANEL (TOP)
+        ================================ */}
         {selectedProduct && (
-          <aside className="ms-reviews-panel">
+          <section className="ms-reviews-panel">
             <h3 className="ms-reviews-title">
               Reviews – {selectedProduct.name}
             </h3>
@@ -282,63 +326,278 @@ const SellerProducts = () => {
                 ))
               )}
             </div>
-          </aside>
+          </section>
         )}
 
-        {/* =========================
-            PRODUCTS GRID
-        ========================= */}
+        {/* EDIT PANEL */}
+        {editingId && (
+          <section className="ms-edit-panel">
+
+            {/* HEADER */}
+            <div className="ms-edit-header">
+              <h2 className="ms-edit-title">Edit Product</h2>
+              <p className="ms-edit-sub">
+                Update product details, images & video
+              </p>
+            </div>
+
+            {/* ================= BASIC INFO ================= */}
+            <div className="ms-edit-section">
+              <h4 className="ms-edit-section-title">Basic Information</h4>
+
+              <div className="ms-edit-grid">
+
+                <div className="ms-field">
+                  <label className="ms-label">Product Name</label>
+                  <input
+                    className="ms-input"
+                    name="name"
+                    value={editForm.name}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* PRODUCT TYPE */}
+                <div className="ms-field">
+                  <label className="ms-label">Product Type</label>
+                  <select
+                    className="ms-select"
+                    name="productType"
+                    value={editForm.productType}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditForm((p) => ({
+                        ...p,
+                        productType: value,
+                        category: "", // reset category on type change
+                      }));
+                    }}
+                  >
+                    <option value="">Select type</option>
+                    <option value="finished">Finished Product</option>
+                    <option value="material">Raw Material</option>
+                  </select>
+                </div>
+
+                {/* CATEGORY */}
+                <div className="ms-field">
+                  <label className="ms-label">Category</label>
+                  <select
+                    className="ms-select"
+                    name="category"
+                    value={editForm.category}
+                    onChange={handleChange}
+                    disabled={!editForm.productType}
+                  >
+                    <option value="">
+                      {editForm.productType
+                        ? "Select category"
+                        : "Select product type first"}
+                    </option>
+
+                    {editForm.productType &&
+                      productCategories[editForm.productType]?.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+
+                <div className="ms-field">
+                  <label className="ms-label">Price (₹)</label>
+                  <input
+                    className="ms-input"
+                    type="number"
+                    name="price"
+                    value={editForm.price}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="ms-field">
+                  <label className="ms-label">Availability</label>
+                  <select
+                    className="ms-select"
+                    name="availability"
+                    value={editForm.availability}
+                    onChange={handleChange}
+                  >
+                    <option value="available">Available</option>
+                    <option value="low_stock">Low Stock</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                    <option value="discontinued">Discontinued</option>
+                  </select>
+                </div>
+
+                <div className="ms-field ms-full">
+                  <label className="ms-label">Description</label>
+                  <textarea
+                    className="ms-textarea"
+                    name="description"
+                    value={editForm.description}
+                    onChange={handleChange}
+                    placeholder="Describe the product in detail…"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ================= IMAGES ================= */}
+            <div className="ms-edit-section">
+              <h4 className="ms-edit-section-title">Product Images</h4>
+
+              <div className="ms-media-grid">
+                {editForm.existingImages.map((img) => (
+                  <div key={img} className="ms-media-card">
+                    <img src={img} className="ms-preview" />
+                    <button
+                      className="ms-btn ms-btn--ghost"
+                      onClick={() => removeExistingImage(img)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <input
+                className="ms-file"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageSelect}
+              />
+            </div>
+
+            {/* ================= VIDEO ================= */}
+            <div className="ms-edit-section">
+              <h4 className="ms-edit-section-title">Product Video</h4>
+
+              <div className="ms-media-grid">
+                {editForm.existingVideo && (
+                  <video
+                    src={editForm.existingVideo}
+                    controls
+                    className="ms-preview"
+                  />
+                )}
+
+                {editForm.newVideoPreview && (
+                  <video
+                    src={editForm.newVideoPreview}
+                    controls
+                    className="ms-preview"
+                  />
+                )}
+              </div>
+
+              <input
+                className="ms-file"
+                type="file"
+                accept="video/*"
+                onChange={handleVideoSelect}
+              />
+
+              <button
+                className="ms-btn ms-btn--ghost"
+                onClick={removeVideo}
+              >
+                Remove Video
+              </button>
+            </div>
+
+            {/* ================= ACTIONS ================= */}
+            <div className="ms-edit-actions">
+              <button
+                className="ms-btn ms-btn--primary"
+                onClick={saveEdit}
+              >
+                Save Changes
+              </button>
+
+              <button
+                className="ms-btn ms-btn--outline"
+                onClick={cancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
+
+          </section>
+        )}
+
+
+
+        {/* GRID */}
         <section className="ms-grid">
-          {materials.length === 0 ? (
-            <div className="ms-empty">No products added</div>
-          ) : (
-            materials.map((m) => (
-              <article key={m.id} className="ms-card">
-                <img
-                  src={
-                    m.images?.length
-                      ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]}`
-                      : ""
-                  }
-                  className="ms-thumb"
-                  alt={m.name}
-                />
+          {materials.map((m) => (
+            <div key={m.id} className="ms-card">
 
-                <div className="ms-body">
-                  <h3 className="ms-name">{m.name}</h3>
-                  <div className="ms-price">
-                    ₹{Number(m.price).toLocaleString()}
-                  </div>
+              {/* IMAGE */}
+              <img
+                src={
+                  m.images?.length
+                    ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]}`
+                    : ""
+                }
+                className="ms-thumb"
+                alt={m.name}
+              />
 
-                  <div className={`ms-meta stock-${m.availability}`}>
-                    Status: <strong>{formatAvailability(m.availability)}</strong>
-                  </div>
-                </div>
+              {/* BODY */}
+              <div className="ms-body">
+                <h3 className="ms-name">{m.name}</h3>
 
-                <div className="ms-actions">
-                  <button
-                    className="ms-btn ms-btn--outline"
-                    onClick={() => startEdit(m)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="ms-btn ms-btn--ghost"
-                    onClick={() => removeMaterial(m.id)}
-                  >
-                    Remove
-                  </button>
-                  <button
-                    className="ms-btn ms-btn--ghost"
-                    onClick={() => loadReviews(m)}
-                  >
-                    View Reviews
-                  </button>
-                </div>
-              </article>
-            ))
-          )}
+                <p className="ms-price">
+                  ₹{Number(m.price).toLocaleString()}
+                </p>
+
+                <p className="ms-desc">
+                  {m.description || "No description provided"}
+                </p>
+
+                <p className={`ms-meta stock-${m.availability}`}>
+                  Status: <strong>{formatAvailability(m.availability)}</strong>
+                </p>
+
+                <p className="ms-meta">
+                  Category: <strong>{m.category}</strong>
+                </p>
+
+                <p className="ms-meta">
+                  Type: <strong>{m.productType}</strong>
+                </p>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="ms-actions">
+                <button
+                  className="ms-btn ms-btn--outline"
+                  onClick={() => startEdit(m)}
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="ms-btn ms-btn--danger"
+                  onClick={() => removeMaterial(m.id)}
+                >
+                  Delete
+                </button>
+
+                <button
+                  className="ms-btn ms-btn--outline"
+                  onClick={() => viewReviews(m)}
+                >
+                  View Reviews
+                </button>
+              </div>
+            </div>
+          ))}
         </section>
+
       </main>
     </div>
   );
