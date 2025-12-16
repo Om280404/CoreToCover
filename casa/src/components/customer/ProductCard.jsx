@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./ProductCard.css";
 import { useNavigate } from "react-router-dom";
 import Sample from "../../assets/images/sample.jpg";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import api from "../../api/axios";
 
+/* ===============================
+   HELPERS
+=============================== */
 const formatAvailability = (value) => {
   switch (value) {
     case "available": return "Available";
@@ -14,7 +18,7 @@ const formatAvailability = (value) => {
   }
 };
 
-const renderStars = (rating) => {
+const renderStars = (rating = 0) => {
   const stars = [];
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
@@ -41,11 +45,37 @@ const ProductCard = ({
   seller,
   origin,
   availability = "available",
-  avgRating = 0,
-  ratingCount = 0,
 }) => {
   const navigate = useNavigate();
-  const finalImage = image || Sample;
+
+  /* ===============================
+     RATING STATE (FROM API)
+  =============================== */
+  const [avgRating, setAvgRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
+
+  /* ===============================
+     LOAD RATINGS
+  =============================== */
+  useEffect(() => {
+    if (!id) return;
+
+    api.get(`/product/${id}/ratings`)
+      .then((res) => {
+        setAvgRating(res.data.avgRating || 0);
+        setRatingCount(res.data.count || 0);
+      })
+      .catch(() => {
+        setAvgRating(0);
+        setRatingCount(0);
+      });
+  }, [id]);
+
+  /* ===============================
+     IMAGE
+  =============================== */
+  const finalImage =
+    image || (images.length ? images[0] : Sample);
 
   return (
     <article className="product-card">
@@ -61,7 +91,7 @@ const ProductCard = ({
         <div className="product-rating">
           {renderStars(avgRating)}
           <span className="rating-text">
-            {avgRating > 0 ? avgRating : "No ratings"}
+            {avgRating > 0 ? avgRating.toFixed(1) : "No ratings"}
             {ratingCount > 0 && ` (${ratingCount})`}
           </span>
         </div>
@@ -69,7 +99,6 @@ const ProductCard = ({
         <p className="product-description" title={description}>
           {description}
         </p>
-
 
         <div className="product-meta-row">
           <span className="product-meta">Seller: {seller}</span>
@@ -83,7 +112,9 @@ const ProductCard = ({
         </div>
 
         <div className="product-price">
-          <span className="price-value">₹{price.toLocaleString()}</span>
+          <span className="price-value">
+            ₹{price.toLocaleString()}
+          </span>
           <span className="price-unit">/unit</span>
         </div>
 

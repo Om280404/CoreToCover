@@ -4,7 +4,16 @@ import NotificationButton from "./NotificationButton";
 import "./SellerProducts.css";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
+import {
+  getSellerProducts,
+  updateSellerProduct,
+  deleteSellerProduct,
+  getProductRatings,
+} from "../../api/seller";
 
+/* ===============================
+   AVAILABILITY FORMATTER
+=============================== */
 const formatAvailability = (value) => {
   switch (value) {
     case "available":
@@ -32,13 +41,16 @@ const SellerProducts = () => {
     productType: "",
     price: "",
     description: "",
-    availability: "available", // ✅ NEW
+    availability: "available",
     existingImages: [],
     removedImages: [],
     newImageFiles: [],
     newImagePreviews: [],
   });
-  // ⭐ Reviews state 
+
+  /* =========================
+     REVIEWS STATE (🔥 KEPT)
+  ========================= */
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [ratingData, setRatingData] = useState({
     avgRating: 0,
@@ -53,9 +65,6 @@ const SellerProducts = () => {
     );
   };
 
-
-
-
   /* =========================
      FETCH SELLER PRODUCTS
   ========================= */
@@ -66,13 +75,11 @@ const SellerProducts = () => {
       return;
     }
 
-    fetch(`http://localhost:3001/seller/${sellerId}/products`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMaterials(Array.isArray(data) ? data : []);
-        setLoading(false);
+    getSellerProducts(sellerId)
+      .then((res) => {
+        setMaterials(Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => setLoading(false));
+      .finally(() => setLoading(false));
   }, []);
 
   /* =========================
@@ -104,8 +111,7 @@ const SellerProducts = () => {
       productType: m.productType,
       price: m.price,
       description: m.description || "",
-      availability: m.availability || "available", // ✅ FIX
-
+      availability: m.availability || "available",
       existingImages: (m.images || []).map(
         (img) => `http://localhost:3001/${img}`
       ),
@@ -117,9 +123,7 @@ const SellerProducts = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-  };
+  const cancelEdit = () => setEditingId(null);
 
   /* =========================
      FORM HANDLERS
@@ -133,12 +137,13 @@ const SellerProducts = () => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    const previews = files.map((f) => URL.createObjectURL(f));
-
     setEditForm((p) => ({
       ...p,
       newImageFiles: [...p.newImageFiles, ...files],
-      newImagePreviews: [...p.newImagePreviews, ...previews],
+      newImagePreviews: [
+        ...p.newImagePreviews,
+        ...files.map((f) => URL.createObjectURL(f)),
+      ],
     }));
   };
 
@@ -158,6 +163,9 @@ const SellerProducts = () => {
     }));
   };
 
+  /* =========================
+     SAVE EDIT (API)
+  ========================= */
   const saveEdit = async () => {
     try {
       const formData = new FormData();
@@ -169,37 +177,19 @@ const SellerProducts = () => {
       formData.append("description", editForm.description);
       formData.append("availability", editForm.availability);
 
-
-      // Keep only remaining images (strip server URL)
       const keptImages = editForm.existingImages.map((img) =>
         img.replace("http://localhost:3001/", "")
       );
-
       formData.append("existingImages", JSON.stringify(keptImages));
 
-      // Add new images
-      editForm.newImageFiles.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      const res = await fetch(
-        `http://localhost:3001/seller/product/${editingId}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
+      editForm.newImageFiles.forEach((file) =>
+        formData.append("images", file)
       );
 
-      if (!res.ok) {
-        alert("Failed to update product");
-        return;
-      }
+      const res = await updateSellerProduct(editingId, formData);
 
-      const data = await res.json();
-
-      // ✅ Update UI instantly
       setMaterials((prev) =>
-        prev.map((p) => (p.id === editingId ? data.product : p))
+        prev.map((p) => (p.id === editingId ? res.data.product : p))
       );
 
       cancelEdit();
@@ -210,52 +200,36 @@ const SellerProducts = () => {
   };
 
   /* =========================
-     REMOVE PRODUCT (🔥 FIX)
+     DELETE PRODUCT
   ========================= */
   const removeMaterial = async (productId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/seller/product/${productId}`,
-        { method: "DELETE" }
-      );
-
-      if (!res.ok) {
-        alert("Failed to delete product");
-        return;
-      }
-
-      // ✅ Update UI instantly
+      await deleteSellerProduct(productId);
       setMaterials((prev) => prev.filter((p) => p.id !== productId));
-    } catch (err) {
-      console.error(err);
-      alert("Server error while deleting product");
+    } catch {
+      alert("Failed to delete product");
     }
   };
 
+  /* =========================
+     LOAD REVIEWS (🔥 KEPT)
+  ========================= */
   const loadReviews = async (product) => {
     setSelectedProduct(product);
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/product/${product.id}/ratings`
-      );
-      const data = await res.json();
-
+      const res = await getProductRatings(product.id);
       setRatingData({
-        avgRating: data.avgRating || 0,
-        count: data.count || 0,
-        reviews: data.reviews || [],
+        avgRating: res.data.avgRating || 0,
+        count: res.data.count || 0,
+        reviews: res.data.reviews || [],
       });
     } catch {
       setRatingData({ avgRating: 0, count: 0, reviews: [] });
     }
   };
-
 
   return (
     <div className="ms-root">
@@ -270,118 +244,9 @@ const SellerProducts = () => {
           </p>
         </header>
 
-        {editingId && (
-          <section className="ms-edit-panel">
-            <h2 className="ms-edit-title">Edit Product</h2>
-
-            <div className="ms-edit-grid">
-              <label className="ms-field">
-                <span className="ms-label">Product Name</span>
-                <input
-                  name="name"
-                  className="ms-input"
-                  value={editForm.name}
-                  onChange={handleChange}
-                />
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Product Type</span>
-                <input
-                  name="productType"
-                  className="ms-input"
-                  value={editForm.productType}
-                  onChange={handleChange}
-                />
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Category</span>
-                <input
-                  name="category"
-                  className="ms-input"
-                  value={editForm.category}
-                  onChange={handleChange}
-                />
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Price</span>
-                <input
-                  name="price"
-                  className="ms-input"
-                  value={editForm.price}
-                  onChange={handleChange}
-                />
-              </label>
-
-              <label className="ms-field">
-                <span className="ms-label">Availability</span>
-                <select
-                  name="availability"
-                  className="ms-input"
-                  value={editForm.availability}
-                  onChange={handleChange}
-                >
-                  <option value="available">Available</option>
-                  <option value="out_of_stock">Out of Stock</option>
-                  <option value="low_stock">Low Stock</option>
-                  <option value="discontinued">Discontinued</option>
-                </select>
-              </label>
-
-
-              <label className="ms-field ms-full">
-                <span className="ms-label">Description</span>
-                <textarea
-                  name="description"
-                  className="ms-textarea"
-                  value={editForm.description}
-                  onChange={handleChange}
-                />
-              </label>
-
-              <label className="ms-field ms-full">
-                <span className="ms-label">Product Images</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="ms-file"
-                  onChange={handleImageSelect}
-                />
-
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  {editForm.existingImages.map((img, i) => (
-                    <div key={i}>
-                      <img src={img} className="ms-preview" alt="" />
-                      <button className="ms-btn ms-btn--ghost" onClick={() => removeExistingImage(img)}>
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-
-                  {editForm.newImagePreviews.map((img, i) => (
-                    <div key={i}>
-                      <img src={img} className="ms-preview" alt="" />
-                      <button onClick={() => removeNewImage(i)}>Remove</button>
-                    </div>
-                  ))}
-                </div>
-              </label>
-            </div>
-
-            <div className="ms-edit-actions">
-              <button className="ms-btn ms-btn--ghost" onClick={cancelEdit}>
-                Cancel
-              </button>
-              <button className="ms-btn ms-btn--primary" onClick={saveEdit}>
-                Save Changes
-              </button>
-            </div>
-          </section>
-        )}
-
+        {/* =========================
+            REVIEWS PANEL (🔥 KEPT)
+        ========================= */}
         {selectedProduct && (
           <aside className="ms-reviews-panel">
             <h3 className="ms-reviews-title">
@@ -420,6 +285,9 @@ const SellerProducts = () => {
           </aside>
         )}
 
+        {/* =========================
+            PRODUCTS GRID
+        ========================= */}
         <section className="ms-grid">
           {materials.length === 0 ? (
             <div className="ms-empty">No products added</div>
@@ -429,8 +297,7 @@ const SellerProducts = () => {
                 <img
                   src={
                     m.images?.length
-                      ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]
-                      }`
+                      ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]}`
                       : ""
                   }
                   className="ms-thumb"
@@ -442,15 +309,10 @@ const SellerProducts = () => {
                   <div className="ms-price">
                     ₹{Number(m.price).toLocaleString()}
                   </div>
-                  <div className="ms-desc" title={m.description}>
-                    {m.description}
-                  </div>
 
                   <div className={`ms-meta stock-${m.availability}`}>
                     Status: <strong>{formatAvailability(m.availability)}</strong>
                   </div>
-
-
                 </div>
 
                 <div className="ms-actions">
@@ -477,7 +339,6 @@ const SellerProducts = () => {
             ))
           )}
         </section>
-
       </main>
     </div>
   );

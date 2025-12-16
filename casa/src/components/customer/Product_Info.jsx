@@ -5,7 +5,11 @@ import Navbar from "./Navbar";
 import "./Product_Info.css";
 import sample from "../../assets/images/sample.jpg";
 import { addToCart } from "../../utils/cart";
+import api from "../../api/axios";
 
+/* ===============================
+   HELPERS
+=============================== */
 const formatAvailability = (value) => {
   switch (value) {
     case "available": return "Available";
@@ -16,7 +20,7 @@ const formatAvailability = (value) => {
   }
 };
 
-const renderStars = (rating) => {
+const renderStars = (rating = 0) => {
   const stars = [];
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
@@ -56,17 +60,17 @@ const ProductInfo = () => {
   const [reviews, setReviews] = useState([]);
 
   /* =========================
-     FETCH RATINGS
+     FETCH RATINGS (API)
   ========================= */
   useEffect(() => {
     if (!id) return;
 
-    fetch(`http://localhost:3001/product/${id}/ratings`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAvgRating(data.avgRating || 0);
-        setRatingCount(data.count || 0);
-        setReviews(data.reviews || []);
+    api
+      .get(`/product/${id}/ratings`)
+      .then((res) => {
+        setAvgRating(res.data.avgRating || 0);
+        setRatingCount(res.data.count || 0);
+        setReviews(res.data.reviews || []);
       })
       .catch(() => {
         setAvgRating(0);
@@ -78,12 +82,18 @@ const ProductInfo = () => {
   const imageList = images.length ? images : [sample];
   const [activeImage, setActiveImage] = useState(imageList[0]);
 
-  const totalPrice = useMemo(() => price * quantity, [price, quantity]);
+  const totalPrice = useMemo(
+    () => price * quantity,
+    [price, quantity]
+  );
 
   const isUnavailable =
     availability === "out_of_stock" ||
     availability === "discontinued";
 
+  /* =========================
+     CART ACTIONS
+  ========================= */
   const handleAddToCart = () => {
     if (isUnavailable) return alert("Unavailable");
 
@@ -144,14 +154,17 @@ const ProductInfo = () => {
               <img
                 key={i}
                 src={img}
-                className={`pd-thumb ${activeImage === img ? "active" : ""}`}
+                className={`pd-thumb ${
+                  activeImage === img ? "active" : ""
+                }`}
                 onClick={() => setActiveImage(img)}
+                alt=""
               />
             ))}
           </div>
 
           <div className="pd-image-box">
-            <img src={activeImage} className="pd-image" />
+            <img src={activeImage} className="pd-image" alt="" />
           </div>
         </div>
 
@@ -160,14 +173,19 @@ const ProductInfo = () => {
           <h1 className="pd-title">{title}</h1>
 
           <div className="pd-rating-line">
-            <div className="pd-stars">{renderStars(avgRating)}</div>
+            <div className="pd-stars">
+              {renderStars(avgRating)}
+            </div>
             <span className="pd-rating-count">
-              {avgRating || "No ratings"} {ratingCount > 0 && `(${ratingCount})`}
+              {avgRating || "No ratings"}{" "}
+              {ratingCount > 0 && `(${ratingCount})`}
             </span>
           </div>
 
           <div
-            className={`pd-description ${expanded ? "expanded" : "collapsed"}`}
+            className={`pd-description ${
+              expanded ? "expanded" : "collapsed"
+            }`}
           >
             {description}
           </div>
@@ -181,25 +199,27 @@ const ProductInfo = () => {
             </span>
           )}
 
-
-
           <hr className="pd-divider" />
 
           <div className="pd-key-details">
             <p><strong>Seller:</strong> {seller}</p>
             <p><strong>Origin:</strong> {origin}</p>
-            <p><strong>Status:</strong> {formatAvailability(availability)}</p>
+            <p>
+              <strong>Status:</strong>{" "}
+              {formatAvailability(availability)}
+            </p>
           </div>
 
           <hr className="pd-divider" />
-
         </div>
 
         {/* RIGHT */}
         <div className="pd-right">
           <div className="pd-buybox">
             <p className="pd-buybox-title">{title}</p>
-            <p className="pd-price">₹{totalPrice.toLocaleString()}</p>
+            <p className="pd-price">
+              ₹{totalPrice.toLocaleString()}
+            </p>
 
             <button
               className="pd-btn pd-btn-buy"
@@ -226,9 +246,10 @@ const ProductInfo = () => {
           </div>
         </div>
       </div>
+
       {/* =========================
-     REVIEWS SECTION (BOTTOM)
-========================= */}
+         REVIEWS SECTION
+      ========================= */}
       <section className="pd-reviews-section">
         <h2 className="pd-reviews-title">
           Customer Reviews
@@ -248,21 +269,24 @@ const ProductInfo = () => {
             {reviews.map((r) => (
               <div key={r.id} className="pd-review-card">
                 <div className="pd-review-header">
-                  <strong className="pd-review-user">{r.user}</strong>
+                  <strong className="pd-review-user">
+                    {r.user}
+                  </strong>
                   <div className="pd-stars">
                     {renderStars(r.stars)}
                   </div>
                 </div>
 
                 {r.comment && (
-                  <p className="pd-review-comment">{r.comment}</p>
+                  <p className="pd-review-comment">
+                    {r.comment}
+                  </p>
                 )}
               </div>
             ))}
           </div>
         )}
       </section>
-
     </>
   );
 };

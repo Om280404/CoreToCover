@@ -1,28 +1,11 @@
-// File: src/components/supplier/SelledAddProduct.jsx
+// File: src/components/supplier/SellerAddProduct.jsx
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./SellerAddProduct.css";
-
-/* ===============================
-   AVAILABILITY FORMATTER
-=============================== */
-const formatAvailability = (value) => {
-  switch (value) {
-    case "available":
-      return "Available";
-    case "out_of_stock":
-      return "Out of Stock";
-    case "low_stock":
-      return "Low Stock";
-    case "discontinued":
-      return "Discontinued";
-    default:
-      return "Available";
-  }
-};
+import { addSellerProduct } from "../../api/seller";
 
 const SellerAddProduct = () => {
   const navigate = useNavigate();
@@ -35,8 +18,7 @@ const SellerAddProduct = () => {
   const [productType, setProductType] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-
-  const [availability, setAvailability] = useState("available"); // ✅ default
+  const [availability, setAvailability] = useState("available");
 
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -94,9 +76,9 @@ const SellerAddProduct = () => {
       }
     }
 
-    setImages((p) => [...p, ...files]);
-    setImagePreviews((p) => [
-      ...p,
+    setImages((prev) => [...prev, ...files]);
+    setImagePreviews((prev) => [
+      ...prev,
       ...files.map((f) => URL.createObjectURL(f)),
     ]);
 
@@ -138,7 +120,7 @@ const SellerAddProduct = () => {
     if (images.length < 1 || images.length > 5)
       return alert("Upload 1–5 images.");
 
-    const sellerId = localStorage.getItem("SellerId");
+    const sellerId = localStorage.getItem("sellerId");
     if (!sellerId) return alert("Seller not logged in.");
 
     setSubmitting(true);
@@ -152,22 +134,12 @@ const SellerAddProduct = () => {
       formData.append("productType", productType);
       formData.append("category", category);
       formData.append("description", description);
-      formData.append("availability", availability); // ✅ SEND TO DB
+      formData.append("availability", availability);
 
       images.forEach((img) => formData.append("images", img));
       if (video) formData.append("video", video);
 
-      const res = await fetch("http://localhost:3001/seller/product", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to add product");
-        return;
-      }
+      await addSellerProduct(formData);
 
       alert("Product added successfully ✅");
 
@@ -185,7 +157,10 @@ const SellerAddProduct = () => {
       navigate("/selleraddproduct");
     } catch (err) {
       console.error("ADD PRODUCT ERROR:", err);
-      alert("Server error while adding product");
+      alert(
+        err?.response?.data?.message ||
+          "Server error while adding product"
+      );
     } finally {
       setSubmitting(false);
     }

@@ -1,8 +1,13 @@
 // File: src/components/SupplierOrders.jsx
+
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./Orders.css";
+import {
+  getSellerOrders,
+  updateSellerOrderStatus,
+} from "../../api/seller";
 
 const SellerOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,14 +21,16 @@ const SellerOrders = () => {
   useEffect(() => {
     if (!sellerId) return;
 
-    fetch(`http://localhost:3001/seller/${sellerId}/orders`)
-      .then((res) => res.json())
-      .then((data) => {
-        setOrders(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => {
+    const loadOrders = async () => {
+      try {
+        const res = await getSellerOrders(sellerId);
+        setOrders(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
         console.error(err);
-      });
+      }
+    };
+
+    loadOrders();
   }, [sellerId]);
 
   /* =========================
@@ -31,19 +38,7 @@ const SellerOrders = () => {
   ========================= */
   const updateStatus = async (orderItemId, newStatus) => {
     try {
-      const res = await fetch(
-        `http://localhost:3001/seller/order/${orderItemId}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
-
-      if (!res.ok) {
-        alert("Failed to update order status");
-        return;
-      }
+      await updateSellerOrderStatus(orderItemId, newStatus);
 
       setOrders((prev) =>
         prev.map((o) =>
@@ -78,14 +73,7 @@ const SellerOrders = () => {
 
       await Promise.all(
         pendingOrders.map((order) =>
-          fetch(
-            `http://localhost:3001/seller/order/${order.id}/status`,
-            {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "confirmed" }),
-            }
-          )
+          updateSellerOrderStatus(order.id, "confirmed")
         )
       );
 
@@ -126,14 +114,7 @@ const SellerOrders = () => {
 
       await Promise.all(
         confirmedOrders.map((order) =>
-          fetch(
-            `http://localhost:3001/seller/order/${order.id}/status`,
-            {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "fulfilled" }),
-            }
-          )
+          updateSellerOrderStatus(order.id, "fulfilled")
         )
       );
 
@@ -312,7 +293,10 @@ const SellerOrders = () => {
                       <>
                         <button
                           onClick={() =>
-                            updateStatus(order.id, "confirmed")
+                            updateStatus(
+                              order.id,
+                              "confirmed"
+                            )
                           }
                           className="confirm-btn"
                         >
@@ -320,7 +304,10 @@ const SellerOrders = () => {
                         </button>
                         <button
                           onClick={() =>
-                            updateStatus(order.id, "rejected")
+                            updateStatus(
+                              order.id,
+                              "rejected"
+                            )
                           }
                           className="reject-btn"
                         >
@@ -332,7 +319,10 @@ const SellerOrders = () => {
                     {order.status === "confirmed" && (
                       <button
                         onClick={() =>
-                          updateStatus(order.id, "fulfilled")
+                          updateStatus(
+                            order.id,
+                            "fulfilled"
+                          )
                         }
                         className="fulfill-btn"
                       >

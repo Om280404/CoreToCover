@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./Checkout.css";
 import { loadCart, clearCart } from "../../utils/cart";
+import { placeOrder } from "../../api/order";
 // import sample from "../../assets/images/sample.jpg";
 import GooGlePay from "../../assets/images/GooglePay.png";
 import Paytm from "../../assets/images/Paytm.png";
@@ -53,7 +54,7 @@ const Checkout = () => {
         setName(data.name || "");
         setAddress(data.address || "");
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [userEmail, navigate]);
 
   /* ============================
@@ -110,18 +111,21 @@ const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:3001/order/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerEmail: userEmail,
-          checkoutDetails: { name, address, paymentMethod },
-          orders: calculatedOrders,
-          summary: { subtotal, casaCharge, deliveryCharge, grandTotal },
-        }),
+      await placeOrder({
+        customerEmail: userEmail,
+        checkoutDetails: {
+          name,
+          address,
+          paymentMethod,
+        },
+        orders: calculatedOrders,
+        summary: {
+          subtotal,
+          casaCharge,
+          deliveryCharge,
+          grandTotal,
+        },
       });
-
-      if (!res.ok) throw new Error();
 
       alert("Order placed successfully ✅");
 
@@ -132,12 +136,16 @@ const Checkout = () => {
       }
 
       navigate("/");
-    } catch {
-      alert("Failed to place order");
+    } catch (err) {
+      alert(
+        err?.response?.data?.message ||
+        "Failed to place order"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   /* ============================
      EMPTY STATE

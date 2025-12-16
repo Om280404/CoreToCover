@@ -8,7 +8,13 @@ import path from "path";
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Vite frontend
+    credentials: true,
+  })
+);
+
 app.use(express.json()); // ✅ REQUIRED
 
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
@@ -204,21 +210,86 @@ app.post("/seller/login", async (req, res) => {
   }
 });
 
+// ============================
+// SEARCH PRODUCTS
+// ============================
+app.get("/products/search", async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+
+    if (!q) return res.json([]);
+
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { category: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+        ],
+        availability: {
+          not: "discontinued",
+        },
+      },
+      include: {
+        seller: {
+          select: {
+            name: true,
+            business: {
+              select: { city: true, state: true },
+            },
+          },
+        },
+        ratings: {
+          select: { stars: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formatted = products.map((p) => {
+      const total = p.ratings.reduce((sum, r) => sum + r.stars, 0);
+      const count = p.ratings.length;
+      const avgRating = count ? total / count : 0;
+
+      return {
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        description: p.description,
+        images: p.images,
+        availability: p.availability,
+
+        sellerId: p.sellerId,
+        sellerName: p.seller.name,
+        location: p.seller.business
+          ? `${p.seller.business.city}, ${p.seller.business.state}`
+          : "Not specified",
+
+        avgRating: Number(avgRating.toFixed(1)),
+        ratingCount: count,
+      };
+    });
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("SEARCH PRODUCTS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
+
 /* =========================
-   GET USER BY EMAIL
+   UPDATE USER PROFILE
 ========================= */
 app.get("/user/:email", async (req, res) => {
   try {
-    const email = decodeURIComponent(req.params.email);
+    const email = decodeURIComponent(req.params.email)
+      .trim()
+      .toLowerCase();
 
     const user = await prisma.user.findUnique({
       where: { email },
-      select: {
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-      },
     });
 
     if (!user) {
@@ -227,10 +298,11 @@ app.get("/user/:email", async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error("GET USER ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
+
 
 
 /* =========================

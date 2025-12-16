@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import "./UserProfile.css";
 import Navbar from "./Navbar";
 import MyOrders from "./MyOrders";
+import { getUserByEmail, updateUserProfile } from "../../api/user";
+
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -46,16 +48,19 @@ const UserProfile = () => {
       return;
     }
 
-    fetch(`http://localhost:3001/user/${encodeURIComponent(userEmail)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
-        setFormData(data);
-      })
-      .catch(() => {
+    const loadUser = async () => {
+      try {
+        const res = await getUserByEmail(userEmail);
+        setUser(res.data);
+        setFormData(res.data);
+      } catch {
         alert("Failed to load user profile");
-      });
+      }
+    };
+
+    loadUser();
   }, [userEmail, navigate]);
+
 
   /* ==============================
      HANDLERS
@@ -68,12 +73,22 @@ const UserProfile = () => {
     }));
   };
 
-  // ⚠️ For now this is frontend-only save
-  const handleSave = () => {
+  const handleSave = async () => {
+  try {
+    await updateUserProfile(userEmail, {
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+    });
+
     setUser(formData);
     setIsEditing(false);
-    alert("Profile updated (frontend only)");
-  };
+    alert("Profile updated successfully");
+  } catch (err) {
+    alert(err.message || "Failed to update profile");
+  }
+};
+
 
   return (
     <>

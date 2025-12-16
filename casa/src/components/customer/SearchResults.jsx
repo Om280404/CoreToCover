@@ -1,66 +1,43 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import ProductCard from "./ProductCard";
 import Footer from "./Footer";
 import "./SearchResults.css";
+import api from "../../api/axios";
 
-/* =========================================
-   MOCK PRODUCTS (Frontend Only)
-========================================= */
-const PRODUCTS = [
-  {
-    id: 1,
-    title: "Premium Wooden Door",
-    imageUrl: "/images/door.jpg",
-    category: "Doors",
-    price: 18500,
-    description: "High-quality teak wood door with premium finish.",
-    supplierName: "Om Interiors",
-    supplierLocation: "Pune, Maharashtra",
-  },
-  {
-    id: 2,
-    title: "Modular Kitchen Cabinet",
-    imageUrl: "/images/kitchen.jpg",
-    category: "Kitchen",
-    price: 45000,
-    description: "Modern modular kitchen cabinet with soft-close drawers.",
-    supplierName: "Casa Furnish",
-    supplierLocation: "Mumbai, Maharashtra",
-  },
-  {
-    id: 3,
-    title: "Marble Flooring Tiles",
-    imageUrl: "/images/tiles.jpg",
-    category: "Flooring",
-    price: 220,
-    description: "Premium Italian marble tiles for luxury flooring.",
-    supplierName: "Hearth Stones",
-    supplierLocation: "Rajasthan, India",
-  },
-];
 
 const SearchResults = () => {
   const location = useLocation();
-
   const queryParams = new URLSearchParams(location.search);
   const searchQuery = queryParams.get("search") || "";
 
-  /* =========================================
-     FRONTEND SEARCH FILTER
-  ========================================= */
-  const results = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const q = searchQuery.toLowerCase();
+  /* =========================
+     FETCH SEARCH RESULTS
+  ========================= */
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
 
-    return PRODUCTS.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
-    );
+    setLoading(true);
+
+    api
+      .get(`/products/search`, {
+        params: { q: searchQuery },
+      })
+      .then((res) => {
+        setResults(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        setResults([]);
+      })
+      .finally(() => setLoading(false));
   }, [searchQuery]);
 
   return (
@@ -74,31 +51,49 @@ const SearchResults = () => {
         </p>
 
         <div className="product-grid">
-          {searchQuery.trim() === "" && (
+          {loading && (
+            <p style={{ gridColumn: "1 / -1" }}>Searching…</p>
+          )}
+
+          {!loading && searchQuery.trim() === "" && (
             <p style={{ gridColumn: "1 / -1", color: "#6b7280" }}>
               Please enter a search term.
             </p>
           )}
 
-          {searchQuery.trim() !== "" && results.length === 0 && (
+          {!loading && searchQuery.trim() !== "" && results.length === 0 && (
             <p style={{ gridColumn: "1 / -1", color: "#6b7280" }}>
               No product found matching your search term.
             </p>
           )}
 
-          {results.map((product) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              title={product.title}
-              image={product.imageUrl}
-              category={product.category}
-              price={product.price}
-              description={product.description}
-              seller={product.supplierName}
-              origin={product.supplierLocation}
-            />
-          ))}
+          {!loading &&
+            results.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                sellerId={product.sellerId}
+                title={product.name}
+                category={product.category}
+                price={product.price}
+                description={product.description}
+                images={
+                  product.images?.map(
+                    (img) => `http://localhost:3001/${img}`
+                  ) || []
+                }
+                image={
+                  product.images?.length
+                    ? `http://localhost:3001/${product.images[0]}`
+                    : null
+                }
+                seller={product.sellerName}
+                origin={product.location}
+                availability={product.availability}
+                avgRating={product.avgRating || 0}
+                ratingCount={product.ratingCount || 0}
+              />
+            ))}
         </div>
       </div>
 

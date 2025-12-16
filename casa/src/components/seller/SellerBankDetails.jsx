@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import { useNavigate } from "react-router-dom";
 import "./SellerBankDetails.css";
+import {
+  getSellerBankDetails,
+  saveSellerBankDetails,
+} from "../../api/seller";
 
 const SellerBankDetails = () => {
   const navigate = useNavigate();
@@ -15,30 +17,48 @@ const SellerBankDetails = () => {
     ifsc: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  /* =========================
+     FETCH BANK DETAILS
+  ========================= */
   useEffect(() => {
-    if (!sellerId) return;
+    if (!sellerId) {
+      navigate("/sellerlogin");
+      return;
+    }
 
-    setLoading(true);
+    const loadBankDetails = async () => {
+      try {
+        const res = await getSellerBankDetails(sellerId);
+        if (res.data) {
+          setForm(res.data);
+        }
+      } catch {
+        // no bank details yet — safe to ignore
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    fetch(`http://localhost:3001/seller/${sellerId}/bank-details`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data) setForm(data);
-      })
-      .finally(() => setLoading(false));
-  }, [sellerId]);
+    loadBankDetails();
+  }, [sellerId, navigate]);
 
+  /* =========================
+     HANDLERS
+  ========================= */
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
-    if (!form.accountHolder || !form.bankName || !form.accountNumber || !form.ifsc) {
+    const { accountHolder, bankName, accountNumber, ifsc } = form;
+
+    if (!accountHolder || !bankName || !accountNumber || !ifsc) {
       alert("Please fill all fields");
       return;
     }
@@ -46,26 +66,31 @@ const SellerBankDetails = () => {
     setSaving(true);
 
     try {
-      const res = await fetch("http://localhost:3001/seller/bank-details", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sellerId, ...form }),
+      await saveSellerBankDetails({
+        sellerId: Number(sellerId),
+        accountHolder,
+        bankName,
+        accountNumber,
+        ifsc,
       });
 
-      if (!res.ok) throw new Error();
-
       alert("Bank details saved successfully ✅");
-      navigate("/sellerdashboard"); // ✅ navigate AFTER success
-    } catch {
-      alert("Failed to save bank details");
+      navigate("/sellerdashboard");
+    } catch (err) {
+      alert(
+        err?.response?.data?.message ||
+        "Failed to save bank details"
+      );
     } finally {
       setSaving(false);
     }
   };
 
+  /* =========================
+     UI
+  ========================= */
   return (
     <div className="bs-layout-root">
-
       <div className="bs-profile-shell">
         <h1 className="bs-heading">Bank Details</h1>
 
@@ -73,23 +98,46 @@ const SellerBankDetails = () => {
           <p>Loading…</p>
         ) : (
           <form className="bs-card bs-bank-form" onSubmit={handleSave}>
-            <label>Account Holder Name
-              <input name="accountHolder" value={form.accountHolder} onChange={handleChange} />
+            <label>
+              Account Holder Name
+              <input
+                name="accountHolder"
+                value={form.accountHolder}
+                onChange={handleChange}
+              />
             </label>
 
-            <label>Bank Name
-              <input name="bankName" value={form.bankName} onChange={handleChange} />
+            <label>
+              Bank Name
+              <input
+                name="bankName"
+                value={form.bankName}
+                onChange={handleChange}
+              />
             </label>
 
-            <label>Account Number
-              <input name="accountNumber" value={form.accountNumber} onChange={handleChange} />
+            <label>
+              Account Number
+              <input
+                name="accountNumber"
+                value={form.accountNumber}
+                onChange={handleChange}
+              />
             </label>
 
-            <label>IFSC Code
-              <input name="ifsc" value={form.ifsc} onChange={handleChange} />
+            <label>
+              IFSC Code
+              <input
+                name="ifsc"
+                value={form.ifsc}
+                onChange={handleChange}
+              />
             </label>
 
-            <button className="bs-btn bs-btn--primary" disabled={saving}>
+            <button
+              className="bs-btn bs-btn--primary"
+              disabled={saving}
+            >
               {saving ? "Saving..." : "Save & Go to Dashboard"}
             </button>
           </form>

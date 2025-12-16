@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
+import { customerSignup } from "../../api/auth";
 import "./Signup.css";
 
 export default function Signup() {
@@ -32,8 +33,7 @@ export default function Signup() {
       e.password = "Password must be at least 6 characters";
     if (form.password !== form.confirmPassword)
       e.confirmPassword = "Passwords do not match";
-    if (!termsAccepted)
-      e.terms = "You must accept the terms";
+    if (!termsAccepted) e.terms = "You must accept the terms";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -46,30 +46,18 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          address: form.address.trim(),
-          password: form.password,
-        }),
+      await customerSignup({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        password: form.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Signup failed");
-        return;
-      }
-
       alert("Account created successfully. Please login.");
-      navigate("/");
+      navigate("/login");
     } catch (err) {
-      console.error("Signup error:", err);
-      alert("Signup failed");
+      alert(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }

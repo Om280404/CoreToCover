@@ -6,71 +6,91 @@ import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./SellerDashboard.css";
 import { FaShoppingCart, FaRupeeSign } from "react-icons/fa";
+import {
+  getSellerProfile,
+  getSellerOrders,
+} from "../../api/seller";
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
-
   const sellerId = localStorage.getItem("sellerId");
 
   /* ===============================
      STATE
   =============================== */
-  const [seller, setSeller] = useState({
-    name: "Seller",
-  });
-
+  const [sellerName, setSellerName] = useState("Seller");
   const [ordersCount, setOrdersCount] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   /* ===============================
-     LOAD SELLER PROFILE (LOCAL)
+     AUTH GUARD
   =============================== */
   useEffect(() => {
-    const sellerEmail = localStorage.getItem("sellerEmail");
-
-    if (!sellerEmail || !sellerId) {
-      alert("Please log in as a seller.");
-      // navigate("/sellerlogin");
-      return;
+    if (!sellerId) {
+      navigate("/sellerlogin");
     }
-
-    const storedProfile = JSON.parse(
-      localStorage.getItem("sellerProfile")
-    );
-
-    setSeller({
-      name: storedProfile?.name || "Seller",
-    });
-  }, [navigate, sellerId]);
+  }, [sellerId, navigate]);
 
   /* ===============================
-     FETCH DASHBOARD STATS
+     LOAD SELLER PROFILE
   =============================== */
   useEffect(() => {
     if (!sellerId) return;
 
-    fetch(`http://localhost:3001/seller/${sellerId}/orders`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!Array.isArray(data)) return;
+    const loadProfile = async () => {
+      try {
+        const res = await getSellerProfile(sellerId);
+        setSellerName(res.data.name || "Seller");
+      } catch {
+        setSellerName("Seller");
+      }
+    };
 
-        // ✅ Orders received
-        setOrdersCount(data.length);
+    loadProfile();
+  }, [sellerId]);
 
-        // ✅ Earnings from fulfilled orders only
-        const earnings = data
+  /* ===============================
+     LOAD DASHBOARD STATS
+  =============================== */
+  useEffect(() => {
+    if (!sellerId) return;
+
+    const loadStats = async () => {
+      try {
+        const res = await getSellerOrders(sellerId);
+        const orders = Array.isArray(res.data) ? res.data : [];
+
+        setOrdersCount(orders.length);
+
+        const earnings = orders
           .filter((o) => o.status === "fulfilled")
-          .reduce((sum, o) => {
-            const amount = Number(o.totalAmount || 0);
-            return sum + amount;
-          }, 0);
+          .reduce(
+            (sum, o) => sum + Number(o.totalAmount || 0),
+            0
+          );
 
         setTotalEarnings(earnings);
-      })
-      .catch((err) => {
-        console.error("DASHBOARD FETCH ERROR:", err);
-      });
+      } catch (err) {
+        console.error("DASHBOARD ERROR:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
   }, [sellerId]);
+
+  if (loading) {
+    return (
+      <div className="dashboard-wrapper">
+        <Sidebar />
+        <div className="dashboard-main">
+          <h2>Loading dashboard…</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-wrapper">
@@ -79,7 +99,7 @@ const SellerDashboard = () => {
 
       <div className="dashboard-main">
         <h1 className="dashboard-title">
-          Welcome, {seller.name}
+          Welcome, {sellerName}
         </h1>
 
         <div className="dashboard-cards">

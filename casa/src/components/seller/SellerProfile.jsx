@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "./SellerProfile.css";
 import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
+import { getSellerProfile, updateSellerProfile } from "../../api/seller";
+
 
 const SellerProfile = () => {
   const navigate = useNavigate();
@@ -27,25 +29,26 @@ const SellerProfile = () => {
       return;
     }
 
-    fetch(`http://localhost:3001/seller/profile/${sellerId}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load profile");
-        return res.json();
-      })
-      .then((data) => {
-        setProfile(data);
+    const loadProfile = async () => {
+      try {
+        const res = await getSellerProfile(sellerId);
+
+        setProfile(res.data);
         setFormData({
-          name: data.name || "",
-          email: data.email || "",
-          phone: data.phone || "",
+          name: res.data.name || "",
+          email: res.data.email || "",
+          phone: res.data.phone || "",
         });
+      } catch (err) {
+        alert("Failed to load profile");
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      }
+    };
+
+    loadProfile();
   }, [sellerId, navigate]);
+
 
   /* =========================
      SAVE PROFILE
@@ -59,41 +62,36 @@ const SellerProfile = () => {
     setSaving(true);
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/seller/profile/${sellerId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.name,
-            phone: formData.phone,
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error();
-
-      const data = await res.json();
-
-      setProfile({
-        ...profile,
-        name: data.seller.name,
-        phone: data.seller.phone,
+      const res = await updateSellerProfile(sellerId, {
+        name: formData.name,
+        phone: formData.phone,
       });
+
+      setProfile((prev) => ({
+        ...prev,
+        name: res.data.seller.name,
+        phone: res.data.seller.phone,
+      }));
 
       setIsEditing(false);
       alert("Profile updated successfully ✅");
-    } catch {
-      alert("Failed to update profile");
+    } catch (err) {
+      alert(
+        err?.response?.data?.message ||
+        "Failed to update profile"
+      );
     } finally {
       setSaving(false);
     }
   };
 
+
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("sellerId");
+    window.dispatchEvent(new Event("storage"));
     navigate("/sellerlogin");
   };
+
 
   if (loading) {
     return (

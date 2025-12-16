@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./SellerSignup.css";
+import { sellerSignup } from "../../api/sellerAuth";
+
 
 const SellerSignup = () => {
   const navigate = useNavigate();
@@ -41,36 +43,31 @@ const SellerSignup = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3001/seller/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          password: form.password,
-        }),
+      const res = await sellerSignup({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        password: form.password,
       });
 
-      const data = await res.json();
+      // ✅ Save sellerId for onboarding steps
+      localStorage.setItem("sellerId", res.data.sellerId);
+      localStorage.setItem("sellerEmail", form.email);
 
-      if (!res.ok) {
-        alert(data.message || "Signup failed");
-        return;
-      }
-
-      // ✅ Save sellerId for business details step
-      localStorage.setItem("SellerId", data.sellerId);
-      localStorage.setItem("SellerEmail", form.email);
+      // 🔔 notify app about auth change
+      window.dispatchEvent(new Event("storage"));
 
       navigate("/businessdetails");
     } catch (err) {
-      console.error("Signup error:", err);
-      alert("Server error during signup");
+      alert(
+        err?.response?.data?.message ||
+        "Signup failed"
+      );
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="signup-container">

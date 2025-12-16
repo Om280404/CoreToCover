@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import "./SellerLogin.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { sellerLogin } from "../../api/sellerAuth";
+
 
 const SellerLogin = () => {
   const [email, setEmail] = useState("");
@@ -19,30 +21,25 @@ const SellerLogin = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/seller/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await sellerLogin({ email, password });
 
-      const data = await res.json();
+      // ✅ REQUIRED
+      localStorage.setItem("sellerId", res.data.seller.id);
+      localStorage.setItem("sellerEmail", res.data.seller.email);
+      localStorage.setItem("sellerProfile", JSON.stringify(res.data.seller));
 
-      if (!res.ok) {
-        alert(data.message || "Login failed");
-        return;
-      }
-
-      // ✅ CORRECT & REQUIRED
-      localStorage.setItem("sellerId", data.seller.id);
-      localStorage.setItem("sellerEmail", data.seller.email);
-      localStorage.setItem("sellerProfile", JSON.stringify(data.seller));
+      // 🔔 notify app about auth change
+      window.dispatchEvent(new Event("storage"));
 
       navigate("/sellerdashboard");
     } catch (err) {
-      console.error("SELLER LOGIN ERROR:", err);
-      alert("Server error during login");
+      alert(
+        err?.response?.data?.message ||
+        "Invalid email or password"
+      );
     }
   };
+
 
   return (
     <div className="login-container">
@@ -52,7 +49,7 @@ const SellerLogin = () => {
         <p className="subtitle">Log in to manage your store</p>
 
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
+          <div className="input-groups">
             <label>Email</label>
             <input
               type="email"
@@ -63,7 +60,7 @@ const SellerLogin = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="input-groups">
             <label>Password</label>
             <div className="password-fld">
               <input

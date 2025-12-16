@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import "./MyOrders.css";
 import sample from "../../assets/images/sample.jpg";
+import api from "../../api/axios";
 
 /* =========================
    ORDER STATUS META
@@ -29,21 +30,21 @@ export default function MyOrders() {
   const userEmail = localStorage.getItem("userEmail");
 
   /* =========================
-     FETCH USER ORDERS
+     FETCH USER ORDERS (API)
   ========================= */
   useEffect(() => {
     if (!userEmail) return;
 
-    fetch(`http://localhost:3001/orders/user/${encodeURIComponent(userEmail)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!Array.isArray(data)) {
+    api
+      .get(`/orders/user/${encodeURIComponent(userEmail)}`)
+      .then((res) => {
+        if (!Array.isArray(res.data)) {
           setOrders([]);
           return;
         }
 
         setOrders(
-          data.map((o) => ({
+          res.data.map((o) => ({
             ...o,
             rated: false, // frontend-only lock
           }))
@@ -53,7 +54,7 @@ export default function MyOrders() {
   }, [userEmail]);
 
   /* =========================
-     SUBMIT RATING
+     SUBMIT RATING (API)
   ========================= */
   const submitRating = async (orderItemId) => {
     const stars = ratings[orderItemId];
@@ -65,30 +66,20 @@ export default function MyOrders() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/order/item/${orderItemId}/rate`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            stars,
-            comment,
-            userEmail, // ✅ REQUIRED BY BACKEND
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
-      }
+      await api.post(`/order/item/${orderItemId}/rate`, {
+        stars,
+        comment,
+        userEmail, // ✅ required by backend
+      });
 
       alert("Thank you for your review ⭐");
 
       // lock rating UI
       setOrders((prev) =>
         prev.map((o) =>
-          o.orderItemId === orderItemId ? { ...o, rated: true } : o
+          o.orderItemId === orderItemId
+            ? { ...o, rated: true }
+            : o
         )
       );
 
@@ -97,7 +88,7 @@ export default function MyOrders() {
         [orderItemId]: false,
       }));
     } catch (err) {
-      alert(err.message || "Failed to submit rating");
+      alert(err?.message || "Failed to submit rating");
     }
   };
 
@@ -106,7 +97,9 @@ export default function MyOrders() {
   ========================= */
   const filteredOrders = useMemo(() => {
     return orders.filter((o) =>
-      (o.productName || "").toLowerCase().includes(query.toLowerCase())
+      (o.productName || "")
+        .toLowerCase()
+        .includes(query.toLowerCase())
     );
   }, [orders, query]);
 
@@ -131,7 +124,10 @@ export default function MyOrders() {
           const isDelivered = order.orderStatus === "fulfilled";
 
           return (
-            <article key={order.orderItemId} className="order-card">
+            <article
+              key={order.orderItemId}
+              className="order-card"
+            >
               <img
                 src={
                   order.imageUrl
@@ -144,8 +140,12 @@ export default function MyOrders() {
 
               <div className="order-info">
                 <div className="order-header">
-                  <h3 className="order-name">{order.productName}</h3>
-                  <span className={`order-status ${statusMeta.className}`}>
+                  <h3 className="order-name">
+                    {order.productName}
+                  </h3>
+                  <span
+                    className={`order-status ${statusMeta.className}`}
+                  >
                     {statusMeta.text}
                   </span>
                 </div>
@@ -173,49 +173,55 @@ export default function MyOrders() {
                     </button>
                   )}
 
-                {isDelivered && openRating[order.orderItemId] && (
-                  <div className="order-rating">
-                    <div>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FaStar
-                          key={star}
-                          size={18}
-                          style={{ cursor: "pointer", marginRight: 4 }}
-                          color={
-                            (ratings[order.orderItemId] || 0) >= star
-                              ? "#facc15"
-                              : "#d1d5db"
-                          }
-                          onClick={() =>
-                            setRatings((p) => ({
-                              ...p,
-                              [order.orderItemId]: star,
-                            }))
-                          }
-                        />
-                      ))}
+                {isDelivered &&
+                  openRating[order.orderItemId] && (
+                    <div className="order-rating">
+                      <div>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FaStar
+                            key={star}
+                            size={18}
+                            style={{
+                              cursor: "pointer",
+                              marginRight: 4,
+                            }}
+                            color={
+                              (ratings[order.orderItemId] || 0) >= star
+                                ? "#facc15"
+                                : "#d1d5db"
+                            }
+                            onClick={() =>
+                              setRatings((p) => ({
+                                ...p,
+                                [order.orderItemId]: star,
+                              }))
+                            }
+                          />
+                        ))}
+                      </div>
+
+                      <textarea
+                        className="order-review"
+                        placeholder="Write a review (optional)"
+                        value={reviews[order.orderItemId] || ""}
+                        onChange={(e) =>
+                          setReviews((p) => ({
+                            ...p,
+                            [order.orderItemId]: e.target.value,
+                          }))
+                        }
+                      />
+
+                      <button
+                        className="track-btn"
+                        onClick={() =>
+                          submitRating(order.orderItemId)
+                        }
+                      >
+                        Submit Review
+                      </button>
                     </div>
-
-                    <textarea
-                      className="order-review"
-                      placeholder="Write a review (optional)"
-                      value={reviews[order.orderItemId] || ""}
-                      onChange={(e) =>
-                        setReviews((p) => ({
-                          ...p,
-                          [order.orderItemId]: e.target.value,
-                        }))
-                      }
-                    />
-
-                    <button
-                      className="track-btn"
-                      onClick={() => submitRating(order.orderItemId)}
-                    >
-                      Submit Review
-                    </button>
-                  </div>
-                )}
+                  )}
               </div>
             </article>
           );
