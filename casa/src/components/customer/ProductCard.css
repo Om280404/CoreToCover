@@ -106,7 +106,7 @@
 
   /* 🔥 MULTI-LINE ELLIPSIS */
   display: -webkit-box;
-  -webkit-line-clamp: 1;       /* show 3 lines */
+  -webkit-line-clamp: 1;       /* show 1 line */
   line-clamp: 1;  
   -webkit-box-orient: vertical;
 
@@ -192,9 +192,19 @@
   text-overflow: ellipsis;
 }
 
+.product-rating{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product-price{
+  margin-left: auto;
+  margin-right: auto;
+}
 /* =========================================
    RESPONSIVE
 ========================================= */
+
 @media (max-width: 480px) {
   .product-card {
     width: 100%;

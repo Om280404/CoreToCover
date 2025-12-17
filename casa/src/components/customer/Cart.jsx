@@ -76,7 +76,7 @@ const Cart = () => {
                     </p>
 
                     <div className="cart-actions">
-                      <label>Qty</label>
+                      <label>Quantity</label>
                       <input
                         type="number"
                         min="1"

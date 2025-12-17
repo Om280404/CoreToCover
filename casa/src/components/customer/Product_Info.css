@@ -94,6 +94,9 @@
   background: #fff;
 }
 
+video::-webkit-media-controls-overflow-button {
+  display: none;
+}
 
 .pd-image:hover {
   transform: scale(1.05);

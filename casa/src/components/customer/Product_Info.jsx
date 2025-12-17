@@ -153,6 +153,34 @@ const ProductInfo = () => {
     navigate("/checkout");
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+
+    const shareData = {
+      title: title,
+      text: `Check out this product on Casa`,
+      url: shareUrl,
+    };
+
+    // Web Share API (mobile + supported browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Share cancelled", err);
+      }
+    } else {
+      // Fallback: copy link
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Product link copied to clipboard!");
+      } catch (err) {
+        alert("Unable to copy link");
+      }
+    }
+  };
+
+
   if (!id || !sellerId) {
     return (
       <>
@@ -200,6 +228,7 @@ const ProductInfo = () => {
               <video
                 src={activeMedia.src}
                 controls
+                controlsList="nodownload noplaybackrate noremoteplayback"
                 autoPlay
                 style={{ width: "100%", height: "100%", background: "#000" }}
               />
@@ -270,6 +299,11 @@ const ProductInfo = () => {
             <button className="pd-btn pd-btn-back" onClick={() => navigate(-1)}>
               ← Go Back
             </button>
+
+            <button className="pd-btn pd-btn-share" onClick={handleShare}>
+              🔗 Share
+            </button>
+
           </div>
         </div>
       </div>
