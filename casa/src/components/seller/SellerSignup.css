@@ -32,7 +32,6 @@
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
-  box-sizing: border-box;
 }
 
 /* =========================================
@@ -67,7 +66,6 @@
   font-weight: 700;
   color: var(--text-dark);
   text-align: center;
-  margin: 4px 0 0;
 }
 
 .subtitle {
@@ -87,14 +85,13 @@
   gap: 14px;
 }
 
-/* Input group */
+/* =========================================
+   INPUT GROUP
+========================================= */
 .input-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: 95%;
-  height: 50px;
-  margin-bottom: 5px;
 }
 
 .input-group label {
@@ -103,9 +100,8 @@
   color: var(--green-dark);
 }
 
-/* Inputs */
 .input-group input {
-  padding: 10px 12px;
+  padding: 11px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: #fff;
@@ -115,10 +111,6 @@
   transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
 }
 
-.input-group input::placeholder {
-  color: rgba(71, 71, 71, 0.45);
-}
-
 .input-group input:focus {
   border-color: var(--green-mid);
   box-shadow: 0 10px 30px rgba(145, 165, 110, 0.35);
@@ -126,38 +118,70 @@
 }
 
 /* =========================================
-   PASSWORD FIELD
+   PASSWORD
 ========================================= */
-.password-group .password-wrapper {
+.password-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  /* height: 20px; */
-
 }
 
 .password-wrapper input {
   flex: 1;
   padding-right: 42px;
-  
 }
 
 .password-wrapper button {
   position: absolute;
-  right: 10px;
+  right: 8px;
   background: transparent;
   border: none;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 1rem;
   padding: 6px;
   border-radius: 8px;
-  transition: color var(--ease), background var(--ease);
+  transition: background var(--ease), color var(--ease);
 }
 
 .password-wrapper button:hover {
   color: var(--green-dark);
   background: rgba(96, 110, 82, 0.1);
+}
+
+/* =========================================
+   OTP SECTION
+========================================= */
+.otp-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.otp-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--green-mid);
+  background: transparent;
+  color: var(--green-dark);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all var(--ease);
+}
+
+.otp-btn:hover {
+  background: rgba(145, 165, 110, 0.15);
+  transform: translateY(-2px);
+}
+
+.otp-btn.primary {
+  background: #fff;
+  color: black;
+  border: none;
+  box-shadow: 0 12px 32px rgba(96, 110, 82, 0.35);
+}
+
+.otp-btn.primary:hover {
+  box-shadow: 0 18px 46px rgba(96, 110, 82, 0.45);
 }
 
 /* =========================================
@@ -180,7 +204,7 @@
 
 .terms a {
   color: var(--green-dark);
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
 }
 
@@ -192,16 +216,12 @@
    PRIMARY BUTTON
 ========================================= */
 .signup-btn {
-  margin-top: 6px;
+  margin-top: 8px;
   height: 46px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(
-    90deg,
-    var(--green-dark),
-    var(--green-mid)
-  );
-  color: #ffffff;
+  background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
+  color: #fff;
   font-weight: 800;
   font-size: 1rem;
   cursor: pointer;
@@ -209,7 +229,13 @@
   transition: transform var(--ease), box-shadow var(--ease);
 }
 
-.signup-btn:hover {
+.signup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.signup-btn:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 22px 60px rgba(96, 110, 82, 0.45);
 }
@@ -234,6 +260,12 @@
   text-decoration: underline;
 }
 
+.otp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 /* =========================================
    RESPONSIVE
 ========================================= */
@@ -247,7 +279,7 @@
   }
 
   .signup-card h2 {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 }
 

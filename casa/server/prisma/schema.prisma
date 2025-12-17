@@ -29,12 +29,24 @@ model Seller {
   email      String                 @unique
   phone      String
   password   String
+  phoneVerified Boolean  @default(false)
   createdAt  DateTime               @default(now())
   orderItems OrderItem[]
   products   Product[]
   business   SellerBusinessDetails?
   bank       SellerBankDetails?
 }
+
+///SELLER OTP
+model SellerOtp {
+  id        String   @id @default(uuid())
+  phone     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 
 /// =========================
 /// SELLER BUSINESS DETAILS

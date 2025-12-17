@@ -14,6 +14,13 @@ export const sellerSignup = (payload) => {
   return api.post("/seller/signup", payload);
 };
 
+export const sendSellerOtp = (phone) =>
+  api.post("/seller/send-otp", { phone });
+
+export const verifySellerOtp = (phone, otp) =>
+  api.post("/seller/verify-otp", { phone, otp });
+
+
 /* =========================
    CUSTOMER LOGIN
 ========================= */

@@ -139,42 +139,115 @@ app.post("/seller/signup", async (req, res) => {
     const { name, email, phone, password } = req.body;
 
     if (!name || !email || !phone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields required" });
     }
 
-    // Check if seller already exists
-    const existingSeller = await prisma.seller.findUnique({
-      where: { email },
+    const verifiedOtp = await prisma.sellerOtp.findFirst({
+      where: { phone },
+      orderBy: { createdAt: "desc" },
     });
 
+    if (!verifiedOtp || !verifiedOtp.verified) {
+      return res.status(403).json({ message: "Phone not verified" });
+    }
+
+
+    const existingSeller = await prisma.seller.findUnique({ where: { email } });
     if (existingSeller) {
       return res.status(409).json({ message: "Seller already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create seller
     const seller = await prisma.seller.create({
       data: {
         name,
         email,
         phone,
         password: hashedPassword,
+        phoneVerified: true,
       },
     });
 
-    return res.status(201).json({
-      message: "Seller account created",
-      sellerId: seller.id,
+
+    await prisma.sellerOtp.deleteMany({ where: { phone } });
+
+    res.status(201).json({ sellerId: seller.id });
+  } catch (err) {
+    console.error("SIGNUP ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+
+});
+
+
+
+/* ===============
+OTP via API
+==================*/
+app.post("/seller/send-otp", async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ message: "Phone required" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await prisma.sellerOtp.deleteMany({ where: { phone } });
+
+    await prisma.sellerOtp.create({
+      data: {
+        phone,
+        otp,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
     });
-  } catch (error) {
-    console.error("Seller signup error:", error);
-    return res.status(500).json({
-      message: "Server error during signup",
-    });
+
+    console.log("OTP:", otp); // ⚠️ remove in production
+
+    res.json({ message: "OTP sent" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send OTP" });
   }
 });
+
+
+/*========
+VERIFY OTP
+==========*/
+app.post("/seller/verify-otp", async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+
+    const record = await prisma.sellerOtp.findFirst({
+      where: {
+        phone,
+        otp,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+
+    if (!record) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    if (record.verified) {
+      return res.json({ message: "OTP already verified" });
+    }
+
+    await prisma.sellerOtp.update({
+      where: { id: record.id },
+      data: { verified: true },
+    });
+
+    res.json({ message: "OTP verified" });
+  } catch (err) {
+    res.status(500).json({ message: "OTP verification failed" });
+  }
+});
+
+
 
 /* ======================
    SELLER LOGIN
