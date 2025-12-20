@@ -167,15 +167,48 @@ const ProductInfo = () => {
   const [avgRating, setAvgRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
 
+  /* ===============================
+   REVIEWS
+=============================== */
+  const [reviews, setReviews] = useState([]);
+
+
   useEffect(() => {
     if (!id) return;
+
     api.get(`/product/${id}/ratings`)
       .then(res => {
         setAvgRating(res.data.avgRating || 0);
         setRatingCount(res.data.count || 0);
+        setReviews(res.data.reviews || []);
       })
-      .catch(() => {});
+      .catch(() => {
+        setAvgRating(0);
+        setRatingCount(0);
+        setReviews([]);
+      });
   }, [id]);
+
+
+  /*Buy Now */
+
+  const handleBuyNow = () => {
+    localStorage.setItem(
+      "singleCheckoutItem",
+      JSON.stringify({
+        materialId: id,
+        supplierId: sellerId,
+        name: title,
+        supplier: seller,
+        amountPerTrip: price,
+        trips: 1,
+        image: pickCartImage(images),
+      })
+    );
+
+    navigate("/checkout");
+  };
+
 
   /* ===============================
      CART LOGIC (ORIGINAL)
@@ -326,7 +359,7 @@ const ProductInfo = () => {
             <p className="pd-buybox-title">{title}</p>
             <p className="pd-price">₹{price.toLocaleString()}</p>
 
-            <button className="pd-btn pd-btn-buy" onClick={handleAddToCart}>
+            <button className="pd-btn pd-btn-buy" onClick={handleBuyNow}>
               🛒 Buy Now
             </button>
 
@@ -344,6 +377,35 @@ const ProductInfo = () => {
           </div>
         </div>
       </div>
+
+      {/* ===============================
+    REVIEWS SECTION
+=============================== */}
+      <section className="pd-reviews-section">
+        <h2 className="pd-reviews-title">
+          Customer Reviews {ratingCount > 0 && <span>({ratingCount})</span>}
+        </h2>
+
+        {reviews.length === 0 ? (
+          <p className="pd-no-reviews">No reviews yet.</p>
+        ) : (
+          <div className="pd-reviews-list">
+            {reviews.map((r) => (
+              <div key={r.id} className="pd-review-card">
+                <div className="pd-review-header">
+                  <span className="pd-review-user">{r.user}</span>
+                  <div className="pd-stars">{renderStars(r.stars)}</div>
+                </div>
+
+                {r.comment && (
+                  <p className="pd-review-comment">{r.comment}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
     </>
   );
 };
