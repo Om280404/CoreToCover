@@ -1,375 +1,495 @@
 /* =========================================
-   GLOBAL THEME COLORS & FONTS — CASA
+   CASA PRODUCT INFO — AMAZON-STYLE UI
+   Theme: Warm, Premium, Interior Focused
 ========================================= */
+
 :root {
-  --green-dark: #606E52;
-  --green-mid: #91A56E;
-  --green-light: #C0CCA4;
-  --white: #FFFFFF;
-  --text-dark: #474747;
-  --text-muted: #8F8B84;
+  --casa-green-dark: #5b6a4f;
+  --casa-green-mid: #8fa070;
+  --casa-green-light: #e6edd8;
+
+  --casa-bg: #f7f8f5;
+  --casa-surface: #ffffff;
+
+  --casa-text-dark: #2b2b2b;
+  --casa-text-muted: #7b7b74;
+
+  --casa-border: #e3e6e3;
+  --casa-accent: #cfa44a;
 
   --radius: 14px;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --transition: all 0.25s ease;
+  --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.1);
 
-  --font-ui: "Helvetica", Arial, sans-serif;
-  --font-heading: "Playfair Display", serif;
+  --transition: all 260ms cubic-bezier(.16, .9, .32, 1);
 }
 
 /* =========================================
-   PAGE LAYOUT
+   PAGE CONTAINER
 ========================================= */
 .pd-container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 32px 20px;
   display: grid;
-  grid-template-columns: 1.1fr 1.6fr 0.9fr;
-  gap: 36px;
-  padding: 110px 6vw 60px;
-  background:
-    radial-gradient(1200px 420px at top center,
-      rgba(192,204,164,0.35),
-      transparent 60%),
-    linear-gradient(180deg, #f4f7ef, var(--green-light));
-  color: var(--text-dark);
-  font-family: var(--font-ui);
+  grid-template-columns: 420px 1fr 320px;
+  gap: 32px;
+  background: var(--casa-bg);
 }
 
 /* =========================================
-   LEFT IMAGE SECTION
+   LEFT – MEDIA
 ========================================= */
 .pd-left {
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  padding-top: 24px;
+  gap: 16px;
 }
 
 .pd-thumbnails {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pd-thumb {
-  width: 70px;
-  height: 70px;
-  border-radius: 10px;
-  overflow: hidden;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid transparent;
   cursor: pointer;
+  background: #fff;
+  transition: var(--transition);
 }
 
-
-.pd-thumb:hover {
-  transform: scale(1.06);
-}
-
+.pd-thumb:hover,
 .pd-thumb.active {
-  border-color: var(--green-mid);
-  box-shadow: 0 0 8px rgba(96,110,82,0.35);
+  border-color: var(--casa-green-mid);
 }
 
-/* Main Image */
-.pd-image-box {
-  width: 460px;
-  max-width: 100%;
-  height: auto;        
-  padding: 20px;             
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid #dbe6c6;
-  box-shadow: var(--shadow);
+.video-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--casa-green-light);
+  color: var(--casa-green-dark);
+  font-size: 22px;
+}
 
+/* MAIN IMAGE */
+
+
+
+.pd-image-box {
+  flex: 1;
+  background: var(--casa-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 
 .pd-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover; 
-  background: #fff;
-}
-
-video {
-  width: 100%;
-  height: 100%;
   max-width: 100%;
-  max-height: 100%;
-  object-fit: cover; /* or cover if you prefer */
-  border-radius: inherit;
-  display: block;
-}
-
-video::-webkit-media-controls-overflow-button {
-  display: none;
-}
-
-.pd-image:hover {
-  transform: scale(1.05);
+  height: auto;        
+  object-fit: contain;
 }
 
 /* =========================================
-   CENTER DETAILS
+   FULLSCREEN BUTTON – CASA STYLE
 ========================================= */
-.pd-center {
-  background: var(--white);
-  padding: 32px;
-  border-radius: var(--radius);
-  border: 1px solid #dbe6c6;
-  box-shadow: var(--shadow);
+
+.pd-fullscreen-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: rgba(43, 43, 43, 0.6);
+  backdrop-filter: blur(8px);
+
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 200ms ease;
 }
 
-.pd-title {
-  font-size: 2.1rem;
-  font-family: var(--font-heading);
-  font-weight: 500;
-  color: var(--green-dark);
-  margin-bottom: 12px;
+.pd-fullscreen-btn:hover {
+  background: var(--casa-green-mid);
+  color: #1f2a18;
+  transform: scale(1.08);
 }
 
-/* =========================
-   DESCRIPTION CONTROL 
-========================= */
-
-.pd-description {
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.7;
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  white-space: normal;
-
-  transition: max-height 0.35s ease;
+/* ensure positioning works */
+.pd-image-box {
+  position: relative;
 }
 
-/* Collapsed preview (4 lines) */
-.pd-description.collapsed {
-  max-height: 6.8em;
+/* =========================================
+   FULLSCREEN VIDEO – CASA / AMAZON STYLE
+========================================= */
+
+/* When image-box is fullscreen */
+.pd-image-box:fullscreen {
+  background: #000;               /* true cinema background */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Video wrapper in fullscreen */
+.pd-image-box:fullscreen .pd-video-wrapper {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  background: #000;
+}
+
+/* Video itself */
+.pd-image-box:fullscreen .pd-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;             /* FULLY visible */
+  border-radius: 0;
+}
+
+/* Controls repositioned for fullscreen */
+.pd-image-box:fullscreen .pd-video-controls {
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+
+  padding: 14px 18px;
+  border-radius: 14px;
+
+  background: rgba(20, 20, 20, 0.75);
+  backdrop-filter: blur(14px);
+}
+
+/* Bigger buttons in fullscreen */
+.pd-image-box:fullscreen .pd-video-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+/* Seek bar larger for touch */
+.pd-image-box:fullscreen .pd-video-seek {
+  height: 6px;
+}
+
+/* Fullscreen button tweaks */
+.pd-image-box:fullscreen .pd-fullscreen-btn {
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Hide page scrollbars when fullscreen */
+:fullscreen {
   overflow: hidden;
 }
 
-/* Expanded = FULL CONTENT (no limit) */
-.pd-description.expanded {
-  max-height: none;     /* ✅ KEY FIX */
-  overflow: visible;    /* ✅ KEY FIX */
-}
-
-/* Mobile tuning */
+/* MOBILE FULLSCREEN POLISH */
 @media (max-width: 768px) {
-  .pd-description {
-    font-size: 0.95rem;
+  .pd-image-box:fullscreen .pd-video-controls {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .pd-image-box:fullscreen .pd-video-btn {
+    width: 40px;
+    height: 40px;
   }
 }
 
 
-/* Ratings */
+/* VIDEO */
+/* =========================================
+   CASA VIDEO CONTROLS – PREMIUM
+========================================= */
+
+.pd-video-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+/* VIDEO */
+.pd-video {
+  width: 100%;
+  display: block;
+}
+
+/* CONTROLS BAR */
+.pd-video-controls {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: rgba(43, 43, 43, 0.65);
+  backdrop-filter: blur(10px);
+
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 260ms cubic-bezier(.16, .9, .32, 1);
+}
+
+/* SHOW CONTROLS ON HOVER / TAP */
+.pd-video-wrapper:hover .pd-video-controls,
+.pd-video-wrapper:active .pd-video-controls {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* PLAY / PAUSE / MUTE BUTTONS */
+.pd-video-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+  cursor: pointer;
+
+  font-size: 15px;
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 200ms ease;
+}
+
+.pd-video-btn:hover {
+  background: var(--casa-green-mid);
+  color: #1f2a18;
+  transform: scale(1.08);
+}
+
+/* SEEK BAR */
+.pd-video-seek {
+  flex: 1;
+  height: 4px;
+  cursor: pointer;
+  appearance: none;
+  background: linear-gradient(to right,
+      var(--casa-green-mid) 0%,
+      var(--casa-green-mid) var(--seek-progress, 0%),
+      rgba(255, 255, 255, 0.3) var(--seek-progress, 0%));
+  border-radius: 6px;
+  outline: none;
+}
+
+/* SEEK THUMB */
+.pd-video-seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--casa-green-light);
+  box-shadow: 0 0 0 4px rgba(143, 160, 112, 0.35);
+  transition: transform 160ms ease;
+}
+
+.pd-video-seek::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.pd-video-seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--casa-green-light);
+  border: none;
+}
+
+/* MOBILE – ALWAYS VISIBLE CONTROLS */
+@media (max-width: 768px) {
+  .pd-video-controls {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================
+   CENTER – DETAILS
+========================================= */
+.pd-center {
+  background: var(--casa-surface);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pd-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--casa-text-dark);
+  margin-bottom: 12px;
+}
+
 .pd-rating-line {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
-}
-
-.pd-stars {
-  color: #facc15;
-  font-size: 1.05rem;
-}
-
-.pd-rating-count {
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-/* Divider */
-.pd-divider {
-  border: none;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    #dbe6c6,
-    transparent
-  );
-  margin: 18px 0;
-}
-
-/* Meta */
-.pd-key-details {
-  line-height: 2;
-  font-size: 1rem;
-}
-
-.pd-key-details strong {
-  color: var(--green-dark);
-}
-
-/* =========================================
-   PRICE
-========================================= */
-.pd-price-block {
-  margin: 20px 0 24px;
-}
-
-.pd-final-price {
-  font-size: 2.2rem;
-  font-family: var(--font-heading);
-  color: var(--green-dark);
-}
-
-.pd-tax-info {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-/* =========================================
-   QUANTITY
-========================================= */
-.pd-trips {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: var(--radius);
-  background: var(--white);
-  border: 1px solid #dbe6c6;
-  box-shadow: var(--shadow);
-}
-
-.pd-trips-label {
-  font-weight: 600;
-  color: var(--green-dark);
-}
-
-.pd-trips button {
-  background: var(--green-dark);
-  color: var(--white);
-  border: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.pd-trips button:hover {
-  background: var(--green-mid);
-}
-
-/* =========================================
-   RIGHT BUY BOX
-========================================= */
-.pd-right {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.pd-buybox {
-  background: var(--white);
-  padding: 26px 22px;
-  border-radius: var(--radius);
-  border: 1px solid #dbe6c6;
-  box-shadow: var(--shadow);
-  width: 100%;
-  max-width: 340px;
-  text-align: center;
-  position: sticky;
-  top: 110px;
-}
-
-.pd-buybox-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--green-dark);
-}
-
-.pd-price {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--green-dark);
-  margin-top: 6px;
-}
-
-.pd-tax {
-  color: var(--text-muted);
   margin-bottom: 16px;
 }
 
-/* Buttons */
-.pd-btn {
-  width: 100%;
-  padding: 13px;
-  margin-top: 10px;
+.pd-stars svg {
+  color: var(--casa-accent);
+  margin-right: 2px;
+}
+
+.pd-rating-count {
+  font-size: 14px;
+  color: var(--casa-text-muted);
+}
+
+.pd-description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--casa-text-dark);
+  margin-bottom: 18px;
+}
+
+.pd-divider {
+  border: none;
+  border-top: 1px solid var(--casa-border);
+  margin: 18px 0;
+}
+
+.pd-key-details p {
+  font-size: 14px;
+  color: var(--casa-text-muted);
+  margin-bottom: 8px;
+}
+
+.pd-key-details strong {
+  color: var(--casa-text-dark);
+}
+
+/* =========================================
+   RIGHT – BUY BOX (AMAZON STYLE)
+========================================= */
+.pd-right {
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+}
+
+.pd-buybox {
+  background: var(--casa-surface);
   border-radius: var(--radius);
-  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pd-buybox-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.pd-price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--casa-green-dark);
+}
+
+.pd-btn {
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   transition: var(--transition);
 }
 
 .pd-btn-buy {
-  background: var(--green-dark);
-  color: var(--white);
+  background: var(--casa-green-dark);
+  color: #fff;
 }
 
 .pd-btn-buy:hover {
-  background: var(--green-mid);
+  background: #47543d;
 }
 
 .pd-btn-cart {
-  background: var(--green-mid);
-  color: var(--white);
+  background: var(--casa-green-light);
+  color: var(--casa-green-dark);
 }
 
 .pd-btn-cart:hover {
-  background: var(--green-dark);
+  background: #dbe3c9;
 }
 
+.pd-btn-share,
 .pd-btn-back {
-  background: var(--white);
-  border: 1px solid #dbe6c6;
+  background: #f1f3ef;
+  color: var(--casa-text-dark);
 }
 
+.pd-btn-share:hover,
 .pd-btn-back:hover {
-  background: var(--green-light);
+  background: #e4e7e2;
 }
 
 /* =========================================
-   REVIEWS – FULL WIDTH PREMIUM
+   REVIEWS
 ========================================= */
 .pd-reviews-section {
   max-width: 1400px;
-  margin: 80px auto;
-  padding: 0 6vw;
+  margin: 40px auto;
+  padding: 0 20px;
 }
 
 .pd-reviews-title {
-  font-size: 26px;
-  font-family: var(--font-heading);
-  color: var(--green-dark);
-  margin-bottom: 28px;
+  font-size: 22px;
+  margin-bottom: 20px;
 }
 
 .pd-reviews-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 26px;
+  gap: 16px;
 }
 
 .pd-review-card {
-  background: var(--white);
-  padding: 22px;
-  border-radius: var(--radius);
-  border: 1px solid #dbe6c6;
-  box-shadow: var(--shadow);
+  background: var(--casa-surface);
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .pd-review-header {
@@ -380,374 +500,67 @@ video::-webkit-media-controls-overflow-button {
 
 .pd-review-user {
   font-weight: 600;
-  color: var(--green-dark);
 }
 
 .pd-review-comment {
-  font-size: 0.95rem;
-  color: var(--text-dark);
-  line-height: 1.65;
+  font-size: 14px;
+  color: var(--casa-text-muted);
 }
 
 /* =========================================
    RESPONSIVE
 ========================================= */
-@media (max-width: 1100px) {
-  .pd-container {
-    grid-template-columns: 1fr;
-    padding: 90px 6vw;
-  }
-
+@media (min-width: 1400px) {
   .pd-image-box {
-    max-width: 420px;
-    margin: auto;
-  }
-
-  .pd-buybox {
-    position: static;
-    max-width: 100%;
-    margin-top: 30px;
+    height: min(580px, 72vh);
   }
 }
 
-@media (max-width: 750px) {
-  .pd-thumbnails {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  .pd-left {
-    flex-direction: column-reverse;
-    align-items: center;
-  }
-
-  .pd-image-box {
-    max-width: 360px;
-  }
-
-  .pd-reviews-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================================
-   MOBILE RESPONSIVENESS – CASA
-========================================= */
-@media (max-width: 768px) {
-
-  /* Page container */
+@media (max-width: 1200px) {
   .pd-container {
     grid-template-columns: 1fr;
-    gap: 26px;
-    padding: 78px 4vw 40px;
   }
 
-  /* LEFT IMAGE AREA */
+  /* ORDER CONTROL */
   .pd-left {
-    flex-direction: column-reverse;
-    align-items: center;
-    padding-top: 0;
+    order: 1;
   }
 
-  .pd-thumbnails {
-    flex-direction: row;
-    gap: 10px;
-    overflow-x: auto;
-    width: 100%;
-    padding: 10px 2px;
-    justify-content: flex-start;
-  }
-
-  .pd-thumb {
-    width: 56px;
-    height: 56px;
-    flex-shrink: 0;
-  }
-
-  .pd-image-box {
-    width: 100%;
-    max-width: 340px;
-    margin: auto;
-  }
-
-  /* CENTER DETAILS */
   .pd-center {
-    padding: 22px;
+    order: 2;
   }
 
-  .pd-title {
-    font-size: 1.55rem;
-    text-align: center;
-  }
-
-  .pd-rating-line {
-    justify-content: center;
-  }
-
-  .pd-description {
-    font-size: 0.95rem;
-  }
-
-  .pd-key-details {
-    font-size: 0.95rem;
-  }
-
-  /* QUANTITY */
-  .pd-trips {
-    justify-content: center;
-    padding: 12px;
-  }
-
-  /* BUY BOX */
   .pd-right {
+    order: 3;
+    position: static;
+  }
+
+  .pd-image {
+    max-height: 520px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .pd-container {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-left {
+    flex-direction: column;
+  }
+
+  .pd-thumbnails {
+    flex-direction: row;
     justify-content: center;
   }
 
-  .pd-buybox {
-    position: static;
-    max-width: 100%;
-    padding: 22px;
+  .pd-right {
+    margin-top: 20px;
   }
 
-  .pd-btn {
-    font-size: 0.95rem;
+  .pd-image-box {
+    height: 360px;    
     padding: 12px;
   }
-
-  /* REVIEWS */
-  .pd-reviews-section {
-    margin: 50px auto;
-    padding: 0 4vw;
-  }
-
-  .pd-reviews-title {
-    font-size: 1.3rem;
-    text-align: center;
-  }
-
-  .pd-reviews-list {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .pd-review-card {
-    padding: 18px;
-  }
-  .pd-image {
-    max-height: 320px;
-  }
-}
-
-/* =========================================
-   EXTRA SMALL DEVICES (≤ 420px)
-========================================= */
-@media (max-width: 420px) {
-
-  .pd-title {
-    font-size: 1.35rem;
-  }
-
-  .pd-final-price {
-    font-size: 1.4rem;
-  }
-
-  .pd-thumb {
-    width: 52px;
-    height: 52px;
-  }
-
-  .pd-btn {
-    font-size: 0.9rem;
-  }
-
-  .pd-review-comment {
-    font-size: 0.9rem;
-  }
-}
-
-/* =========================
-   DESCRIPTION – HARD FIX
-========================= */
-
-.pd-description {
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.7;
-
-  /* 🔥 CRITICAL FOR LONG STRINGS */
-  word-break: break-all;
-  overflow-wrap: anywhere;
-  white-space: normal;
-
-  transition: max-height 0.3s ease;
-}
-
-/* Collapsed preview */
-.pd-description.collapsed {
-  max-height: 6.8em; /* ~4 lines */
-  overflow: hidden;
-}
-
-/* FULL EXPANDED */
-.pd-description.expanded {
-  max-height: none;     /* 🔥 NO LIMIT */
-  overflow: visible;    /* 🔥 SHOW EVERYTHING */
-}
-
-/* See more button */
-.pd-see-more {
-  display: inline-block;
-  margin-top: 6px;
-  font-weight: 600;
-  color: var(--green-dark);
-  cursor: pointer;
-}
-
-.pd-see-more:hover {
-  color: var(--green-mid);
-  text-decoration: underline;
-}
-
-/* =========================
-   DESCRIPTION – FINAL FIX
-========================= */
-
-.pd-center {
-  overflow: visible; /* 🔥 REQUIRED */
-}
-
-.pd-description {
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.7;
-
-  word-break: break-all;
-  overflow-wrap: anywhere;
-  white-space: normal;
-
-  transition: max-height 0.3s ease;
-}
-
-/* Preview */
-.pd-description.collapsed {
-  max-height: 6.8em;
-  overflow: hidden;
-}
-
-/* FULL CONTENT */
-.pd-description.expanded {
-  max-height: none;
-  overflow: visible;
-}
-
-/* See more */
-.pd-see-more {
-  display: inline-block;
-  margin-top: 8px;
-  font-weight: 600;
-  color: var(--green-dark);
-  cursor: pointer;
-}
-
-.pd-see-more:hover {
-  color: var(--green-mid);
-  text-decoration: underline;
-}
-
-/* Video thumbnail box */
-.video-thumb {
-  width: 70px;
-  height: 70px;
-  background: #111;
-  color: #fff;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 26px;
-  cursor: pointer;
-  border-radius: 8px;
-
-  position: relative; /* 🔥 REQUIRED */
-}
-
-
-/* Active thumbnail */
-.pd-thumb.active,
-.video-thumb.active {
-  outline: 2px solid #10b981;
-}
-
-.video-thumb::after {
-  content: "Video";
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  opacity: 0.8;
-  pointer-events: none;
-}
-
-/* ===============================
-   CASA CUSTOM VIDEO CONTROLS
-=============================== */
-
-.pd-video-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.pd-video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #000;
-  border-radius: inherit;
-}
-
-/* Controls bar */
-.pd-video-controls {
-  position: absolute;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px);
-  border-radius: 14px;
-}
-
-/* Buttons */
-.pd-video-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* Seek bar */
-.pd-video-seek {
-  flex: 1;
-  appearance: none;
-  height: 4px;
-  background: #c0cca4;
-  border-radius: 10px;
-}
-
-.pd-video-seek::-webkit-slider-thumb {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  background: #606e52;
-  border-radius: 50%;
-  cursor: pointer;
 }

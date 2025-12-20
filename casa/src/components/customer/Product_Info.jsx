@@ -116,6 +116,35 @@ const ProductInfo = () => {
   }, [mediaList]);
 
   /* ===============================
+   FULLSCREEN
+=============================== */
+  const fullscreenRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+
+  const toggleFullscreen = () => {
+    const el = fullscreenRef.current;
+    if (!el) return;
+
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
+
+  /* ===============================
      VIDEO CONTROLS
   =============================== */
   const videoRef = useRef(null);
@@ -301,12 +330,31 @@ const ProductInfo = () => {
             )}
           </div>
 
-          <div className="pd-image-box">
+          <div className="pd-image-box" ref={fullscreenRef}>
+            {/* FULLSCREEN BUTTON */}
+            <button
+              className="pd-fullscreen-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+              }}
+              title={isFullscreen ? "Exit full screen" : "View full screen"}
+            >
+              {isFullscreen ? "✕" : "⛶"}
+            </button>
+
             {activeMedia?.type === "video" ? (
               <div className="pd-video-wrapper" onClick={togglePlay}>
-                <video ref={videoRef} src={activeMedia.src} className="pd-video" />
+                <video
+                  ref={videoRef}
+                  src={activeMedia.src}
+                  className="pd-video"
+                />
 
-                <div className="pd-video-controls" onClick={e => e.stopPropagation()}>
+                <div
+                  className="pd-video-controls"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button onClick={togglePlay} className="pd-video-btn">
                     {isPlaying ? "❚❚" : "▶"}
                   </button>
@@ -326,7 +374,11 @@ const ProductInfo = () => {
                 </div>
               </div>
             ) : (
-              <img src={activeMedia?.src || sample} className="pd-image" alt="" />
+              <img
+                src={activeMedia?.src || sample}
+                className="pd-image"
+                alt=""
+              />
             )}
           </div>
         </div>
@@ -379,8 +431,8 @@ const ProductInfo = () => {
       </div>
 
       {/* ===============================
-    REVIEWS SECTION
-=============================== */}
+              REVIEWS SECTION
+          =============================== */}
       <section className="pd-reviews-section">
         <h2 className="pd-reviews-title">
           Customer Reviews {ratingCount > 0 && <span>({ratingCount})</span>}
