@@ -101,7 +101,7 @@ const ProductCard = ({
         <button
           className="product-btn"
           onClick={() =>
-            navigate("/productinfo", {
+            navigate(`/productinfo?id=${id}`, {
               state: {
                 product: {
                   id,
@@ -121,6 +121,7 @@ const ProductCard = ({
         >
           View Details
         </button>
+
       </div>
     </article>
   );

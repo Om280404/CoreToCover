@@ -1,4 +1,9 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef
+} from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { PiVideoFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -21,11 +26,8 @@ const formatAvailability = (value) => {
   }
 };
 
-const pickCartImage = (images) => {
-  if (!Array.isArray(images) || images.length === 0) return null;
-  return images[0]; // OR random version
-};
-
+const pickCartImage = (images) =>
+  Array.isArray(images) && images.length ? images[0] : null;
 
 const renderStars = (rating = 0) => {
   const stars = [];
@@ -44,165 +46,199 @@ const renderStars = (rating = 0) => {
 const ProductInfo = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const product = location.state?.product || {};
+  const query = new URLSearchParams(location.search);
+  const productId = query.get("id");
 
+  /* ===============================
+     STATE
+  =============================== */
+  const [product, setProduct] = useState(location.state?.product || null);
+  const [loading, setLoading] = useState(!location.state?.product);
+
+  /* ===============================
+     FETCH PRODUCT
+  =============================== */
+  useEffect(() => {
+    if (location.state?.product) {
+      setLoading(false);
+      return;
+    }
+
+    if (!productId) {
+      setLoading(false);
+      setProduct(null);
+      return;
+    }
+
+    setLoading(true);
+    api.get(`/product/${productId}`)
+      .then(res => setProduct(res.data || null))
+      .catch(() => setProduct(null))
+      .finally(() => setLoading(false));
+  }, [productId, location.state]);
+
+  /* ===============================
+     SAFE DEFAULTS
+  =============================== */
   const {
     id,
     sellerId,
-    title = "Product Detail",
-    seller = "Reliable Seller",
-    origin = "India",
+    title = "",
+    seller = "",
+    origin = "",
     price = 0,
     images = [],
     video = null,
-    description = "No description available.",
-    availability = "available",
-  } = product;
+    description = "",
+    availability = "available"
+  } = product || {};
 
-  /* =========================
-     SEE MORE STATE
-  ========================= */
-  const [showFullDesc, setShowFullDesc] = useState(false);
-
-  /* =========================
-     MEDIA NORMALIZATION
-  ========================= */
+  /* ===============================
+     MEDIA
+  =============================== */
   const mediaList = useMemo(() => {
     const list = [];
-
-    const imageArray = images.length ? images : [sample];
-    imageArray.forEach((img) =>
-      list.push({ type: "image", src: img })
-    );
-
+    images.forEach(img => list.push({ type: "image", src: img }));
     if (video) {
-      const videoUrl = video.startsWith("http")
-        ? video
-        : `http://localhost:3001/${video}`;
-      list.push({ type: "video", src: videoUrl });
+      list.push({
+        type: "video",
+        src: video.startsWith("http")
+          ? video
+          : `http://localhost:3001/${video}`
+      });
     }
-
     return list;
   }, [images, video]);
 
   const [activeMedia, setActiveMedia] = useState(null);
-
   useEffect(() => {
     if (mediaList.length) setActiveMedia(mediaList[0]);
   }, [mediaList]);
 
-  /* =========================
+  /* ===============================
+     VIDEO CONTROLS
+  =============================== */
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    const onTime = () => {
+      setProgress((v.currentTime / v.duration) * 100 || 0);
+    };
+
+    v.addEventListener("timeupdate", onTime);
+    return () => v.removeEventListener("timeupdate", onTime);
+  }, [activeMedia]);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    if (v.paused) {
+      v.play();
+      setIsPlaying(true);
+    } else {
+      v.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setIsMuted(v.muted);
+  };
+
+  const handleSeek = (e) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = (e.target.value / 100) * v.duration;
+  };
+
+  /* ===============================
      RATINGS
-  ========================= */
+  =============================== */
   const [avgRating, setAvgRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
-  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     if (!id) return;
-
     api.get(`/product/${id}/ratings`)
-      .then((res) => {
+      .then(res => {
         setAvgRating(res.data.avgRating || 0);
         setRatingCount(res.data.count || 0);
-        setReviews(res.data.reviews || []);
       })
-      .catch(() => {
-        setAvgRating(0);
-        setRatingCount(0);
-        setReviews([]);
-      });
+      .catch(() => {});
   }, [id]);
 
-  const quantity = 1;
-  const totalPrice = price * quantity;
-
-  const isUnavailable =
-    availability === "out_of_stock" ||
-    availability === "discontinued";
-
-  /* =========================
-     CART ACTIONS
-  ========================= */
+  /* ===============================
+     CART LOGIC (ORIGINAL)
+  =============================== */
   const handleAddToCart = () => {
-    if (isUnavailable) return alert("Unavailable");
-
     addToCart({
       materialId: id,
       supplierId: sellerId,
       name: title,
       supplier: seller,
       amountPerTrip: price,
-      trips: quantity,
-
-      // ✅ ANY ONE image from seller uploads
+      trips: 1,
       image: pickCartImage(images),
     });
-
     alert("Added to cart");
   };
 
-
-  const handleBuyNow = () => {
-    if (isUnavailable) return alert("Unavailable");
-
-    localStorage.setItem(
-      "singleCheckoutItem",
-      JSON.stringify({
-        materialId: id,
-        supplierId: sellerId,
-        name: title,
-        supplier: seller,
-        amountPerTrip: price,
-        trips: quantity,
-        image: activeMedia?.src,
-      })
-    );
-
-    navigate("/checkout");
-  };
-
+  /* ===============================
+     SHARE
+  =============================== */
   const handleShare = async () => {
     const shareUrl = window.location.href;
-
-    const shareData = {
-      title: title,
-      text: `Check out this product on Casa`,
-      url: shareUrl,
-    };
-
-    // Web Share API (mobile + supported browsers)
     if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error("Share cancelled", err);
-      }
+      await navigator.share({
+        title,
+        text: "Check out this product on Casa",
+        url: shareUrl,
+      });
     } else {
-      // Fallback: copy link
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("Product link copied to clipboard!");
-      } catch (err) {
-        alert("Unable to copy link");
-      }
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Product link copied!");
     }
   };
 
-
-  if (!id || !sellerId) {
+  if (loading) {
     return (
       <>
         <Navbar />
         <div className="pd-container">
           <h1 className="pd-title" style={{ padding: 80 }}>
-            Product details missing
+            Loading product…
           </h1>
         </div>
       </>
     );
   }
 
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <div className="pd-container">
+          <h1 className="pd-title" style={{ padding: 80 }}>
+            Product not found
+          </h1>
+        </div>
+      </>
+    );
+  }
+
+  /* ===============================
+     UI
+  =============================== */
   return (
     <>
       <Navbar />
@@ -234,20 +270,30 @@ const ProductInfo = () => {
 
           <div className="pd-image-box">
             {activeMedia?.type === "video" ? (
-              <video
-                src={activeMedia.src}
-                controls
-                controlsList="nodownload noplaybackrate noremoteplayback"
-                autoPlay
-                style={{ width: "100%", height: "100%", background: "#000" }}
-              />
+              <div className="pd-video-wrapper" onClick={togglePlay}>
+                <video ref={videoRef} src={activeMedia.src} className="pd-video" />
+
+                <div className="pd-video-controls" onClick={e => e.stopPropagation()}>
+                  <button onClick={togglePlay} className="pd-video-btn">
+                    {isPlaying ? "❚❚" : "▶"}
+                  </button>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={progress}
+                    onChange={handleSeek}
+                    className="pd-video-seek"
+                  />
+
+                  <button onClick={toggleMute} className="pd-video-btn">
+                    {isMuted ? "🔇" : "🔊"}
+                  </button>
+                </div>
+              </div>
             ) : (
-              <img
-                src={activeMedia?.src}
-                alt=""
-                className="pd-image"
-                onError={(e) => (e.target.src = sample)}
-              />
+              <img src={activeMedia?.src || sample} className="pd-image" alt="" />
             )}
           </div>
         </div>
@@ -263,24 +309,7 @@ const ProductInfo = () => {
             </span>
           </div>
 
-          {/* ✅ DESCRIPTION WITH SEE MORE */}
-          {/* DESCRIPTION */}
-          <div
-            className={`pd-description ${showFullDesc ? "expanded" : "collapsed"
-              }`}
-          >
-            {description}
-          </div>
-
-          {description.length > 150 && (
-            <span
-              className="pd-see-more"
-              onClick={() => setShowFullDesc((prev) => !prev)}
-            >
-              {showFullDesc ? "See less" : "See more"}
-            </span>
-          )}
-
+          <div className="pd-description collapsed">{description}</div>
 
           <hr className="pd-divider" />
 
@@ -295,13 +324,13 @@ const ProductInfo = () => {
         <div className="pd-right">
           <div className="pd-buybox">
             <p className="pd-buybox-title">{title}</p>
-            <p className="pd-price">₹{totalPrice.toLocaleString()}</p>
+            <p className="pd-price">₹{price.toLocaleString()}</p>
 
-            <button className="pd-btn pd-btn-buy" onClick={handleBuyNow} disabled={isUnavailable}>
+            <button className="pd-btn pd-btn-buy" onClick={handleAddToCart}>
               🛒 Buy Now
             </button>
 
-            <button className="pd-btn pd-btn-cart" onClick={handleAddToCart} disabled={isUnavailable}>
+            <button className="pd-btn pd-btn-cart" onClick={handleAddToCart}>
               ➕ Add to Cart
             </button>
 
@@ -312,31 +341,9 @@ const ProductInfo = () => {
             <button className="pd-btn pd-btn-share" onClick={handleShare}>
               🔗 Share
             </button>
-
           </div>
         </div>
       </div>
-
-      {/* REVIEWS */}
-      <section className="pd-reviews-section">
-        <h2 className="pd-reviews-title">
-          Customer Reviews {ratingCount > 0 && <span>({ratingCount})</span>}
-        </h2>
-
-        {reviews.length === 0 ? (
-          <p className="pd-no-reviews">No reviews yet.</p>
-        ) : (
-          <div className="pd-reviews-list">
-            {reviews.map((r) => (
-              <div key={r.id} className="pd-review-card">
-                <strong>{r.user}</strong>
-                <div className="pd-stars">{renderStars(r.stars)}</div>
-                {r.comment && <p>{r.comment}</p>}
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
     </>
   );
 };

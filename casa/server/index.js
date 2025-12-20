@@ -964,6 +964,57 @@ app.put(
   }
 );
 
+app.get("/product/:id", async (req, res) => {
+  try {
+    const id = req.params.id; // ✅ KEEP AS STRING
+
+    const product = await prisma.product.findUnique({
+      where: { id }, // matches schema type
+      include: {
+        seller: {
+          select: {
+            name: true,
+            business: {
+              select: { city: true, state: true },
+            },
+          },
+        },
+        ratings: {
+          select: { stars: true, comment: true },
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json(null);
+    }
+
+    const total = product.ratings.reduce((s, r) => s + r.stars, 0);
+    const count = product.ratings.length;
+
+    res.json({
+      id: product.id,
+      sellerId: product.sellerId,
+      title: product.name,
+      seller: product.seller.name,
+      origin: product.seller.business
+        ? `${product.seller.business.city}, ${product.seller.business.state}`
+        : "Not specified",
+      price: product.price,
+      images: product.images.map(img => `http://localhost:3001/${img}`),
+      video: product.video
+        ? `http://localhost:3001/${product.video}`
+        : null,
+      description: product.description,
+      availability: product.availability,
+      avgRating: count ? total / count : 0,
+      ratingCount: count,
+    });
+  } catch (err) {
+    console.error("GET PRODUCT ERROR:", err);
+    res.status(500).json(null);
+  }
+});
 
 
 
