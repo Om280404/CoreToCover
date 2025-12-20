@@ -6,7 +6,6 @@ import Footer from "./Footer";
 import "./SearchResults.css";
 import api from "../../api/axios";
 
-
 const SearchResults = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -28,7 +27,7 @@ const SearchResults = () => {
     setLoading(true);
 
     api
-      .get(`/products/search`, {
+      .get("/products/search", {
         params: { q: searchQuery },
       })
       .then((res) => {
@@ -77,16 +76,11 @@ const SearchResults = () => {
                 category={product.category}
                 price={product.price}
                 description={product.description}
-                images={
-                  product.images?.map(
-                    (img) => `http://localhost:3001/${img}`
-                  ) || []
-                }
-                image={
-                  product.images?.length
-                    ? `http://localhost:3001/${product.images[0]}`
-                    : null
-                }
+
+                /* ✅ USE DIRECTLY */
+                images={product.images || []}
+                image={product.images?.[0] || null}
+
                 seller={product.sellerName}
                 origin={product.location}
                 availability={product.availability}

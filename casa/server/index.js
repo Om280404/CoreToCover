@@ -331,6 +331,7 @@ app.get("/products/search", async (req, res) => {
         price: p.price,
         description: p.description,
 
+        // ✅ FULL IMAGE URLs
         images: p.images.map(
           (img) => `http://localhost:3001/${img}`
         ),
@@ -350,7 +351,6 @@ app.get("/products/search", async (req, res) => {
         avgRating: Number(avgRating.toFixed(1)),
         ratingCount: count,
       };
-
     });
 
     res.json(formatted);
@@ -359,6 +359,7 @@ app.get("/products/search", async (req, res) => {
     res.status(500).json([]);
   }
 });
+
 
 
 /* =========================

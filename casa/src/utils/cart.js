@@ -2,11 +2,6 @@
    CART UTILS — USER SCOPED
 ============================ */
 
-/**
- * Returns the correct cart key based on login state
- * - Logged-in user  → customerCart_email
- * - Guest user      → guestCart
- */
 const getCartKey = () => {
   const email = localStorage.getItem("userEmail");
   return email ? `customerCart_${email}` : "guestCart";
@@ -18,8 +13,6 @@ const getCartKey = () => {
 export const loadCart = () => {
   try {
     const raw = JSON.parse(localStorage.getItem(getCartKey())) || [];
-
-    // Filter invalid items (safety)
     return raw.filter(
       (item) =>
         item &&
@@ -44,15 +37,15 @@ export const saveCart = (cart) => {
    ADD TO CART
 ============================ */
 export const addToCart = (product) => {
-  if (
-    !product ||
-    product.materialId === undefined ||
-    product.supplierId === undefined
-  ) {
+  if (!product || product.materialId === undefined) {
     return loadCart();
   }
 
   const cart = loadCart();
+
+  const image =
+    product.image ||
+    (Array.isArray(product.images) ? product.images[0] : null);
 
   const index = cart.findIndex(
     (item) =>
@@ -61,16 +54,17 @@ export const addToCart = (product) => {
   );
 
   if (index > -1) {
-    const currentQty = Number(cart[index].trips) || 1;
-    const addQty = Number(product.trips) || 1;
-
-    const newQty = currentQty + addQty;
+    const newQty =
+      (Number(cart[index].trips) || 1) +
+      (Number(product.trips) || 1);
 
     cart[index].trips = newQty;
-    cart[index].amount = cart[index].amountPerTrip * newQty;
+    cart[index].amount =
+      cart[index].amountPerTrip * newQty;
   } else {
     cart.push({
       ...product,
+      image,
       trips: Number(product.trips) || 1,
       amount:
         Number(product.amountPerTrip) *
@@ -87,13 +81,11 @@ export const addToCart = (product) => {
 ============================ */
 export const updateCartItemQuantity = (materialId, qty) => {
   const quantity = Number(qty);
-
   if (!materialId || isNaN(quantity) || quantity < 1) {
     return loadCart();
   }
 
   const cart = loadCart();
-
   const index = cart.findIndex(
     (item) => item.materialId === materialId
   );
@@ -121,7 +113,7 @@ export const removeFromCart = (materialId) => {
 };
 
 /* ============================
-   CLEAR CART (OPTIONAL USE)
+   CLEAR CART
 ============================ */
 export const clearCart = () => {
   localStorage.removeItem(getCartKey());

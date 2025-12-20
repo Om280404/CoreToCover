@@ -60,11 +60,16 @@ const Cart = () => {
                 <article key={item.materialId} className="cart-card">
                   {/* IMAGE */}
                   <div className="cart-img-box">
-                    <img
-                      src={item.image || sample}
-                      className="cart-img"
-                      alt={item.name}
-                    />
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        className="cart-img"
+                        alt={item.name}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* DETAILS */}

@@ -21,6 +21,12 @@ const formatAvailability = (value) => {
   }
 };
 
+const pickCartImage = (images) => {
+  if (!Array.isArray(images) || images.length === 0) return null;
+  return images[0]; // OR random version
+};
+
+
 const renderStars = (rating = 0) => {
   const stars = [];
   const full = Math.floor(rating);
@@ -128,11 +134,14 @@ const ProductInfo = () => {
       supplier: seller,
       amountPerTrip: price,
       trips: quantity,
-      image: activeMedia?.src,
+
+      // ✅ ANY ONE image from seller uploads
+      image: pickCartImage(images),
     });
 
     alert("Added to cart");
   };
+
 
   const handleBuyNow = () => {
     if (isUnavailable) return alert("Unavailable");
