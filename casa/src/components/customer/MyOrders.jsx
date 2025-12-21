@@ -157,6 +157,32 @@ export default function MyOrders() {
                   <p><strong>Total:</strong> ₹{order.totalAmount}</p>
                 </div>
 
+                {/* ========== DELIVERY DETAILS ========= */}
+                <div className="order-delivery">
+                  <h4 style={{ margin: "8px 0 4px 0" }}>Delivery details</h4>
+
+                  <p>
+                    <strong>Estimated:</strong>{" "}
+                    {order.deliveryTimeMin || order.deliveryTimeMax
+                      ? `${order.deliveryTimeMin ?? "—"} to ${order.deliveryTimeMax ?? "—"} days`
+                      : "Not specified"}
+                  </p>
+
+                  <p>
+                    <strong>Shipping:</strong>{" "}
+                    {order.shippingChargeType === "free"
+                      ? "Free"
+                      : `₹${order.shippingCharge ?? 0}`}
+                  </p>
+
+                  <p>
+                    <strong>Installation:</strong>{" "}
+                    {order.installationAvailable === "yes"
+                      ? `Available (₹${order.installationCharge ?? 0})`
+                      : "Not available"}
+                  </p>
+                </div>
+
                 {isDelivered &&
                   !order.rated &&
                   !openRating[order.orderItemId] && (

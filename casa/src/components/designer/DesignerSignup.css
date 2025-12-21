@@ -61,6 +61,10 @@
   color: var(--green-dark);
 }
 
+/*Auth Error*/
+.auth-error{
+  color: red;
+}
 /* ===================================================
    FORM — NOW 2 COLUMNS
 =================================================== */
@@ -106,7 +110,7 @@
 .designer-auth-page .toggle-visibility {
   position: absolute;
   right: 12px;
-  top: 50%;
+  top: 38%;
   transform: translateY(-50%);
   background: transparent;
   border: none;

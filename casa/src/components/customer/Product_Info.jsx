@@ -27,7 +27,11 @@ const formatAvailability = (value) => {
 };
 
 const pickCartImage = (images) =>
-  Array.isArray(images) && images.length ? images[0] : null;
+  Array.isArray(images) && images.length
+    ? images[0].startsWith("http")
+      ? images[0]
+      : `http://localhost:3001/${images[0]}`
+    : null;
 
 const renderStars = (rating = 0) => {
   const stars = [];
@@ -55,27 +59,27 @@ const ProductInfo = () => {
   const [product, setProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(!location.state?.product);
 
+  // description toggle state
+  const [descExpanded, setDescExpanded] = useState(false);
+
   /* ===============================
      FETCH PRODUCT
   =============================== */
   useEffect(() => {
-    if (location.state?.product) {
-      setLoading(false);
-      return;
-    }
-
     if (!productId) {
-      setLoading(false);
       setProduct(null);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
+
     api.get(`/product/${productId}`)
       .then(res => setProduct(res.data || null))
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
-  }, [productId, location.state]);
+  }, [productId]);
+
 
   /* ===============================
      SAFE DEFAULTS
@@ -93,12 +97,53 @@ const ProductInfo = () => {
     availability = "available"
   } = product || {};
 
+  /* ✅ SAFE RESOLUTION (ONLY FIX) */
+  const resolvedSeller =
+    typeof seller === "string"
+      ? seller
+      : seller?.name || "Not specified";
+
+  const resolvedOrigin =
+    origin ||
+    (seller?.business
+      ? `${seller.business.city}, ${seller.business.state}`
+      : "Not specified");
+
+
+  /* ===============================
+     DESCRIPTION LOGIC (20 words)
+  =============================== */
+  const descriptionWords = useMemo(() => {
+    if (!description) return [];
+    return description.trim().split(/\s+/).filter(Boolean);
+  }, [description]);
+
+  const isLongDescription = descriptionWords.length > 10;
+
+  const shortDescription = isLongDescription
+    ? descriptionWords.slice(0, 15).join(" ") + "..."
+    : description;
+
+  const displayedDescription = descExpanded ? description : shortDescription;
+
+  const toggleDescription = () => {
+    setDescExpanded((s) => !s);
+  };
+
+
   /* ===============================
      MEDIA
   =============================== */
   const mediaList = useMemo(() => {
     const list = [];
-    images.forEach(img => list.push({ type: "image", src: img }));
+    images.forEach((img) =>
+      list.push({
+        type: "image",
+        src: img.startsWith("http")
+          ? img
+          : `http://localhost:3001/${img}`,
+      })
+    );
     if (video) {
       list.push({
         type: "video",
@@ -196,6 +241,8 @@ const ProductInfo = () => {
   const [avgRating, setAvgRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
 
+
+
   /* ===============================
    REVIEWS
 =============================== */
@@ -219,6 +266,8 @@ const ProductInfo = () => {
   }, [id]);
 
 
+
+
   /*Buy Now */
 
   const handleBuyNow = () => {
@@ -228,15 +277,27 @@ const ProductInfo = () => {
         materialId: id,
         supplierId: sellerId,
         name: title,
-        supplier: seller,
+        supplier: resolvedSeller,
         amountPerTrip: price,
         trips: 1,
         image: pickCartImage(images),
+
+        // ✅ DELIVERY (MISSING BEFORE)
+        shippingChargeType: product.shippingChargeType,
+        shippingCharge: product.shippingCharge,
+        deliveryTimeMin: product.deliveryTimeMin,
+        deliveryTimeMax: product.deliveryTimeMax,
+
+        // ✅ INSTALLATION
+        installationAvailable: product.installationAvailable,
+        installationCharge: Number(product.installationCharge || 0),
       })
     );
 
     navigate("/checkout");
   };
+
+
 
 
   /* ===============================
@@ -247,13 +308,27 @@ const ProductInfo = () => {
       materialId: id,
       supplierId: sellerId,
       name: title,
-      supplier: seller,
+      supplier: resolvedSeller,
       amountPerTrip: price,
       trips: 1,
       image: pickCartImage(images),
+
+      // ✅ DELIVERY (CRITICAL FIX)
+      shippingChargeType: product.shippingChargeType,
+      shippingCharge: product.shippingCharge,
+      deliveryTimeMin: product.deliveryTimeMin,
+      deliveryTimeMax: product.deliveryTimeMax,
+
+      // ✅ INSTALLATION
+      installationAvailable: product.installationAvailable,
+      installationCharge: product.installationCharge,
     });
+
     alert("Added to cart");
   };
+
+
+
 
   /* ===============================
      SHARE
@@ -394,13 +469,32 @@ const ProductInfo = () => {
             </span>
           </div>
 
-          <div className="pd-description collapsed">{description}</div>
+          <div className="pd-description collapsed">
+            {displayedDescription}
+            {isLongDescription && (
+              <button
+                type="button"
+                className="pd-see-more"
+                onClick={toggleDescription}
+                style={{
+                  marginLeft: 8,
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--green-mid)",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                {descExpanded ? "See less" : "See more"}
+              </button>
+            )}
+          </div>
 
           <hr className="pd-divider" />
 
           <div className="pd-key-details">
-            <p><strong>Seller:</strong> {seller}</p>
-            <p><strong>Origin:</strong> {origin}</p>
+            <p><strong>Seller:</strong> {resolvedSeller}</p>
+            <p><strong>Origin:</strong> {resolvedOrigin}</p>
             <p><strong>Status:</strong> {formatAvailability(availability)}</p>
           </div>
         </div>

@@ -84,3 +84,17 @@ export const deleteSellerProduct = (productId) =>
 
 export const getProductRatings = (productId) =>
   api.get(`/product/${productId}/ratings`);
+
+/* =========================
+   SAVE / UPDATE SELLER DELIVERY DETAILS
+========================= */
+export const saveSellerDeliveryDetails = (payload) => {
+  return api.post("/seller/delivery-details", payload);
+};
+
+/* =========================
+   GET SELLER DELIVERY DETAILS (optional, for edit later)
+========================= */
+export const getSellerDeliveryDetails = (sellerId) => {
+  return api.get(`/seller/${sellerId}/delivery-details`);
+};

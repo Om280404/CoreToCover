@@ -33,6 +33,7 @@ const Sidebar = ({ notificationCount = 0 }) => {
     { icon: <FiUser />, label: "Profile", path: "/sellerprofile" },
     { icon: <FiPackage />, label: "Add Product", path: "/selleraddproduct" },
     { icon: <AiOutlineProduct />, label: "My Products", path: "/sellerproducts" },
+    { icon: <FiUser />, label: "Delivery Settings", path: "/sellerdeliveryupdate" },
   ];
 
   return (

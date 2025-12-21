@@ -10,11 +10,16 @@ import api from "../../api/axios";
 =============================== */
 const formatAvailability = (value) => {
   switch (value) {
-    case "available": return "Available";
-    case "out_of_stock": return "Out of Stock";
-    case "low_stock": return "Low Stock";
-    case "discontinued": return "Discontinued";
-    default: return "Available";
+    case "available":
+      return "Available";
+    case "out_of_stock":
+      return "Out of Stock";
+    case "low_stock":
+      return "Low Stock";
+    case "discontinued":
+      return "Discontinued";
+    default:
+      return "Available";
   }
 };
 
@@ -25,7 +30,8 @@ const renderStars = (rating = 0) => {
 
   for (let i = 1; i <= 5; i++) {
     if (i <= full) stars.push(<FaStar key={i} />);
-    else if (i === full + 1 && half) stars.push(<FaStarHalfAlt key={i} />);
+    else if (i === full + 1 && half)
+      stars.push(<FaStarHalfAlt key={i} />);
     else stars.push(<FaRegStar key={i} />);
   }
   return stars;
@@ -52,7 +58,8 @@ const ProductCard = ({
   useEffect(() => {
     if (!id) return;
 
-    api.get(`/product/${id}/ratings`)
+    api
+      .get(`/product/${id}/ratings`)
       .then((res) => {
         setAvgRating(res.data.avgRating || 0);
         setRatingCount(res.data.count || 0);
@@ -63,12 +70,22 @@ const ProductCard = ({
       });
   }, [id]);
 
-  const coverImage = images.length ? images[0] : Sample;
+  /* ✅ IMAGE FIX (does not change existing data) */
+  const coverImage =
+    images.length
+      ? images[0].startsWith("http")
+        ? images[0]
+        : `http://localhost:3001/${images[0]}`
+      : Sample;
 
   return (
     <article className="product-card">
       <div className="product-image-container">
-        <img src={coverImage} alt={title} className="product-image" />
+        <img
+          src={coverImage}
+          alt={title}
+          className="product-image"
+        />
         <span className="product-badge">{category}</span>
       </div>
 
@@ -86,12 +103,20 @@ const ProductCard = ({
         <p className="product-description">{description}</p>
 
         <div className="product-meta-row">
-          <span className="product-meta">Seller: {seller}</span>
-          <span className="product-meta">Location: {origin}</span>
+          <span className="product-meta">
+            Seller: {typeof seller === "string" ? seller : seller?.name || "Not specified"}
+          </span>
+
+          <span className="product-meta">
+            Location: {origin || (seller?.business
+              ? `${seller.business.city}, ${seller.business.state}`
+              : "Not specified")}
+          </span> 
         </div>
 
         <div className="product-meta-row">
-          Status: <strong>{formatAvailability(availability)}</strong>
+          Status:{" "}
+          <strong>{formatAvailability(availability)}</strong>
         </div>
 
         <div className="product-price">
@@ -121,7 +146,6 @@ const ProductCard = ({
         >
           View Details
         </button>
-
       </div>
     </article>
   );

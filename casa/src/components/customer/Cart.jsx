@@ -7,20 +7,32 @@ import {
   loadCart,
   updateCartItemQuantity,
   removeFromCart,
+  clearSingleCheckoutItem,
 } from "../../utils/cart";
 
 const Cart = () => {
   const navigate = useNavigate();
   const [basketItems, setBasketItems] = useState([]);
 
+  /* ===============================
+     LOAD CART
+  =============================== */
+  const refreshCart = () => {
+    const cart = loadCart();
+    setBasketItems(Array.isArray(cart) ? cart : []);
+  };
+
   useEffect(() => {
-    setBasketItems(loadCart());
+    refreshCart();
   }, []);
 
+  /* ===============================
+     QUANTITY HANDLERS
+  =============================== */
   const handleQuantityChange = (id, value) => {
     if (value === "") {
-      setBasketItems(prev =>
-        prev.map(item =>
+      setBasketItems((prev) =>
+        prev.map((item) =>
           item.materialId === id ? { ...item, trips: "" } : item
         )
       );
@@ -30,20 +42,63 @@ const Cart = () => {
     const qty = Number(value);
     if (isNaN(qty) || qty < 1) return;
 
-    setBasketItems(updateCartItemQuantity(id, qty));
+    updateCartItemQuantity(id, qty);
+    refreshCart();
   };
 
   const handleQuantityBlur = (id, value) => {
     const qty = Number(value);
-    setBasketItems(updateCartItemQuantity(id, qty >= 1 ? qty : 1));
+    updateCartItemQuantity(id, qty >= 1 ? qty : 1);
+    refreshCart();
   };
 
+  /* ===============================
+     REMOVE ITEM
+  =============================== */
+  const handleRemove = (id) => {
+    removeFromCart(id);
+    refreshCart();
+  };
+
+  /* ===============================
+     TOTAL
+  =============================== */
   const subtotal = basketItems.reduce(
     (sum, item) =>
-      sum + (Number(item.amountPerTrip) || 0) * (Number(item.trips) || 1),
+      sum +
+      (Number(item.amountPerTrip) || 0) *
+        (Number(item.trips) || 1),
     0
   );
 
+  /* ===============================
+     CHECKOUT NAVIGATION (FIXED)
+     - Save cart under the same key utils/cart.js uses: "casa_cart"
+     - Clear singleCheckoutItem so Checkout reads the full cart
+  =============================== */
+  const handleCheckout = () => {
+    if (!basketItems.length) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    // Save full cart under the same key used by utils/loadCart()
+    // utils/cart.js uses CART_KEY = "casa_cart"
+    try {
+      localStorage.setItem("casa_cart", JSON.stringify(basketItems));
+    } catch (err) {
+      console.error("Failed to save cart to localStorage", err);
+    }
+
+    // Ensure single-checkout is cleared so Checkout loads the full cart.
+    clearSingleCheckoutItem();
+
+    navigate("/checkout");
+  };
+
+  /* ===============================
+     UI
+  =============================== */
   return (
     <>
       <Navbar />
@@ -56,20 +111,21 @@ const Cart = () => {
             {basketItems.length === 0 ? (
               <p className="cart-empty">Your cart is empty.</p>
             ) : (
-              basketItems.map(item => (
-                <article key={item.materialId} className="cart-card">
+              basketItems.map((item) => (
+                <article
+                  key={item.materialId}
+                  className="cart-card"
+                >
                   {/* IMAGE */}
                   <div className="cart-img-box">
-                    {item.image && (
-                      <img
-                        src={item.image}
-                        className="cart-img"
-                        alt={item.name}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    )}
+                    <img
+                      src={item.image || sample}
+                      className="cart-img"
+                      alt={item.name}
+                      onError={(e) => {
+                        e.target.src = sample;
+                      }}
+                    />
                   </div>
 
                   {/* DETAILS */}
@@ -77,7 +133,11 @@ const Cart = () => {
                     <h3>{item.name}</h3>
 
                     <p className="cart-price">
-                      ₹{item.amountPerTrip * (item.trips || 1)}
+                      ₹
+                      {(
+                        Number(item.amountPerTrip) *
+                        (Number(item.trips) || 1)
+                      ).toLocaleString()}
                     </p>
 
                     <div className="cart-actions">
@@ -86,13 +146,13 @@ const Cart = () => {
                         type="number"
                         min="1"
                         value={item.trips}
-                        onChange={e =>
+                        onChange={(e) =>
                           handleQuantityChange(
                             item.materialId,
                             e.target.value
                           )
                         }
-                        onBlur={e =>
+                        onBlur={(e) =>
                           handleQuantityBlur(
                             item.materialId,
                             e.target.value
@@ -103,9 +163,7 @@ const Cart = () => {
                       <button
                         className="cart-remove-btn"
                         onClick={() =>
-                          setBasketItems(
-                            removeFromCart(item.materialId)
-                          )
+                          handleRemove(item.materialId)
                         }
                       >
                         Remove
@@ -117,19 +175,19 @@ const Cart = () => {
             )}
           </div>
 
-          {/* ✅ SUMMARY NOW VISIBLE */}
+          {/* SUMMARY */}
           <aside className="cart-summary">
             <h2>Order Summary</h2>
 
             <div className="summary-row total">
               <span>Total</span>
-              <span>₹{subtotal}</span>
+              <span>₹{subtotal.toLocaleString()}</span>
             </div>
 
             <button
               className="checkout-btn"
               disabled={!basketItems.length}
-              onClick={() => navigate("/checkout")}
+              onClick={handleCheckout}
             >
               Proceed to Checkout
             </button>

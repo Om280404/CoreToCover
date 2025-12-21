@@ -24,17 +24,18 @@ model User {
 /// SELLER (ACCOUNT)
 /// =========================
 model Seller {
-  id         Int                    @id @default(autoincrement())
-  name       String
-  email      String                 @unique
-  phone      String
-  password   String
-  phoneVerified Boolean  @default(false)
-  createdAt  DateTime               @default(now())
-  orderItems OrderItem[]
-  products   Product[]
-  business   SellerBusinessDetails?
-  bank       SellerBankDetails?
+  id            Int                    @id @default(autoincrement())
+  name          String
+  email         String                 @unique
+  phone         String
+  password      String
+  phoneVerified Boolean                @default(false)
+  createdAt     DateTime               @default(now())
+  orderItems    OrderItem[]
+  products      Product[]
+  business      SellerBusinessDetails?
+  delivery      SellerDeliveryDetails?
+  bank          SellerBankDetails?
 }
 
 ///SELLER OTP
@@ -46,7 +47,6 @@ model SellerOtp {
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
-
 
 /// =========================
 /// SELLER BUSINESS DETAILS
@@ -63,6 +63,27 @@ model SellerBusinessDetails {
   sellerId     Int      @unique
   createdAt    DateTime @default(now())
   seller       Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+}
+
+/// =========================
+/// SELLER DELIVERY DETAILS
+/// =========================
+model SellerDeliveryDetails {
+  id                     Int      @id @default(autoincrement())
+  sellerId               Int      @unique
+  deliveryResponsibility String
+  deliveryCoverage       String
+  deliveryType           String
+  deliveryTimeMin        Int?
+  deliveryTimeMax        Int?
+  shippingChargeType     String
+  shippingCharge         Int?
+  internationalDelivery  Boolean  @default(false)
+  installationAvailable  String?
+  installationCharge     Int?
+  createdAt              DateTime @default(now())
+
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 }
 
 /// =========================
@@ -147,6 +168,14 @@ model OrderItem {
 
   status String @default("pending") // ✅ ADD THIS
 
+  // ✅ DELIVERY SNAPSHOT
+  deliveryTimeMin     Int?
+  deliveryTimeMax     Int?
+  shippingChargeType  String?
+  shippingCharge      Int?
+  installationAvailable String?
+  installationCharge  Int?
+
   createdAt DateTime @default(now())
   rating    Rating?
 }
@@ -165,4 +194,48 @@ model Rating {
 
   orderItemId Int       @unique
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+}
+
+model Designer {
+  id           Int      @id @default(autoincrement())
+  fullname     String
+  email        String   @unique
+  mobile       String   @unique
+  location     String?
+  passwordHash String
+  availability String   @default("Available")
+
+  profile      DesignerProfile?
+  works        DesignerWork[] 
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DesignerProfile {
+  id            Int      @id @default(autoincrement())
+  designerId    Int      @unique
+
+  experience    String?
+  portfolio     String?
+  designerType  String?
+  bio           String?
+  profileImage  String?
+
+  designer      Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model DesignerWork {
+  id          Int      @id @default(autoincrement())
+  designerId  Int
+
+  image       String
+  description String?
+
+  designer    Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
 }

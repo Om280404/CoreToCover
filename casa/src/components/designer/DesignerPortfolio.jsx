@@ -5,34 +5,47 @@ import "./DesignerPortfolio.css";
 const DesignerPortfolio = () => {
   const navigate = useNavigate();
 
+  // 🔑 get designerId from signup
+  const designerId = localStorage.getItem("designerId");
+
   const [works, setWorks] = useState([
     { image: null, preview: null, description: "" },
   ]);
 
-  // explicit derived state so UI never lags behind
   const [isFormEmpty, setIsFormEmpty] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  /* =========================
+     CHECK EMPTY STATE
+  ========================= */
   useEffect(() => {
     const empty = works.every(
       (w) =>
-        (w.image === null || w.image === undefined) &&
+        !w.image &&
         (typeof w.description !== "string" || w.description.trim() === "")
     );
     setIsFormEmpty(empty);
   }, [works]);
 
+  /* =========================
+     ADD WORK
+  ========================= */
   const addWork = () => {
     if (works.length >= 5) return;
     setWorks((s) => [...s, { image: null, preview: null, description: "" }]);
   };
 
+  /* =========================
+     IMAGE CHANGE
+  ========================= */
   const handleImageChange = (index, file) => {
     if (!file) return;
+
     setWorks((prev) => {
       const updated = [...prev];
-      // revoke old preview if present
       if (updated[index].preview) {
-        try { URL.revokeObjectURL(updated[index].preview); } catch {}
+        URL.revokeObjectURL(updated[index].preview);
       }
       updated[index] = {
         ...updated[index],
@@ -43,6 +56,9 @@ const DesignerPortfolio = () => {
     });
   };
 
+  /* =========================
+     DESCRIPTION CHANGE
+  ========================= */
   const handleDescriptionChange = (index, value) => {
     setWorks((prev) => {
       const updated = [...prev];
@@ -51,20 +67,65 @@ const DesignerPortfolio = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  /* =========================
+     SUBMIT PORTFOLIO
+  ========================= */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isFormEmpty) return; // fail-safe
-    // TODO: upload logic
-    navigate("/designer-dashboard");
+    setError("");
+
+    if (!designerId) {
+      setError("Designer not found. Please sign up again.");
+      return;
+    }
+
+    if (isFormEmpty) {
+      navigate("/designerdashboard"); // optional skip
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("designerId", designerId);
+
+      works.forEach((w) => {
+        if (w.image) {
+          formData.append("images", w.image);
+          formData.append("descriptions", w.description || "");
+        }
+      });
+
+      const res = await fetch("http://localhost:3001/designer/portfolio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Failed to save portfolio");
+        return;
+      }
+
+      // ✅ SUCCESS
+      navigate("/designerdashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // cleanup object URLs on unmount
+  /* =========================
+     CLEANUP PREVIEWS
+  ========================= */
   useEffect(() => {
     return () => {
       works.forEach((w) => {
-        if (w.preview) {
-          try { URL.revokeObjectURL(w.preview); } catch {}
-        }
+        if (w.preview) URL.revokeObjectURL(w.preview);
       });
     };
   }, [works]);
@@ -76,6 +137,8 @@ const DesignerPortfolio = () => {
         <p className="portfolio-sub">
           Add 4–5 examples of your previous designs. <strong>(Optional)</strong>
         </p>
+
+        {error && <p className="form-error">{error}</p>}
 
         <form onSubmit={handleSubmit} className="portfolio-form">
           {works.map((item, index) => (
@@ -105,7 +168,9 @@ const DesignerPortfolio = () => {
                 className="work-desc"
                 placeholder="Write something about this work..."
                 value={item.description}
-                onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                onChange={(e) =>
+                  handleDescriptionChange(index, e.target.value)
+                }
               />
             </div>
           ))}
@@ -123,11 +188,12 @@ const DesignerPortfolio = () => {
           <div className="actions-row">
             <button
               type="submit"
-              className={`submit-portfolio-btn ${isFormEmpty ? "disabled" : ""}`}
-              disabled={isFormEmpty}
-              onClick={() => navigate("/designerdashboard")}
+              className={`submit-portfolio-btn ${
+                isFormEmpty ? "disabled" : ""
+              }`}
+              disabled={loading}
             >
-              Save & Continue
+              {loading ? "Saving..." : "Save & Continue"}
             </button>
 
             <button

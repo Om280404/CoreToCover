@@ -10,47 +10,84 @@ const DesignerSignup = () => {
     fullname: "",
     email: "",
     mobile: "",
+    location: "",
     password: "",
     confirmPassword: "",
     experience: "",
     portfolio: "",
-    availability: "Available", // Always available
-    profileImage: null,
-    profilePreview: null,
   });
 
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Handle form input
+  /* =========================
+     HANDLE INPUT CHANGE
+  ========================= */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  
-
-  const handleSignup = (e) => {
+  /* =========================
+     SUBMIT SIGNUP
+  ========================= */
+  const handleSignup = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match");
       return;
     }
 
-    // TODO: API integration
-    navigate("/designersubscription");
+    try {
+      setLoading(true);
+
+      const res = await fetch("http://localhost:3001/designer/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullname: form.fullname,
+          email: form.email,
+          mobile: form.mobile,
+          location: form.location,
+          password: form.password,
+        }),
+
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Signup failed");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ SUCCESS → go to subscription page
+      localStorage.setItem("designerId", data.designer.id);
+      navigate("/designer_profile_setup");
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="designer-auth-page">
       <div className="auth-box reveal">
-
         <h1 className="auth-logo">Casa Designers</h1>
         <p className="auth-sub">Join as a Designer</p>
 
+        {error && <p className="auth-error">{error}</p>}
+
         <form onSubmit={handleSignup} className="auth-form">
-
-
           {/* Full Name */}
           <div className="field">
             <label>Full Name</label>
@@ -90,13 +127,13 @@ const DesignerSignup = () => {
             />
           </div>
 
-          {/* Loaction */}
+          {/* Location */}
           <div className="field">
             <label>Location</label>
             <input
               type="text"
               name="location"
-              placeholder="Enter your city or location"
+              placeholder="City or location"
               value={form.location}
               onChange={handleChange}
             />
@@ -146,7 +183,7 @@ const DesignerSignup = () => {
             </div>
           </div>
 
-          {/* Availability - always ON */}
+          {/* Availability (Locked) */}
           <div className="field full">
             <label>Availability</label>
             <input
@@ -157,13 +194,15 @@ const DesignerSignup = () => {
             />
           </div>
 
-          <button className="auth-btn" type="submit">
-            Create Designer Account
+          <button className="auth-btn" type="submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Create Designer Account"}
           </button>
-
         </form>
+
         <div className="card-footer">
-          <small>By signing up you agree to our terms. We respect your privacy.</small>
+          <small>
+            By signing up you agree to our terms. We respect your privacy.
+          </small>
         </div>
 
         <p className="auth-footer">

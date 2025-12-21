@@ -35,16 +35,30 @@ const SellerSignup = () => {
 
   const sendOtp = async () => {
     if (!form.phone) return alert("Enter phone number");
-    await sendSellerOtp(form.phone);
-    setOtpSent(true);
-    alert("OTP sent");
+
+    try {
+      const res = await sendSellerOtp(form.phone);
+
+      // SHOW OTP IN ALERT (DEV ONLY)
+      alert(`Your OTP is: ${res.data.otp}`);
+
+      setOtpSent(true);
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to send OTP");
+    }
   };
 
+
   const verifyOtp = async () => {
-    await verifySellerOtp(form.phone, otp);
-    setPhoneVerified(true);
-    alert("Phone verified");
+    try {
+      await verifySellerOtp(form.phone, otp);
+      setPhoneVerified(true);
+      alert("Phone verified ✅");
+    } catch (err) {
+      alert(err?.response?.data?.message || "Invalid OTP");
+    }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -135,7 +149,7 @@ const SellerSignup = () => {
                   className="otp-btn primary"
                   placeholder="Enter OTP"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => setOtp(e.target.value.trim())}
                 />
                 <button
                   className="otp-btn"

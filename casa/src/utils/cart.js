@@ -1,108 +1,71 @@
-/* ============================
-   CART UTILS — USER SCOPED
-============================ */
+// src/utils/cart.js
 
-const getCartKey = () => {
-  const email = localStorage.getItem("userEmail");
-  return email ? `customerCart_${email}` : "guestCart";
-};
+const CART_KEY = "casa_cart";
+const SINGLE_CHECKOUT_KEY = "singleCheckoutItem";
 
-/* ============================
+/* =========================
    LOAD CART
-============================ */
+========================= */
 export const loadCart = () => {
   try {
-    const raw = JSON.parse(localStorage.getItem(getCartKey())) || [];
-    return raw.filter(
-      (item) =>
-        item &&
-        item.materialId !== undefined &&
-        item.supplierId !== undefined &&
-        item.amountPerTrip !== undefined
-    );
-  } catch (err) {
-    console.error("LOAD CART ERROR:", err);
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
     return [];
   }
 };
 
-/* ============================
+/* =========================
    SAVE CART
-============================ */
-export const saveCart = (cart) => {
-  localStorage.setItem(getCartKey(), JSON.stringify(cart));
+========================= */
+const saveCart = (items) => {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
 };
 
-/* ============================
+/* =========================
    ADD TO CART
-============================ */
-export const addToCart = (product) => {
-  if (!product || product.materialId === undefined) {
-    return loadCart();
-  }
-
+========================= */
+export const addToCart = (item) => {
   const cart = loadCart();
 
-  const image =
-    product.image ||
-    (Array.isArray(product.images) ? product.images[0] : null);
-
   const index = cart.findIndex(
-    (item) =>
-      item.materialId === product.materialId &&
-      item.supplierId === product.supplierId
+    (c) =>
+      c.materialId === item.materialId &&
+      c.supplierId === item.supplierId
   );
 
-  if (index > -1) {
-    const newQty =
-      (Number(cart[index].trips) || 1) +
-      (Number(product.trips) || 1);
-
-    cart[index].trips = newQty;
-    cart[index].amount =
-      cart[index].amountPerTrip * newQty;
+  if (index >= 0) {
+    cart[index].trips += Number(item.trips || 1);
   } else {
     cart.push({
-      ...product,
-      image,
-      trips: Number(product.trips) || 1,
-      amount:
-        Number(product.amountPerTrip) *
-        (Number(product.trips) || 1),
+      ...item,
+      trips: Number(item.trips || 1),
+      amountPerTrip: Number(item.amountPerTrip || 0),
+      shippingCharge: Number(item.shippingCharge || 0),
+      installationCharge: Number(item.installationCharge || 0),
     });
   }
 
   saveCart(cart);
-  return cart;
 };
 
-/* ============================
-   UPDATE CART ITEM QUANTITY
-============================ */
+/* =========================
+   UPDATE QUANTITY
+========================= */
 export const updateCartItemQuantity = (materialId, qty) => {
-  const quantity = Number(qty);
-  if (!materialId || isNaN(quantity) || quantity < 1) {
-    return loadCart();
-  }
-
-  const cart = loadCart();
-  const index = cart.findIndex(
-    (item) => item.materialId === materialId
+  const cart = loadCart().map((item) =>
+    item.materialId === materialId
+      ? { ...item, trips: qty }
+      : item
   );
-
-  if (index > -1) {
-    cart[index].trips = quantity;
-    cart[index].amount =
-      cart[index].amountPerTrip * quantity;
-  }
 
   saveCart(cart);
   return cart;
 };
 
-/* ============================
-   REMOVE ITEM FROM CART
-============================ */
+/* =========================
+   REMOVE ITEM
+========================= */
 export const removeFromCart = (materialId) => {
   const cart = loadCart().filter(
     (item) => item.materialId !== materialId
@@ -112,9 +75,34 @@ export const removeFromCart = (materialId) => {
   return cart;
 };
 
-/* ============================
+/* =========================
    CLEAR CART
-============================ */
+========================= */
 export const clearCart = () => {
-  localStorage.removeItem(getCartKey());
+  localStorage.removeItem(CART_KEY);
 };
+
+/* =========================
+   SINGLE CHECKOUT
+========================= */
+export const setSingleCheckoutItem = (item) => {
+  localStorage.setItem(
+    SINGLE_CHECKOUT_KEY,
+    JSON.stringify(item)
+  );
+};
+
+export const getSingleCheckoutItem = () => {
+  try {
+    const raw = localStorage.getItem(SINGLE_CHECKOUT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const clearSingleCheckoutItem = () => {
+  localStorage.removeItem(SINGLE_CHECKOUT_KEY);
+};
+
+export const getCart = loadCart;

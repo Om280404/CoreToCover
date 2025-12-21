@@ -57,7 +57,7 @@ const BusinessDetails = () => {
       });
 
       alert("Business details saved successfully ✅");
-      navigate("/sellerbankdetails");
+      navigate("/deliverydetails");
     } catch (err) {
       alert(
         err?.response?.data?.message ||

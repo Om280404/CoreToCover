@@ -1,70 +1,140 @@
 import React, { useState, useEffect } from "react";
 import "./DesignerExperience.css";
 import { Link } from "react-router-dom";
-import { FaBars, FaTimes, FaPlus, FaTrashAlt, FaEdit } from "react-icons/fa";
+import { FaBars, FaTimes, FaPlus, FaTrashAlt, FaEdit, FaSave } from "react-icons/fa";
 
 const DesignerExperience = () => {
   const [works, setWorks] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [savingId, setSavingId] = useState(null);
 
-  // SAMPLE WORKS ON FIRST LOAD
+  const designerId = localStorage.getItem("designerId");
+
+  /* =========================
+     FETCH PORTFOLIO
+  ========================= */
   useEffect(() => {
-    if (works.length === 0) {
-      setWorks([
-        {
-          id: 1,
-          preview:
-            "https://images.pexels.com/photos/6588580/pexels-photo-6588580.jpeg",
-          description: "Modern living room interior with warm tones.",
-        },
-        {
-          id: 2,
-          preview:
-            "https://images.pexels.com/photos/3965520/pexels-photo-3965520.jpeg",
-          description: "Minimalistic bedroom with soft lighting.",
-        },
-        {
-          id: 3,
-          preview:
-            "https://images.pexels.com/photos/6588582/pexels-photo-6588582.jpeg",
-          description: "Elegant wooden furniture design concept.",
-        },
-      ]);
-    }
-  }, []);
+    if (!designerId) return;
 
-  // ADD NEW WORK (MAX 5)
+    fetch(`http://localhost:3001/designer/${designerId}/portfolio`)
+      .then((res) => res.json())
+      .then((data) => setWorks(data))
+      .catch(console.error);
+  }, [designerId]);
+
+  /* =========================
+     ADD NEW WORK (LOCAL)
+  ========================= */
   const addWork = () => {
     if (works.length >= 5) return;
-    setWorks([
-      ...works,
+
+    setWorks((prev) => [
+      ...prev,
       {
-        id: Date.now(),
+        id: `new-${Date.now()}`, // temp id
         image: null,
         preview: null,
         description: "",
+        isNew: true,
       },
     ]);
   };
 
+  /* =========================
+     IMAGE CHANGE
+  ========================= */
   const handleImageChange = (id, file) => {
-    const updated = works.map((work) =>
-      work.id === id
-        ? { ...work, image: file, preview: URL.createObjectURL(file) }
-        : work
+    if (!file) return;
+
+    setWorks((prev) =>
+      prev.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              image: file,
+              preview: URL.createObjectURL(file),
+            }
+          : w
+      )
     );
-    setWorks(updated);
   };
 
+  /* =========================
+     DESCRIPTION CHANGE
+  ========================= */
   const handleDescriptionChange = (id, value) => {
-    const updated = works.map((work) =>
-      work.id === id ? { ...work, description: value } : work
+    setWorks((prev) =>
+      prev.map((w) =>
+        w.id === id ? { ...w, description: value } : w
+      )
     );
-    setWorks(updated);
   };
 
-  const deleteWork = (id) => {
-    setWorks(works.filter((work) => work.id !== id));
+  /* =========================
+     SAVE / UPDATE WORK
+  ========================= */
+  const saveWork = async (work) => {
+    if (!work.description && !work.image) {
+      alert("Please add image or description");
+      return;
+    }
+
+    setSavingId(work.id);
+
+    const formData = new FormData();
+    formData.append("description", work.description || "");
+    if (work.image) formData.append("image", work.image);
+
+    try {
+      const url = work.isNew
+        ? `http://localhost:3001/designer/${designerId}/portfolio`
+        : `http://localhost:3001/designer/work/${work.id}`;
+
+      const method = work.isNew ? "POST" : "PUT";
+
+      const res = await fetch(url, {
+        method,
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to save work");
+        return;
+      }
+
+      // replace temp work with DB work
+      setWorks((prev) =>
+        prev.map((w) =>
+          w.id === work.id ? data.work : w
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  /* =========================
+     DELETE WORK
+  ========================= */
+  const deleteWork = async (id) => {
+    if (!window.confirm("Delete this work?")) return;
+
+    // remove local-only work
+    if (String(id).startsWith("new-")) {
+      setWorks((prev) => prev.filter((w) => w.id !== id));
+      return;
+    }
+
+    await fetch(`http://localhost:3001/designer/work/${id}`, {
+      method: "DELETE",
+    });
+
+    setWorks((prev) => prev.filter((w) => w.id !== id));
   };
 
   return (
@@ -94,10 +164,13 @@ const DesignerExperience = () => {
         </div>
       </header>
 
+      {/* PAGE */}
       <div className="designer-page">
         <div className="page-header reveal">
           <h1 className="title">My Work Experience</h1>
-          <p className="subtitle">Showcase your best interior & product designs.</p>
+          <p className="subtitle">
+            Showcase your best interior & product designs.
+          </p>
         </div>
 
         {/* EMPTY STATE */}
@@ -107,7 +180,7 @@ const DesignerExperience = () => {
               src="https://cdn-icons-png.flaticon.com/512/9541/9541430.png"
               alt="Empty"
             />
-            <p>You did not enter your work experience before</p>
+            <p>You have not added any work yet</p>
 
             <button className="add-work-btn" onClick={addWork}>
               I want to add my work experience
@@ -115,11 +188,11 @@ const DesignerExperience = () => {
           </div>
         )}
 
-        {/* NEW SHOWCASE LIST STYLE */}
+        {/* LIST */}
         <div className="experience-list">
           {works.map((work) => (
             <div key={work.id} className="experience-item reveal">
-              {/* IMAGE SIDE */}
+              {/* IMAGE */}
               <label className="experience-image">
                 {work.preview ? (
                   <img src={work.preview} alt="work" />
@@ -139,22 +212,31 @@ const DesignerExperience = () => {
                 />
               </label>
 
-              {/* DETAILS SIDE */}
+              {/* DETAILS */}
               <div className="experience-details">
                 <textarea
                   className="experience-description"
                   placeholder="Describe your work..."
-                  value={work.description}
+                  value={work.description || ""}
                   onChange={(e) =>
                     handleDescriptionChange(work.id, e.target.value)
                   }
-                ></textarea>
+                />
 
                 <div className="actions">
-                  <button className="edit-btn">
-                    <FaEdit /> Edit
+                  <button
+                    className="edit-btn"
+                    onClick={() => saveWork(work)}
+                    disabled={savingId === work.id}
+                  >
+                    <FaSave />
+                    {savingId === work.id ? "Saving..." : "Save"}
                   </button>
-                  <button className="delete-btn" onClick={() => deleteWork(work.id)}>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() => deleteWork(work.id)}
+                  >
                     <FaTrashAlt /> Delete
                   </button>
                 </div>
@@ -163,7 +245,7 @@ const DesignerExperience = () => {
           ))}
         </div>
 
-        {/* ADD NEW WORK BUTTON (DISABLED IF >5) */}
+        {/* ADD BUTTON */}
         <button
           className={`add-work-btn big-btn ${
             works.length >= 5 ? "disabled" : ""

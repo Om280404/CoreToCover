@@ -126,30 +126,21 @@ const ProductListing = () => {
                 description={product.description}
                 price={product.price}
                 availability={product.availability}
+                avgRating={product.avgRating}
+                ratingCount={product.ratingCount}
 
-                avgRating={product.avgRating}        // ⭐ ADD
-                ratingCount={product.ratingCount}    // ⭐ ADD
-
-                image={
-                  product.images?.length
-                    ? `http://localhost:3001/${product.images[0]}`
-                    : null
-                }
-                images={product.images?.map(
-                  (img) => `http://localhost:3001/${img}`
-                )}
+                images={product.images || []}
                 video={product.video}
-                seller={product.seller?.name}
+
+                // ✅ FIXED HERE
+                seller={product.seller}
                 origin={
-                  product.seller?.business
-                    ? `${product.seller.business.city}, ${product.seller.business.state}`
-                    : "Location not available"
+                  product.sellerBusiness
+                    ? `${product.sellerBusiness.city}, ${product.sellerBusiness.state}`
+                    : "Not specified"
                 }
               />
-
-
             ))
-
           )}
         </div>
       </section>

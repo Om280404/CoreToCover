@@ -530,73 +530,75 @@ const SellerProducts = () => {
 
 
 
+
         {/* GRID */}
         <section className="ms-grid">
-          {materials.map((m) => (
-            <div key={m.id} className="ms-card">
+          {materials.map((m) => {
+            const img =
+              m.images?.length
+                ? m.images[slideIndex[m.id] || 0]
+                : null;
 
-              {/* IMAGE */}
-              <img
-                src={
-                  m.images?.length
-                    ? `http://localhost:3001/${m.images[slideIndex[m.id] || 0]}`
-                    : ""
-                }
-                className="ms-thumb"
-                alt={m.name}
-              />
+            const imageSrc = img
+              ? img.startsWith("http")
+                ? img
+                : `http://localhost:3001/${img}`
+              : "";
 
-              {/* BODY */}
-              <div className="ms-body">
-                <h3 className="ms-name">{m.name}</h3>
+            return (
+              <div key={m.id} className="ms-card">
+                <img
+                  src={imageSrc}
+                  className="ms-thumb"
+                  alt={m.name}
+                />
 
-                <p className="ms-price">
-                  ₹{Number(m.price).toLocaleString()}
-                </p>
+                {/* BODY */}
+                <div className="ms-body">
+                  <h3 className="ms-name">{m.name}</h3>
+                  <p className="ms-price">₹{Number(m.price).toLocaleString()}</p>
 
-                <p className="ms-desc">
-                  {m.description || "No description provided"}
-                </p>
+                  <p className={`ms-meta stock-${m.availability}`}>
+                    Status: <strong>{formatAvailability(m.availability)}</strong>
+                  </p>
 
-                <p className={`ms-meta stock-${m.availability}`}>
-                  Status: <strong>{formatAvailability(m.availability)}</strong>
-                </p>
+                  <p className="ms-meta">
+                    Category: <strong>{m.category}</strong>
+                  </p>
 
-                <p className="ms-meta">
-                  Category: <strong>{m.category}</strong>
-                </p>
+                  <p className="ms-meta">
+                    Type: <strong>{m.productType}</strong>
+                  </p>
+                </div>
 
-                <p className="ms-meta">
-                  Type: <strong>{m.productType}</strong>
-                </p>
+                {/* ACTIONS */}
+                <div className="ms-actions">
+                  <button
+                    className="ms-btn ms-btn--outline"
+                    onClick={() => startEdit(m)}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    className="ms-btn ms-btn--danger"
+                    onClick={() => removeMaterial(m.id)}
+                  >
+                    Delete
+                  </button>
+
+                  <button
+                    className="ms-btn ms-btn--outline"
+                    onClick={() => viewReviews(m)}
+                  >
+                    View Reviews
+                  </button>
+                </div>
               </div>
-
-              {/* ACTIONS */}
-              <div className="ms-actions">
-                <button
-                  className="ms-btn ms-btn--outline"
-                  onClick={() => startEdit(m)}
-                >
-                  Edit
-                </button>
-
-                <button
-                  className="ms-btn ms-btn--danger"
-                  onClick={() => removeMaterial(m.id)}
-                >
-                  Delete
-                </button>
-
-                <button
-                  className="ms-btn ms-btn--outline"
-                  onClick={() => viewReviews(m)}
-                >
-                  View Reviews
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
+
 
       </main>
     </div>

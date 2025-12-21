@@ -2,8 +2,10 @@ import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
-import { upload } from "./multer.js";
+import { upload, uploadDesignerProfile, uploadDesignerPortfolio } from "./multer.js";
 import path from "path";
+
+
 
 const app = express();
 const prisma = new PrismaClient();
@@ -44,6 +46,16 @@ app.use(
 app.use(
   "/raw/videos",
   express.static(path.join(process.cwd(), "uploads/raw/videos"))
+);
+
+app.use(
+  "/designers/profiles",
+  express.static(path.join(process.cwd(), "uploads/designers/profiles"))
+);
+
+app.use(
+  "/designers/portfolio",
+  express.static(path.join(process.cwd(), "uploads/designers/portfolio"))
 );
 
 
@@ -151,7 +163,6 @@ app.post("/seller/signup", async (req, res) => {
       return res.status(403).json({ message: "Phone not verified" });
     }
 
-
     const existingSeller = await prisma.seller.findUnique({ where: { email } });
     if (existingSeller) {
       return res.status(409).json({ message: "Seller already exists" });
@@ -169,7 +180,6 @@ app.post("/seller/signup", async (req, res) => {
       },
     });
 
-
     await prisma.sellerOtp.deleteMany({ where: { phone } });
 
     res.status(201).json({ sellerId: seller.id });
@@ -177,56 +187,76 @@ app.post("/seller/signup", async (req, res) => {
     console.error("SIGNUP ERROR:", err);
     res.status(500).json({ message: err.message });
   }
-
 });
 
-
-
 /* ===============
-OTP via API
+   OTP via API
 ==================*/
 app.post("/seller/send-otp", async (req, res) => {
   try {
+    // ✅ STEP 1: Extract phone properly
     const { phone } = req.body;
-    if (!phone) return res.status(400).json({ message: "Phone required" });
 
+    if (!phone) {
+      return res.status(400).json({ message: "Phone required" });
+    }
+
+    // ✅ STEP 2: Normalize phone
+    const phoneNormalized = phone.trim();
+
+    // ✅ STEP 3: Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await prisma.sellerOtp.deleteMany({ where: { phone } });
+    // ✅ STEP 4: Delete old OTPs
+    await prisma.sellerOtp.deleteMany({
+      where: { phone: phoneNormalized },
+    });
 
+    // ✅ STEP 5: Save new OTP
     await prisma.sellerOtp.create({
       data: {
-        phone,
+        phone: phoneNormalized,
         otp,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
     });
 
-    console.log("OTP:", otp); // ⚠️ remove in production
+    // ✅ DEV ONLY
+    console.log("OTP:", otp);
 
-    res.json({ message: "OTP sent" });
+    // ✅ STEP 6: Send response
+    res.json({ message: "OTP sent", otp });
   } catch (err) {
+    console.error("SEND OTP ERROR:", err);
     res.status(500).json({ message: "Failed to send OTP" });
   }
 });
-
 
 /*========
 VERIFY OTP
 ==========*/
 app.post("/seller/verify-otp", async (req, res) => {
   try {
+    // ✅ STEP 1: Extract from request body
     const { phone, otp } = req.body;
 
+    if (!phone || !otp) {
+      return res.status(400).json({ message: "Phone and OTP are required" });
+    }
+
+    // ✅ STEP 2: Normalize values
+    const phoneNormalized = phone.trim();
+    const otpNormalized = otp.toString().trim();
+
+    // ✅ STEP 3: Find latest valid OTP
     const record = await prisma.sellerOtp.findFirst({
       where: {
-        phone,
-        otp,
+        phone: phoneNormalized,
+        otp: otpNormalized,
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: "desc" },
     });
-
 
     if (!record) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
@@ -236,6 +266,7 @@ app.post("/seller/verify-otp", async (req, res) => {
       return res.json({ message: "OTP already verified" });
     }
 
+    // ✅ STEP 4: Mark OTP as verified
     await prisma.sellerOtp.update({
       where: { id: record.id },
       data: { verified: true },
@@ -243,15 +274,15 @@ app.post("/seller/verify-otp", async (req, res) => {
 
     res.json({ message: "OTP verified" });
   } catch (err) {
+    console.error("VERIFY OTP ERROR:", err);
     res.status(500).json({ message: "OTP verification failed" });
   }
 });
 
-
-
 /* ======================
    SELLER LOGIN
-====================== */
+======================
+*/
 app.post("/seller/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -276,7 +307,6 @@ app.post("/seller/login", async (req, res) => {
         email: seller.email,
       },
     });
-
   } catch (err) {
     console.error("SELLER LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error during login" });
@@ -360,8 +390,6 @@ app.get("/products/search", async (req, res) => {
   }
 });
 
-
-
 /* =========================
    UPDATE USER PROFILE
 ========================= */
@@ -385,8 +413,6 @@ app.get("/user/:email", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
-
-
 
 /* =========================
    CREATE SELLER BUSINESS DETAILS
@@ -478,6 +504,91 @@ app.get("/seller/:sellerId/business-details", async (req, res) => {
 });
 
 /* =========================
+   POST SELLER DELIVERY DETAILS
+========================= */
+app.post("/seller/delivery-details", async (req, res) => {
+  try {
+    const {
+      sellerId,
+      deliveryResponsibility,
+      deliveryCoverage,
+      deliveryType,
+      deliveryTimeMin,
+      deliveryTimeMax,
+      shippingChargeType,
+      shippingCharge,
+      internationalDelivery,
+      installationAvailable,
+      installationCharge,
+    } = req.body;
+
+    if (!sellerId || isNaN(Number(sellerId))) {
+      return res.status(400).json({ message: "Invalid seller ID" });
+    }
+
+    const delivery = await prisma.sellerDeliveryDetails.upsert({
+      where: { sellerId: Number(sellerId) },
+      update: {
+        deliveryResponsibility,
+        deliveryCoverage,
+        deliveryType,
+        deliveryTimeMin: deliveryTimeMin ? Number(deliveryTimeMin) : null,
+        deliveryTimeMax: deliveryTimeMax ? Number(deliveryTimeMax) : null,
+        shippingChargeType,
+        shippingCharge: shippingCharge ? Number(shippingCharge) : null,
+        internationalDelivery,
+        installationAvailable,
+        installationCharge: installationCharge ? Number(installationCharge) : null,
+      },
+      create: {
+        sellerId: Number(sellerId),
+        deliveryResponsibility,
+        deliveryCoverage,
+        deliveryType,
+        deliveryTimeMin: deliveryTimeMin ? Number(deliveryTimeMin) : null,
+        deliveryTimeMax: deliveryTimeMax ? Number(deliveryTimeMax) : null,
+        shippingChargeType,
+        shippingCharge: shippingCharge ? Number(shippingCharge) : null,
+        internationalDelivery,
+        installationAvailable,
+        installationCharge: installationCharge ? Number(installationCharge) : null,
+      },
+    });
+
+    res.json(delivery);
+  } catch (err) {
+    console.error("SAVE DELIVERY ERROR:", err);
+    res.status(500).json({ message: "Failed to save delivery details" });
+  }
+});
+
+// =========================
+// GET SELLER DELIVERY DETAILS
+// =========================
+app.get("/seller/:sellerId/delivery-details", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+
+    if (isNaN(sellerId)) {
+      return res.status(400).json({ message: "Invalid seller ID" });
+    }
+
+    const delivery = await prisma.sellerDeliveryDetails.findUnique({
+      where: { sellerId },
+    });
+
+    if (!delivery) {
+      return res.status(404).json({ message: "Delivery details not found" });
+    }
+
+    res.json(delivery);
+  } catch (err) {
+    console.error("FETCH DELIVERY ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch delivery details" });
+  }
+});
+
+/* =========================
    ADD PRODUCT
 ========================= */
 app.post(
@@ -549,7 +660,6 @@ app.post(
     }
   }
 );
-
 
 // ============================
 // ADD / UPDATE SELLER BANK DETAILS
@@ -668,8 +778,6 @@ app.get("/seller/:sellerId/onboarding-status", async (req, res) => {
   }
 });
 
-
-
 // ============================
 // GET PRODUCTS BY TYPE
 // ============================
@@ -695,14 +803,28 @@ app.get("/products", async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
 
-    // 🔥 CALCULATE AVG RATING
     const formatted = products.map((p) => {
       const total = p.ratings.reduce((sum, r) => sum + r.stars, 0);
       const count = p.ratings.length;
       const avgRating = count ? total / count : 0;
 
       return {
-        ...p,
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        description: p.description,
+        availability: p.availability,
+        productType: p.productType,
+
+        // ✅ RELATIVE PATHS ONLY
+        images: p.images,
+        video: p.video,
+
+        sellerId: p.sellerId,
+        seller: p.seller.name,
+        sellerBusiness: p.seller.business,
+
         avgRating: Number(avgRating.toFixed(1)),
         ratingCount: count,
       };
@@ -714,8 +836,6 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
-
-
 
 app.post("/order/place", async (req, res) => {
   try {
@@ -751,14 +871,29 @@ app.post("/order/place", async (req, res) => {
     });
 
     /* =========================
+       FETCH SELLER DELIVERY SNAPSHOTS
+    ========================= */
+    const sellerDeliveryMap = {};
+
+    for (const item of orders) {
+      if (!sellerDeliveryMap[item.supplierId]) {
+        sellerDeliveryMap[item.supplierId] =
+          await prisma.sellerDeliveryDetails.findUnique({
+            where: { sellerId: item.supplierId },
+          });
+      }
+    }
+
+    /* =========================
        CREATE ORDER ITEMS
-       (STORE GRAND TOTAL)
     ========================= */
     const orderItemsData = await Promise.all(
       orders.map(async (item) => {
         const product = await prisma.product.findUnique({
           where: { id: item.materialId },
         });
+
+        const delivery = sellerDeliveryMap[item.supplierId];
 
         return {
           orderId: order.id,
@@ -771,10 +906,26 @@ app.post("/order/place", async (req, res) => {
           quantity: item.trips,
           pricePerUnit: item.amountPerTrip,
 
-          // 🔥 THIS IS THE KEY CHANGE
-          totalAmount: summary.grandTotal, // ✅ 63000
+          // keep totalAmount as calculated per item (same behavior as before)
+          totalAmount: item.amountPerTrip * item.trips,
 
           imageUrl: product?.images?.[0] || null,
+
+          // ✅ DELIVERY SNAPSHOT (IMMUTABLE)
+          deliveryTimeMin: delivery?.deliveryTimeMin || null,
+          deliveryTimeMax: delivery?.deliveryTimeMax || null,
+          shippingChargeType:
+            delivery?.shippingChargeType ?? "free",
+
+          shippingCharge:
+            delivery?.shippingCharge ?? 0,
+
+          installationAvailable:
+            delivery?.installationAvailable ?? "no",
+
+          installationCharge:
+            delivery?.installationCharge ?? 0,
+
         };
       })
     );
@@ -794,7 +945,6 @@ app.post("/order/place", async (req, res) => {
     });
   }
 });
-
 
 app.get("/orders/user/:email", async (req, res) => {
   try {
@@ -824,7 +974,6 @@ app.get("/orders/user/:email", async (req, res) => {
       order.items.map((item) => ({
         id: `ORD-${order.id}`,
         orderItemId: item.id,
-        materialId: item.materialId,
 
         productName: item.materialName,
         sellerName: item.seller.name,
@@ -832,10 +981,16 @@ app.get("/orders/user/:email", async (req, res) => {
         totalAmount: item.totalAmount,
         imageUrl: item.imageUrl,
 
-        // 🔥 THIS IS THE FIX
-        orderStatus: item.status, // fulfilled | pending | confirmed | rejected
-
+        orderStatus: item.status,
         createdAt: order.createdAt,
+
+        // ✅ DELIVERY DETAILS FOR UI
+        deliveryTimeMin: item.deliveryTimeMin,
+        deliveryTimeMax: item.deliveryTimeMax,
+        shippingChargeType: item.shippingChargeType,
+        shippingCharge: item.shippingCharge,
+        installationAvailable: item.installationAvailable,
+        installationCharge: item.installationCharge,
       }))
     );
 
@@ -845,10 +1000,6 @@ app.get("/orders/user/:email", async (req, res) => {
     res.status(500).json([]);
   }
 });
-
-
-
-
 
 // ============================
 // GET PRODUCTS OF A SELLER
@@ -877,7 +1028,6 @@ app.get("/seller/:sellerId/products", async (req, res) => {
   }
 });
 
-
 // ============================
 // DELETE PRODUCT (SELLER)
 // ============================
@@ -898,7 +1048,6 @@ app.delete("/seller/product/:id", async (req, res) => {
   }
 });
 
-
 // ============================
 // UPDATE PRODUCT (EDIT) 
 // ============================
@@ -915,7 +1064,7 @@ app.put(
       const {
         name,
         category,
-        productType,
+        productType, // 🔥 REQUIRED
         price,
         description,
         availability,
@@ -923,15 +1072,31 @@ app.put(
         removeVideo,
       } = req.body;
 
-      let keptImages = existingImages ? JSON.parse(existingImages) : [];
+      if (!productType) {
+        return res.status(400).json({
+          message: "productType is required",
+        });
+      }
 
+      // ✅ parse existing images safely
+      let keptImages = [];
+      if (existingImages) {
+        try {
+          keptImages = JSON.parse(existingImages);
+        } catch {
+          keptImages = [];
+        }
+      }
+
+      // ✅ new uploaded images
       const newImages =
-        req.files?.images?.map((f) =>
-          f.path.replace(/\\/g, "/").replace("uploads/", "")
+        req.files?.images?.map((file) =>
+          file.path.replace(/\\/g, "/").replace("uploads/", "")
         ) || [];
 
       const finalImages = [...keptImages, ...newImages];
 
+      // ✅ handle video
       let videoPath = undefined;
 
       if (req.files?.video?.length) {
@@ -945,20 +1110,23 @@ app.put(
       const updated = await prisma.product.update({
         where: { id: productId },
         data: {
-          name,
-          category,
-          productType,
+          name: name?.trim(),
+          category: category?.trim(),
+          productType, // 🔥 KEEP UPDATED
           price: Number(price),
-          description,
+          description: description?.trim() || null,
           availability,
           images: finalImages,
           ...(videoPath !== undefined && { video: videoPath }),
         },
       });
 
-      res.json({ product: updated });
+      res.json({
+        message: "Product updated successfully",
+        product: updated,
+      });
     } catch (err) {
-      console.error(err);
+      console.error("UPDATE PRODUCT ERROR:", err);
       res.status(500).json({ message: "Update failed" });
     }
   }
@@ -966,10 +1134,14 @@ app.put(
 
 app.get("/product/:id", async (req, res) => {
   try {
-    const id = req.params.id; // ✅ KEEP AS STRING
+    const id = Number(req.params.id); // ✅ FIX
+
+    if (isNaN(id)) {
+      return res.status(400).json(null);
+    }
 
     const product = await prisma.product.findUnique({
-      where: { id }, // matches schema type
+      where: { id }, // ✅ now Int
       include: {
         seller: {
           select: {
@@ -977,6 +1149,7 @@ app.get("/product/:id", async (req, res) => {
             business: {
               select: { city: true, state: true },
             },
+            delivery: true,
           },
         },
         ratings: {
@@ -1009,14 +1182,20 @@ app.get("/product/:id", async (req, res) => {
       availability: product.availability,
       avgRating: count ? total / count : 0,
       ratingCount: count,
+      deliveryTimeMin: product.seller.delivery?.deliveryTimeMin ?? null,
+      deliveryTimeMax: product.seller.delivery?.deliveryTimeMax ?? null,
+      installationAvailable:
+        product.seller.delivery?.installationAvailable ?? "no",
+      installationCharge:
+        product.seller.delivery?.installationCharge ?? 0,
+      shippingChargeType: product.seller.delivery?.shippingChargeType ?? "free",
+      shippingCharge: product.seller.delivery?.shippingCharge ?? 0,
     });
   } catch (err) {
     console.error("GET PRODUCT ERROR:", err);
     res.status(500).json(null);
   }
 });
-
-
 
 // ============================
 // GET SELLER PROFILE
@@ -1095,7 +1274,6 @@ app.put("/seller/profile/:id", async (req, res) => {
   }
 });
 
-
 // ============================
 // GET SELLER ORDERS
 // ============================
@@ -1134,8 +1312,6 @@ app.get("/seller/:sellerId/orders", async (req, res) => {
   }
 });
 
-
-
 // ============================
 // UPDATE ORDER ITEM STATUS
 // ============================
@@ -1161,7 +1337,6 @@ app.patch("/seller/order/:orderItemId/status", async (req, res) => {
     res.status(500).json({ ok: false });
   }
 });
-
 
 // ============================
 // USER CANCEL ORDER (WITH RULES)
@@ -1229,6 +1404,7 @@ app.patch("/order/:orderId/cancel", async (req, res) => {
       data: { status: "rejected" }, // unified cancel state
     });
 
+    return res.json({ ok: true });
   } catch (err) {
     console.error("❌ CANCEL ORDER ERROR:", err);
     return res.status(500).json({
@@ -1328,15 +1504,538 @@ app.get("/product/:productId/ratings", async (req, res) => {
   }
 });
 
+/* ============================
+   DESIGNER SIGNUP
+============================ */
+app.post("/designer/signup", async (req, res) => {
+  try {
+    const { fullname, email, mobile, location, password } = req.body;
+
+    if (!fullname || !email || !mobile || !password) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Check email
+    const existingEmail = await prisma.designer.findUnique({
+      where: { email },
+    });
+
+    if (existingEmail) {
+      return res.status(409).json({ message: "Email already registered" });
+    }
+
+    // Check mobile
+    const existingMobile = await prisma.designer.findUnique({
+      where: { mobile },
+    });
+
+    if (existingMobile) {
+      return res.status(409).json({ message: "Mobile already registered" });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const designer = await prisma.designer.create({
+      data: {
+        fullname,
+        email,
+        mobile,
+        location,
+        passwordHash,
+      },
+    });
+
+    res.status(201).json({
+      message: "Designer created",
+      designer: { id: designer.id },
+    });
+  } catch (err) {
+    console.error("DESIGNER SIGNUP ERROR:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* ============================
+   GET DESIGNER BASIC INFO
+============================ */
+app.get("/designer/:id/basic", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer ID" });
+    }
+
+    const designer = await prisma.designer.findUnique({
+      where: { id: designerId },
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        availability: true,
+      },
+    });
+
+    if (!designer) {
+      return res.status(404).json({ message: "Designer not found" });
+    }
+
+    res.json(designer);
+  } catch (err) {
+    console.error("GET DESIGNER BASIC ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch designer" });
+  }
+});
+
+/* ============================
+   UPDATE DESIGNER AVAILABILITY
+============================ */
+app.patch("/designer/:id/availability", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    const { availability } = req.body;
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer ID" });
+    }
+
+    if (!["Available", "Unavailable"].includes(availability)) {
+      return res.status(400).json({ message: "Invalid availability value" });
+    }
+
+    const updated = await prisma.designer.update({
+      where: { id: designerId },
+      data: { availability },
+      select: { availability: true },
+    });
+
+    res.json({
+      message: "Availability updated successfully",
+      availability: updated.availability,
+    });
+  } catch (err) {
+    console.error("UPDATE AVAILABILITY ERROR:", err);
+    res.status(500).json({ message: "Failed to update availability" });
+  }
+});
+
+
+/* ============================
+   DESIGNER PROFILE SETUP
+============================ */
+app.post(
+  "/designer/profile",
+  uploadDesignerProfile.single("profileImage"),
+  async (req, res) => {
+    try {
+      const {
+        designerId,
+        experience,
+        portfolio,
+        designerType,
+        bio,
+      } = req.body;
+
+      if (!designerId) {
+        return res.status(400).json({
+          message: "Designer ID is required",
+        });
+      }
+
+      // 🔍 Verify designer exists
+      const designer = await prisma.designer.findUnique({
+        where: { id: Number(designerId) },
+      });
+
+      if (!designer) {
+        return res.status(404).json({
+          message: "Designer not found",
+        });
+      }
+
+      // 📸 Image path
+      let profileImage = null;
+      if (req.file) {
+        profileImage = req.file.path
+          .replace(/\\/g, "/")
+          .replace("uploads/", "");
+      }
+
+      // 🔁 UPSERT profile
+      const profile = await prisma.designerProfile.upsert({
+        where: { designerId: Number(designerId) },
+        update: {
+          experience: experience?.toString() || null,
+          portfolio: portfolio?.trim() || null,
+          designerType: designerType?.trim() || null,
+          bio: bio?.trim() || null,
+          ...(profileImage && { profileImage }),
+        },
+        create: {
+          designerId: Number(designerId),
+          experience: experience?.toString() || null,
+          portfolio: portfolio?.trim() || null,
+          designerType: designerType?.trim() || null,
+          bio: bio?.trim() || null,
+          profileImage,
+        },
+      });
+
+      res.json({
+        message: "Designer profile saved successfully",
+        profile: {
+          id: profile.id,
+          designerId: profile.designerId,
+          profileImage: profile.profileImage
+            ? `http://localhost:3001/${profile.profileImage}`
+            : null,
+        },
+      });
+    } catch (err) {
+      console.error("DESIGNER PROFILE ERROR:", err);
+      res.status(500).json({
+        message: "Failed to save designer profile",
+      });
+    }
+  }
+);
+
+/* ============================
+   GET DESIGNER EDIT PROFILE
+============================ */
+app.get("/designer/:id/edit-profile", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer ID" });
+    }
+
+    const designer = await prisma.designer.findUnique({
+      where: { id: designerId },
+      include: {
+        profile: true,
+      },
+    });
+
+    if (!designer) {
+      return res.status(404).json({ message: "Designer not found" });
+    }
+
+    res.json({
+      fullname: designer.fullname,
+      email: designer.email,
+      mobile: designer.mobile,
+      location: designer.location,
+      experience: designer.profile?.experience || "",
+      portfolio: designer.profile?.portfolio || "",
+      bio: designer.profile?.bio || "",
+      designerType: designer.profile?.designerType || "",
+      profileImage: designer.profile?.profileImage
+        ? `http://localhost:3001/${designer.profile.profileImage}`
+        : null,
+    });
+  } catch (err) {
+    console.error("GET EDIT PROFILE ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch profile" });
+  }
+});
+
+/* ============================
+   UPDATE DESIGNER EDIT PROFILE
+============================ */
+app.put(
+  "/designer/:id/edit-profile",
+  uploadDesignerProfile.single("profileImage"),
+  async (req, res) => {
+    try {
+      const designerId = Number(req.params.id);
+
+      const {
+        fullname,
+        email,
+        mobile,
+        location,
+        experience,
+        portfolio,
+        bio,
+        designerType,
+      } = req.body;
+
+      if (isNaN(designerId)) {
+        return res.status(400).json({ message: "Invalid designer ID" });
+      }
+
+      const designer = await prisma.designer.findUnique({
+        where: { id: designerId },
+        include: { profile: true },
+      });
+
+      if (!designer) {
+        return res.status(404).json({ message: "Designer not found" });
+      }
+
+      // profile image (optional)
+      let profileImagePath = designer.profile?.profileImage || null;
+      if (req.file) {
+        profileImagePath = req.file.path
+          .replace(/\\/g, "/")
+          .replace("uploads/", "");
+      }
+
+      // 1️⃣ Update Designer (account)
+      await prisma.designer.update({
+        where: { id: designerId },
+        data: {
+          fullname,
+          email,
+          mobile,
+          location,
+        },
+      });
+
+      // 2️⃣ Update or Create DesignerProfile
+      await prisma.designerProfile.upsert({
+        where: { designerId },
+        update: {
+          experience,
+          portfolio,
+          bio,
+          designerType,
+          profileImage: profileImagePath,
+        },
+        create: {
+          designerId,
+          experience,
+          portfolio,
+          bio,
+          designerType,
+          profileImage: profileImagePath,
+        },
+      });
+
+      res.json({ message: "Profile updated successfully" });
+    } catch (err) {
+      console.error("UPDATE EDIT PROFILE ERROR:", err);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  }
+);
+
+
+/* ============================
+   DESIGNER PORTFOLIO
+============================ */
+app.post(
+  "/designer/portfolio",
+  uploadDesignerPortfolio.array("images", 5),
+  async (req, res) => {
+    try {
+      const { designerId, descriptions } = req.body;
+
+      if (!designerId) {
+        return res.status(400).json({
+          message: "Designer ID is required",
+        });
+      }
+
+      const designer = await prisma.designer.findUnique({
+        where: { id: Number(designerId) },
+      });
+
+      if (!designer) {
+        return res.status(404).json({
+          message: "Designer not found",
+        });
+      }
+
+      // Safety check
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          message: "At least one work image is required",
+        });
+      }
+
+      if (req.files.length > 5) {
+        return res.status(400).json({
+          message: "Maximum 5 works allowed",
+        });
+      }
+
+      // descriptions may come as string or array
+      const descArray = Array.isArray(descriptions)
+        ? descriptions
+        : [descriptions];
+
+      // Prepare data
+      const worksData = req.files.map((file, index) => ({
+        designerId: Number(designerId),
+        image: file.path
+          .replace(/\\/g, "/")
+          .replace("uploads/", ""),
+        description: descArray[index] || null,
+      }));
+
+      await prisma.designerWork.createMany({
+        data: worksData,
+      });
+
+      res.status(201).json({
+        message: "Portfolio works saved successfully",
+        count: worksData.length,
+      });
+    } catch (err) {
+      console.error("DESIGNER PORTFOLIO ERROR:", err);
+      res.status(500).json({
+        message: "Failed to save portfolio",
+      });
+    }
+  }
+);
+
+/* ============================
+   GET DESIGNER PORTFOLIO
+============================ */
+app.get("/designer/:designerId/portfolio", async (req, res) => {
+  try {
+    const designerId = Number(req.params.designerId);
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer ID" });
+    }
+
+    const works = await prisma.designerWork.findMany({
+      where: { designerId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(
+      works.map((w) => ({
+        id: w.id,
+        description: w.description,
+        preview: `http://localhost:3001/${w.image}`,
+      }))
+    );
+  } catch (err) {
+    console.error("FETCH DESIGNER PORTFOLIO ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch portfolio" });
+  }
+});
+
+
+/* ============================
+   UPDATE DESIGNER WORK
+============================ */
+app.put(
+  "/designer/work/:workId",
+  uploadDesignerPortfolio.single("image"),
+  async (req, res) => {
+    try {
+      const workId = Number(req.params.workId);
+      const { description } = req.body;
+
+      const existing = await prisma.designerWork.findUnique({
+        where: { id: workId },
+      });
+
+      if (!existing) {
+        return res.status(404).json({ message: "Work not found" });
+      }
+
+      let imagePath = undefined;
+      if (req.file) {
+        imagePath = req.file.path
+          .replace(/\\/g, "/")
+          .replace("uploads/", "");
+      }
+
+      const updated = await prisma.designerWork.update({
+        where: { id: workId },
+        data: {
+          description,
+          ...(imagePath && { image: imagePath }),
+        },
+      });
+
+      res.json({
+        message: "Work updated successfully",
+        work: {
+          id: updated.id,
+          description: updated.description,
+          preview: `http://localhost:3001/${updated.image}`,
+        },
+      });
+    } catch (err) {
+      console.error("UPDATE WORK ERROR:", err);
+      res.status(500).json({ message: "Failed to update work" });
+    }
+  }
+);
+
+/* ============================
+   DELETE DESIGNER WORK
+============================ */
+app.delete("/designer/work/:workId", async (req, res) => {
+  try {
+    const workId = Number(req.params.workId);
+
+    const work = await prisma.designerWork.findUnique({
+      where: { id: workId },
+    });
+
+    if (!work) {
+      return res.status(404).json({ message: "Work not found" });
+    }
+
+    await prisma.designerWork.delete({
+      where: { id: workId },
+    });
+
+    res.json({ message: "Work deleted successfully" });
+  } catch (err) {
+    console.error("DELETE WORK ERROR:", err);
+    res.status(500).json({ message: "Failed to delete work" });
+  }
+});
+
+app.post(
+  "/designer/:designerId/work",
+  uploadDesignerPortfolio.single("image"),
+  async (req, res) => {
+    try {
+      const designerId = Number(req.params.designerId);
+      const { description } = req.body;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Image is required" });
+      }
+
+      const work = await prisma.designerWork.create({
+        data: {
+          designerId,
+          description,
+          image: req.file.path
+            .replace(/\\/g, "/")
+            .replace("uploads/", ""),
+        },
+      });
+
+      res.status(201).json({
+        work: {
+          id: work.id,
+          description: work.description,
+          preview: `http://localhost:3001/${work.image}`,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to add work" });
+    }
+  }
+);
 
 
 
-
-
-
-
-
-// ============================
 app.listen(3001, () => {
   console.log("✅ Server running on http://localhost:3001");
 });
