@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { customerLogin } from "../../api/auth"; // ✅ ADD
+import { customerLogin } from "../../api/auth";
 import "./Login.css";
 
 export default function Login() {
@@ -9,7 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,14 +18,17 @@ export default function Login() {
     try {
       const res = await customerLogin({ email, password });
 
-      // ✅ Store user session
+      // 🔥 RESET SESSION
+      localStorage.clear();
+
+      // ✅ SINGLE SOURCE OF TRUTH
+      localStorage.setItem("userId", res.data.user.id);
       localStorage.setItem("userEmail", res.data.user.email);
       localStorage.setItem("userName", res.data.user.name);
-      localStorage.setItem("userId", res.data.user.id);
 
       navigate("/");
     } catch (err) {
-      alert(err.message || "Login failed");
+      alert("Login failed");
     } finally {
       setLoading(false);
     }
@@ -40,12 +42,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
 
           <div className="password-wrap">
             <label>Password</label>
@@ -55,10 +52,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <button type="button" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>

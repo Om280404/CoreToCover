@@ -84,6 +84,12 @@ const Navbar = () => {
               </li>
 
               <li>
+                <Link to="/myhireddesigners" className="nav-link">
+                  <FaUser /> My Hired Designers
+                </Link>
+              </li>
+
+              <li>
                 <Link to="/cart" className="cart-btn">
                   <FaShoppingCart /> Cart
                 </Link>

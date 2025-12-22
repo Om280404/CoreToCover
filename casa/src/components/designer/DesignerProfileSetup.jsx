@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./DesignerProfileSetup.css";
 import { useNavigate } from "react-router-dom";
+import { saveDesignerProfile } from "../../api/designer";
 
 const DesignerProfileSetup = () => {
   const navigate = useNavigate();
-
-  // 🔑 Get designerId saved after signup
   const designerId = localStorage.getItem("designerId");
 
   const [form, setForm] = useState({
@@ -21,7 +20,7 @@ const DesignerProfileSetup = () => {
   const [error, setError] = useState("");
 
   /* =========================
-     REDIRECT IF NO DESIGNER ID
+     REDIRECT IF NO DESIGNER
   ========================= */
   useEffect(() => {
     if (!designerId) {
@@ -51,16 +50,11 @@ const DesignerProfileSetup = () => {
   };
 
   /* =========================
-     SUBMIT PROFILE
+     SUBMIT PROFILE (API)
   ========================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!designerId) {
-      setError("Designer not found. Please sign up again.");
-      return;
-    }
 
     try {
       setLoading(true);
@@ -76,23 +70,18 @@ const DesignerProfileSetup = () => {
         formData.append("profileImage", form.profileImage);
       }
 
-      const res = await fetch("http://localhost:3001/designer/profile", {
-        method: "POST",
-        body: formData,
-      });
+      await saveDesignerProfile(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Failed to save profile");
-        return;
-      }
-
-      // ✅ SUCCESS → next step
+      // ✅ next step
       navigate("/designerportfolio");
     } catch (err) {
-      console.error(err);
-      setError("Server error. Please try again.");
+      console.error("PROFILE SETUP ERROR:", err);
+
+      if (err.response?.status === 400 || err.response?.status === 404) {
+        setError(err.response.data.message);
+      } else {
+        setError("Server error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -121,9 +110,7 @@ const DesignerProfileSetup = () => {
                   className="profile-preview"
                 />
               ) : (
-                <div className="profile-placeholder">
-                  Upload Image
-                </div>
+                <div className="profile-placeholder">Upload Image</div>
               )}
 
               <input
@@ -135,33 +122,29 @@ const DesignerProfileSetup = () => {
             </div>
           </div>
 
-          {/* Experience */}
           <label className="input-label">Experience (in years)</label>
           <input
             type="number"
             name="experience"
             className="input-field"
-            placeholder="2"
             value={form.experience}
             onChange={handleChange}
             required
           />
 
-          {/* Portfolio */}
           <label className="input-label">Portfolio Link (Optional)</label>
           <input
             type="text"
             name="portfolio"
             className="input-field"
-            placeholder="https://yourportfolio.com"
+            placeholder="Ex. https://portfolio.com"
             value={form.portfolio}
             onChange={handleChange}
           />
 
-          {/* Designer Type */}
           <label className="input-label">Designer Type</label>
           <select
-            className="input-field designer-type"
+            className="input-field"
             name="designerType"
             value={form.designerType}
             onChange={handleChange}
@@ -177,16 +160,14 @@ const DesignerProfileSetup = () => {
             </option>
           </select>
 
-          {/* Bio */}
           <label className="input-label">Short Bio</label>
           <textarea
             name="bio"
             className="input-field textarea"
-            placeholder="Describe your design philosophy..."
             value={form.bio}
             onChange={handleChange}
             required
-          ></textarea>
+          />
 
           <button className="setup-btn" type="submit" disabled={loading}>
             {loading ? "Saving..." : "Next"}

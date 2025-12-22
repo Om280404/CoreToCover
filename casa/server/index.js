@@ -1555,6 +1555,48 @@ app.post("/designer/signup", async (req, res) => {
   }
 });
 
+
+/* ============================
+   DESIGNER LOGIN
+============================ */
+app.post("/designer/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    const designer = await prisma.designer.findUnique({
+      where: { email },
+    });
+
+    if (!designer) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, designer.passwordHash);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    res.json({
+      message: "Login successful",
+      designer: {
+        id: designer.id,
+        fullname: designer.fullname,
+        email: designer.email,
+        availability: designer.availability,
+      },
+    });
+  } catch (err) {
+    console.error("DESIGNER LOGIN ERROR:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 /* ============================
    GET DESIGNER BASIC INFO
 ============================ */
@@ -1603,21 +1645,25 @@ app.patch("/designer/:id/availability", async (req, res) => {
       return res.status(400).json({ message: "Invalid availability value" });
     }
 
-    const updated = await prisma.designer.update({
+    const designer = await prisma.designer.update({
       where: { id: designerId },
       data: { availability },
-      select: { availability: true },
+      select: {
+        id: true,
+        availability: true,
+      },
     });
 
     res.json({
       message: "Availability updated successfully",
-      availability: updated.availability,
+      availability: designer.availability,
     });
   } catch (err) {
     console.error("UPDATE AVAILABILITY ERROR:", err);
     res.status(500).json({ message: "Failed to update availability" });
   }
 });
+
 
 
 /* ============================
@@ -2033,6 +2079,538 @@ app.post(
     }
   }
 );
+
+
+
+/* ============================
+   GET ALL DESIGNERS (PUBLIC)
+============================ */
+app.get("/designers", async (req, res) => {
+  try {
+    const designers = await prisma.designer.findMany({
+      where: {
+        availability: "Available",
+      },
+      include: {
+        profile: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const formatted = designers.map((d) => ({
+      id: d.id,
+      name: d.fullname,
+      category: d.profile?.designerType || "General",
+      description: d.profile?.bio || "No description provided.",
+      designerLocation: d.location || "Location not specified",
+      imageUrl: d.profile?.profileImage
+        ? `http://localhost:3001/${d.profile.profileImage}`
+        : null,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("FETCH DESIGNERS ERROR:", err);
+    res.status(500).json({
+      message: "Failed to fetch designers",
+    });
+  }
+});
+
+/* ============================
+   GET DESIGNER DETAILS
+============================ */
+app.get("/designer/:id", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({
+        message: "Invalid designer ID",
+      });
+    }
+
+    const designer = await prisma.designer.findUnique({
+      where: { id: designerId },
+      include: {
+        profile: true,
+        works: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!designer) {
+      return res.status(404).json({
+        message: "Designer not found",
+      });
+    }
+
+    res.json({
+      id: designer.id,
+      name: designer.fullname,
+      designer: designer.fullname,
+      category: designer.profile?.designerType || "General",
+      description:
+        designer.profile?.bio || "No description provided.",
+      origin: designer.location || "Location not specified",
+      image: designer.profile?.profileImage
+        ? `http://localhost:3001/${designer.profile.profileImage}`
+        : null,
+      portfolio: designer.works.map((w) => ({
+        id: w.id,
+        image: `http://localhost:3001/${w.image}`,
+        description: w.description,
+      })),
+    });
+  } catch (err) {
+    console.error("FETCH DESIGNER DETAIL ERROR:", err);
+    res.status(500).json({
+      message: "Failed to fetch designer details",
+    });
+  }
+});
+
+/* ============================
+   GET DESIGNER INFO (DETAIL PAGE)
+============================ */
+app.get("/designer/:id/info", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer ID" });
+    }
+
+    const designer = await prisma.designer.findUnique({
+      where: { id: designerId },
+      include: {
+        profile: true,
+        works: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!designer) {
+      return res.status(404).json({ message: "Designer not found" });
+    }
+
+    res.json({
+      id: designer.id,
+      name: designer.fullname,
+
+      // ✅ SAFE BOOLEAN CONVERSION
+      availability: designer.availability?.toLowerCase() === "available",
+
+      designerType: designer.profile?.designerType || "Designer",
+      location: designer.location || "Location not specified",
+
+      image: designer.profile?.profileImage
+        ? `http://localhost:3001/${designer.profile.profileImage}`
+        : null,
+
+      bio: designer.profile?.bio || "",
+      portfolio: designer.profile?.portfolio || null,
+
+
+      works: designer.works.map((w) => ({
+        id: w.id,
+        img: `http://localhost:3001/${w.image}`,
+        title: w.description?.split(".")[0] || "Design Work",
+        desc: w.description || "",
+      })),
+    });
+  } catch (err) {
+    console.error("DESIGNER INFO ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch designer info" });
+  }
+});
+
+
+/* ============================
+   CREATE DESIGNER HIRE REQUEST
+============================ */
+app.post("/designer/:id/hire", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    const {
+      userId,
+      fullName,
+      email,
+      mobile,
+      location,
+      budget,
+      workType,
+      timelineDays,
+      description,
+    } = req.body;
+
+    /* ---------------------------
+       BASIC VALIDATION
+    --------------------------- */
+    if (!userId) {
+      return res.status(401).json({ message: "Login required" });
+    }
+
+    if (!fullName || !email || !mobile || !location || !budget || !workType) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    /* ---------------------------
+       CREATE HIRE REQUEST
+    --------------------------- */
+    const hire = await prisma.designerHireRequest.create({
+      data: {
+        userId: Number(userId),       // ✅ FIXED
+        designerId,
+        fullName,
+        email,
+        mobile,
+        location,
+        budget: Number(budget),       // ✅ SAFE CAST
+        workType,
+        timelineDays: timelineDays ? Number(timelineDays) : null,
+        description: description || null,
+      },
+    });
+
+    res.status(201).json(hire);
+  } catch (err) {
+    console.error("HIRE ERROR:", err);
+    res.status(500).json({
+      message: "Failed to hire designer",
+      error: err.message, // ✅ helps debugging
+    });
+  }
+});
+
+
+
+// ============================
+// GET DESIGNER WORK REQUESTS
+// ============================
+app.get("/designer/:id/work-requests", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    if (isNaN(designerId)) {
+      return res.status(400).json({ message: "Invalid designer id" });
+    }
+
+    // fetch requests for this designer (includes any userRating this designer left)
+    const requests = await prisma.designerHireRequest.findMany({
+      where: { designerId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        userRating: true, // rating THIS designer gave to THIS client (if any)
+      },
+    });
+
+    // collect all client emails (dedup)
+    const emails = [...new Set(requests.map((r) => r?.email).filter(Boolean))];
+
+    // if no emails, skip the rating query to avoid extra DB call
+    let allRatings = [];
+    if (emails.length > 0) {
+      // IMPORTANT: include the related hireRequest so we can read hireRequest.email safely
+      allRatings = await prisma.userRating.findMany({
+        where: {
+          hireRequest: {
+            email: { in: emails },
+          },
+        },
+        include: {
+          hireRequest: true, // <-- this was missing and caused r.hireRequest to be undefined
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    }
+
+    // group ratings by client email
+    const ratingsByEmail = {};
+    for (const r of allRatings) {
+      // defensive: ensure hireRequest exists
+      const email = r?.hireRequest?.email;
+      if (!email) continue;
+      if (!ratingsByEmail[email]) ratingsByEmail[email] = [];
+      ratingsByEmail[email].push(r);
+    }
+
+    // build response
+    const response = requests.map((r) => {
+      const clientRatings = ratingsByEmail[r.email] || [];
+      const avg =
+        clientRatings.length > 0
+          ? clientRatings.reduce((s, x) => s + x.stars, 0) / clientRatings.length
+          : 0;
+
+      return {
+        id: r.id,
+        clientName: r.fullName,
+        mobile: r.mobile,
+        email: r.email,
+        type: r.workType,
+        budget: r.budget,
+        location: r.location,
+        timeline: r.timelineDays ? `${r.timelineDays} Days` : "Not specified",
+        status: r.status,
+        message: r.description,
+
+        userRating: r.userRating
+          ? {
+            stars: r.userRating.stars,
+            review: r.userRating.review,
+            reviewerName: r.userRating.reviewerName,
+            createdAt: r.userRating.createdAt,
+          }
+          : null,
+
+        clientSummary: {
+          average: Number(avg.toFixed(1)),
+          count: clientRatings.length,
+          reviews: clientRatings.map((cr) => ({
+            stars: cr.stars,
+            review: cr.review,
+            reviewerName: cr.reviewerName,
+            createdAt: cr.createdAt,
+          })),
+        },
+      };
+    });
+
+    res.json(response);
+  } catch (err) {
+    console.error("FETCH WORK REQUESTS ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch work requests" });
+  }
+});
+
+
+
+/* ============================
+   UPDATE WORK REQUEST STATUS
+============================ */
+app.patch("/designer/work-request/:id/status", async (req, res) => {
+  try {
+    const requestId = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!["accepted", "rejected", "completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const updated = await prisma.designerHireRequest.update({
+      where: { id: requestId },
+      data: { status },
+    });
+
+    res.json({ message: "Status updated", status: updated.status });
+  } catch (err) {
+    console.error("UPDATE REQUEST STATUS ERROR:", err);
+    res.status(500).json({ message: "Failed to update status" });
+  }
+});
+
+/* ============================
+   GET CLIENT HIRED DESIGNERS
+   (CLIENT DASHBOARD)
+============================ */
+app.get("/client/hired-designers", async (req, res) => {
+  try {
+    const userId = Number(req.query.userId);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Login required" });
+    }
+
+    const hires = await prisma.designerHireRequest.findMany({
+      where: { userId },
+      include: {
+        designer: { include: { profile: true } },
+        rating: true,
+        userRating: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(
+      hires.map(h => ({
+        id: h.id,
+        designerId: h.designerId,
+        name: h.designer.fullname,
+        category: h.designer.profile?.designerType,
+        location: h.designer.location,
+        status: h.status,
+        budget: h.budget,
+        workType: h.workType,
+        image: h.designer.profile?.profileImage
+          ? `http://localhost:3001/${h.designer.profile.profileImage}`
+          : null,
+        rating: h.rating,
+        userRating: h.userRating,
+      }))
+    );
+  } catch (err) {
+    console.error("FETCH HIRED DESIGNERS ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
+
+
+
+/* ============================
+   RATE DESIGNER
+============================ */
+app.post("/designer/:id/rate", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    const { hireRequestId, stars, review } = req.body;
+
+    if (!designerId || !hireRequestId || !stars) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // ✅ Fetch hire request WITH DESIGNER
+    const hire = await prisma.designerHireRequest.findUnique({
+      where: { id: Number(hireRequestId) },
+      include: { designer: true },
+    });
+
+    if (!hire) {
+      return res.status(404).json({ message: "Hire request not found" });
+    }
+
+    // ✅ VERY IMPORTANT
+    if (hire.designerId !== designerId) {
+      return res.status(403).json({ message: "Unauthorized rating attempt" });
+    }
+
+    if (hire.status !== "completed") {
+      return res.status(400).json({ message: "Job not completed yet" });
+    }
+
+    // ✅ Prevent duplicate rating
+    const exists = await prisma.designerRating.findUnique({
+      where: { hireRequestId: Number(hireRequestId) },
+    });
+
+    if (exists) {
+      return res.status(409).json({ message: "Already rated" });
+    }
+
+    // ✅ Create rating
+    const rating = await prisma.designerRating.create({
+      data: {
+        designerId,
+        hireRequestId: Number(hireRequestId),
+        reviewerName: hire.fullName,
+        stars: Number(stars),
+        review: review || null,
+      },
+    });
+
+    return res.status(201).json({
+      message: "Rating submitted successfully",
+      ratingId: rating.id,
+    });
+  } catch (err) {
+    console.error("RATE DESIGNER ERROR:", err);
+    return res.status(500).json({ message: "Failed to submit rating" });
+  }
+});
+
+
+
+app.get("/designer/:id/ratings", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+
+    const ratings = await prisma.designerRating.findMany({
+      where: { designerId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const avg =
+      ratings.length > 0
+        ? ratings.reduce((s, r) => s + r.stars, 0) / ratings.length
+        : 0;
+
+    res.json({
+      average: Number(avg.toFixed(1)),
+      count: ratings.length,
+      reviews: ratings.map((r) => ({
+        name: r.reviewerName,   // ✅ SEND NAME
+        stars: r.stars,
+        review: r.review,
+        createdAt: r.createdAt,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch ratings" });
+  }
+});
+
+/* ============================
+   DESIGNER → RATE CLIENT
+============================ */
+app.post("/designer/:id/rate-user", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    const { hireRequestId, stars, review } = req.body;
+
+    if (!designerId || !hireRequestId || !stars) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // verify designer exists
+    const designer = await prisma.designer.findUnique({ where: { id: designerId } });
+    if (!designer) return res.status(404).json({ message: "Designer not found" });
+
+    // make sure hireRequest exists and belongs to this designer
+    const hire = await prisma.designerHireRequest.findUnique({ where: { id: Number(hireRequestId) } });
+    if (!hire || hire.designerId !== designerId) {
+      return res.status(400).json({ message: "Hire request not found or not belonging to you" });
+    }
+
+    // only allow rating after job is completed (you can adjust as needed)
+    if (hire.status !== "completed") {
+      return res.status(400).json({ message: "You can rate the client only after marking the job completed." });
+    }
+
+    // prevent duplicate rating for the same hireRequest
+    const exists = await prisma.userRating.findUnique({ where: { hireRequestId: Number(hireRequestId) } });
+    if (exists) {
+      return res.status(409).json({ message: "You have already rated this client for this hire" });
+    }
+
+    // create rating
+    const created = await prisma.userRating.create({
+      data: {
+        hireRequestId: Number(hireRequestId),
+        designerId: designerId,
+        reviewerName: designer.fullname || null,
+        stars: Number(stars),
+        review: review || null,
+      },
+    });
+
+    res.status(201).json({ message: "User rating submitted", ratingId: created.id });
+  } catch (err) {
+    console.error("RATE USER ERROR:", err);
+    res.status(500).json({ message: "Failed to submit user rating" });
+  }
+});
+
+
+
+
 
 
 

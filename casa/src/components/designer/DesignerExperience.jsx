@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./DesignerExperience.css";
 import { Link } from "react-router-dom";
-import { FaBars, FaTimes, FaPlus, FaTrashAlt, FaEdit, FaSave } from "react-icons/fa";
+import {
+  FaBars,
+  FaTimes,
+  FaPlus,
+  FaTrashAlt,
+  FaSave,
+} from "react-icons/fa";
 
 const DesignerExperience = () => {
   const [works, setWorks] = useState([]);
@@ -86,25 +92,38 @@ const DesignerExperience = () => {
     if (work.image) formData.append("image", work.image);
 
     try {
-      const url = work.isNew
-        ? `http://localhost:3001/designer/${designerId}/portfolio`
-        : `http://localhost:3001/designer/work/${work.id}`;
+      let res;
+      let data;
 
-      const method = work.isNew ? "POST" : "PUT";
+      // ✅ NEW WORK
+      if (work.isNew) {
+        res = await fetch(
+          `http://localhost:3001/designer/${designerId}/work`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+      }
+      // ✅ UPDATE EXISTING WORK
+      else {
+        res = await fetch(
+          `http://localhost:3001/designer/work/${work.id}`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
+      }
 
-      const res = await fetch(url, {
-        method,
-        body: formData,
-      });
-
-      const data = await res.json();
+      data = await res.json();
 
       if (!res.ok) {
         alert(data.message || "Failed to save work");
         return;
       }
 
-      // replace temp work with DB work
+      // 🔁 Replace temp or existing work
       setWorks((prev) =>
         prev.map((w) =>
           w.id === work.id ? data.work : w
@@ -130,11 +149,16 @@ const DesignerExperience = () => {
       return;
     }
 
-    await fetch(`http://localhost:3001/designer/work/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      await fetch(`http://localhost:3001/designer/work/${id}`, {
+        method: "DELETE",
+      });
 
-    setWorks((prev) => prev.filter((w) => w.id !== id));
+      setWorks((prev) => prev.filter((w) => w.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete work");
+    }
   };
 
   return (

@@ -73,6 +73,12 @@ const Home = () => {
               </li>
 
               <li>
+                <Link to="/myhireddesigners" className="nav-link">
+                  <FaUser /> My Hired Designers
+                </Link>
+              </li>
+
+              <li>
                 <Link to="/cart" className="cart-btn">
                   <FaShoppingCart /> Cart
                 </Link>
@@ -113,7 +119,7 @@ const Home = () => {
             ]}
 
 
-            onClick={() => navigate("/productlisting", {state: {page: "Readymade Products", desc: "Find the perfect product that enhances your quality of living."}})}
+            onClick={() => navigate("/productlisting", { state: { page: "Readymade Products", desc: "Find the perfect product that enhances your quality of living." } })}
           />
 
           {/* Card 2 */}
@@ -124,7 +130,7 @@ const Home = () => {
               Raw2, // raw materials image 2
               Raw3  // raw materials image 3
             ]}
-            onClick={() => navigate("/productlisting", {state: {page: "Raw Materials", desc: "Build better with high-grade interior raw materials."}})}
+            onClick={() => navigate("/productlisting", { state: { page: "Raw Materials", desc: "Build better with high-grade interior raw materials." } })}
           />
 
           {/* Card 3 */}
@@ -136,7 +142,7 @@ const Home = () => {
               "https://images.pexels.com/photos/6474344/pexels-photo-6474344.jpeg?auto=compress&cs=tinysrgb&w=800", // interior designer working
             ]}
 
-            onClick={() => navigate("/designers", {state:{page:"Designers"}})}
+            onClick={() => navigate("/designers", { state: { page: "Designers" } })}
           />
 
         </div>

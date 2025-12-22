@@ -9,6 +9,12 @@
   --radius: 18px;
   --shadow: 0 14px 40px rgba(0, 0, 0, 0.07);
   --transition: 0.25s ease;
+  --casa-green: #10b981;
+  --casa-dark: #0f172a;
+  --muted: #64748b;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --accent: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(99, 102, 241, 0.06));
 }
 
 /* PAGE */
@@ -96,10 +102,21 @@
   transform: translateY(0);
 }
 
-.delay-1 { transition-delay: 0.1s; }
-.delay-2 { transition-delay: 0.2s; }
-.delay-3 { transition-delay: 0.3s; }
-.delay-4 { transition-delay: 0.4s; }
+.delay-1 {
+  transition-delay: 0.1s;
+}
+
+.delay-2 {
+  transition-delay: 0.2s;
+}
+
+.delay-3 {
+  transition-delay: 0.3s;
+}
+
+.delay-4 {
+  transition-delay: 0.4s;
+}
 
 
 /* TOGGLE BUTTON */
@@ -119,4 +136,459 @@
 
 .off {
   color: var(--muted);
+}
+
+/* TOP-RIGHT rating card inside .dash-header */
+.dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  /* already left content; we use right area */
+  gap: 16px;
+}
+
+/* container on right */
+.dash-header-right {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* small card showing average + stars */
+.top-rating-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: var(--surface, #fff);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(11, 22, 12, 0.06);
+  min-width: 130px;
+}
+
+/* empty state */
+.top-rating-card.empty {
+  opacity: 0.85;
+  color: var(--text-muted, #6b7280);
+}
+
+/* stars row */
+.top-stars {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+/* numeric rating */
+.top-rating-value {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* small /5 text */
+.top-out {
+  font-weight: 500;
+  color: var(--text-muted, #6b7280);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* review count */
+.top-review-count {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
+}
+
+/* star colors — filled (amber), half same, empty grey */
+.star.filled {
+  color: #f59e0b;
+}
+
+/* amber */
+.star.half {
+  color: #f59e0b;
+}
+
+.star.empty {
+  color: #d1d5db;
+}
+
+/* light grey */
+
+/* =========================
+   PREMIUM REVIEWS SECTION
+========================= */
+
+.dashboard-reviews-section {
+  margin-top: 48px;
+  padding: 0 4px 40px;
+}
+
+.reviews-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 18px;
+  color: var(--text-dark, #2f2f2f);
+}
+
+/* Reviews list */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Individual review card */
+.review-row {
+  display: flex;
+  gap: 22px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(248, 250, 247, 0.92));
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+/* subtle hover lift */
+.review-row:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 42px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Left column (reviewer identity) */
+.review-left {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.reviewer-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark, #1f2937);
+}
+
+.review-date {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
+}
+
+/* Right column */
+.review-right {
+  flex: 1;
+}
+
+/* Stars */
+.review-stars-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+/* Gold stars */
+.star.filled,
+.star.half {
+  color: #f4b400;
+  /* luxury gold */
+}
+
+.star.empty {
+  color: #e5e7eb;
+}
+
+/* Review text */
+.review-text {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-dark, #374151);
+}
+
+/* Empty state */
+.empty-text {
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8faf9;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Error text */
+.form-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  .review-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .review-left {
+    width: 100%;
+  }
+
+  .review-stars-inline {
+    margin-bottom: 6px;
+  }
+}
+
+/* ====== Reviews Section Container ====== */
+.dashboard-reviews-section {
+  margin-top: 36px;
+  padding: 20px;
+  background: transparent;
+}
+
+/* Title */
+.reviews-title {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--casa-dark);
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* Reviews list layout (cards grid) */
+.reviews-list {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+/* Responsive: 2 columns on larger screens */
+@media (min-width: 1000px) {
+  .reviews-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Individual review card — glass + gradient accent */
+.review-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.63));
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-border);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* card hover lift */
+.review-row:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
+}
+
+/* Decorative left accent stripe */
+.review-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 1), rgba(99, 102, 241, 1));
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* LEFT COLUMN — avatar + name + date (compact) */
+.review-left {
+  width: 160px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--casa-dark);
+}
+
+/* Faux avatar circle: we use the first letter of the reviewer name (no markup changes) */
+.reviewer-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* create a circular avatar using ::before and the first letter */
+.reviewer-name::before {
+  content: attr(data-initial, "");
+  /* if data-initial not present: show first letter visually via the real text's first-letter */
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(99, 102, 241, 0.12));
+  color: var(--casa-dark);
+  font-weight: 800;
+  font-size: 18px;
+  text-transform: uppercase;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.06);
+}
+
+/* fallback: if data-initial isn't supplied, style the first letter inside the avatar */
+.reviewer-name:first-letter {
+  font-weight: 800;
+  color: var(--casa-dark);
+}
+
+/* date as small rounded chip */
+.review-date {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(6, 8, 16, 0.03);
+  border: 1px solid rgba(6, 8, 16, 0.03);
+}
+
+/* RIGHT COLUMN — stars + review text */
+.review-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* stars row with rating pill */
+.review-stars-inline {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.08);
+  width: fit-content;
+  border: 1px solid rgba(16, 185, 129, 0.08);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.03);
+}
+
+/* Star sizing & spacing */
+.review-stars-inline .star {
+  font-size: 14px;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Colour mapping:
+   filled → casa green / amber-ish,
+   half → gradient,
+   empty → muted grey
+*/
+.star.filled {
+  color: #f59e0b;
+  filter: drop-shadow(0 2px 6px rgba(16, 185, 129, 0.12));
+}
+
+.star.half {
+  color: var(--casa-green);
+  opacity: 0.95;
+}
+
+.star.empty {
+  color: #e6eef2;
+  opacity: 0.95;
+}
+
+/* review text block with quotation mark and subtle typographic style */
+.review-text {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.0), rgba(255, 255, 255, 0.01));
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: var(--casa-dark);
+  line-height: 1.6;
+  position: relative;
+  font-size: 14px;
+}
+
+/* decorative quote mark in top-left of review text */
+.review-text::before {
+  content: "“";
+  position: absolute;
+  left: 10px;
+  top: -6px;
+  font-size: 36px;
+  color: rgba(16, 185, 129, 0.12);
+  font-weight: 700;
+}
+
+/* make the text a bit indented so quote mark feels integrated */
+.review-text p,
+.review-text em {
+  margin: 0;
+  padding-left: 6px;
+}
+
+/* small-screen adjustments */
+@media (max-width: 600px) {
+  .review-left {
+    width: 110px;
+    min-width: 100px;
+  }
+
+  .review-row {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .review-text::before {
+    font-size: 28px;
+    left: 6px;
+    top: -4px;
+  }
+}
+
+/* little badge for 'verified' or 'rated' — optional */
+.rated-badge {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+  color: var(--casa-green);
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 6px 8px;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.12);
+}
+
+/* subtle animation on entrance (optional, feel free to remove) */
+.review-row {
+  transform-origin: center;
+  animation: floatIn 420ms cubic-bezier(.16, .9, .32, 1) both;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

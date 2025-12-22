@@ -223,3 +223,129 @@
   font-size: 13px;
   color: #6b7280;
 }
+
+/* ================================
+   STAR RATING – CASA / AMAZON STYLE
+================================ */
+
+/* container alignment */
+.stars-inline,
+.stars-large,
+.review-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stars-inline{
+  justify-content: center;
+}
+/* base star */
+.star {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ⭐ FULL STAR */
+.star.filled {
+  color: #f59e0b; /* CASA gold */
+}
+
+/* ⭐ HALF STAR */
+.star.half {
+  color: #f59e0b; /* same gold */
+}
+
+/* ☆ EMPTY STAR */
+.star.empty {
+  color: #d1d5db; /* light grey */
+}
+
+/* bigger stars for Designer Info page */
+.stars-large .star {
+  font-size: 20px;
+}
+
+/* numeric rating next to stars */
+.rating-numeric,
+.average-number {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+
+.average-number {
+  font-size: 22px;
+}
+
+.out-of {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* review count */
+.rating-count,
+.review-count {
+  color: #6b7280;
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+/* no rating text */
+.no-rating {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ================================
+   REVIEWS (Amazon-like)
+================================ */
+.reviews-section {
+  margin-top: 50px;
+}
+
+.reviews-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.review-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 0;
+}
+
+.review-text {
+  font-size: 14px;
+  color: #111827;
+  margin: 6px 0;
+}
+
+.review-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ================================
+   PAGINATION
+================================ */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background: #111827;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

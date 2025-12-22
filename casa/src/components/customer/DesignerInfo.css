@@ -179,7 +179,6 @@
   padding: 20px; /* prevents popup touching edges */
 }
 
-
 /* --------------------------------------------------
    POPUP BOX (WIDER + ELEGANT)
 -------------------------------------------------- */
@@ -196,7 +195,6 @@
   overflow-y: auto;      /* scroll inside popup */
 }
 
-
 /* Title */
 .modal-title {
   font-size: 1.7rem;
@@ -209,126 +207,6 @@
   color: #8f8b84;
   font-weight: 600;
   margin-bottom: 22px;
-}
-
-/* --------------------------------------------------
-   TWO-COLUMN FORM LAYOUT
--------------------------------------------------- */
-.modal-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 partitions */
-  gap: 22px 30px;
-}
-
-.modal-form label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #606E52; /* soft green */
-}
-
-/* Inputs */
-.modal-form input,
-.modal-form select,
-.modal-form textarea {
-  margin-top: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: #f8faf8;
-  border: 1px solid rgba(96, 110, 82, 0.35);
-  font-size: 0.95rem;
-  color: #474747;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Focus State */
-.modal-form input:focus,
-.modal-form select:focus,
-.modal-form textarea:focus {
-  outline: none;
-  border-color: #91A56E;
-  box-shadow: 0 0 0 3px rgba(145, 165, 110, 0.25);
-}
-
-.modal-form textarea {
-  height: 120px;
-  resize: none;
-}
-
-/* File Input Styling */
-.modal-form input[type="file"] {
-  padding: 10px;
-  background: #ffffff;
-}
-
-
-
-/* --------------------------------------------------
-   ACTION BUTTONS
--------------------------------------------------- */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 28px;
-  height: 50px;
-}
-
-/* Cancel Button */
-.cancel-btn {
-  padding: 10px 18px;
-  border-radius: 10px;
-  background: #e9ece8;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  background: #8e3535;
-
-}
-
-.cancel-btn:hover {
-  background: #dd3838;
-}
-
-/* Submit Button (Green Luxury Theme) */
-.submit-btn {
-  padding: 10px 20px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #91A56E, #606E52);
-  color: white;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 12px 30px rgba(96, 110, 82, 0.28);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.submit-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 17px 36px rgba(96, 110, 82, 0.36);
-}
-
-/* --------------------------------------------------
-   ANIMATIONS
--------------------------------------------------- */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --------------------------------------------------
-   MOBILE RESPONSIVE
--------------------------------------------------- */
-@media (max-width: 760px) {
-  .modal-form {
-    grid-template-columns: 1fr; /* single column */
-  }
 }
 
 /* --------------------------------------------------
@@ -640,4 +518,152 @@
 /* Small helper for accessible tooltip cursor */
 .hire-btn[aria-disabled="true"] {
   pointer-events: auto; /* keep title tooltip active */
+}
+
+.reviewer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.review-header {
+  margin-bottom: 4px;
+}
+
+
+/* =========================
+   FORM
+========================= */
+.modal-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.modal-form label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.modal-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.modal-form .desc {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   MODAL ACTIONS
+========================= */
+.modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  background: #f2f2f2;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.portfolio-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.portfolio-link:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   REVIEWS – VERTICAL STACK
+========================= */
+.reviews-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.review-item {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-item p {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.review-meta {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.availability-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.availability-pill.available {
+  background: linear-gradient(90deg, rgba(145,165,110,0.12), rgba(96,110,82,0.06));
+  color: var(--green-dark);
+}
+
+.availability-pill.busy {
+  background: linear-gradient(90deg, rgba(220,100,100,0.06), rgba(220,100,100,0.03));
+  color: #b33b3b;
+}
+
+.availability-pill .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }

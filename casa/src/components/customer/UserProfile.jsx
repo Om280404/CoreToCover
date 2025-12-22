@@ -17,7 +17,7 @@ const UserProfile = () => {
      LOGOUT & NAVIGATION
   ============================== */
   const handleLogout = () => {
-    localStorage.removeItem("userEmail");
+    localStorage.clear();
     alert("You have been logged out.");
     navigate("/");
   };

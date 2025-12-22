@@ -12,10 +12,10 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    return Promise.reject(
-      error.response?.data || { message: "Network error" }
-    );
+    // keep the full axios error object
+    return Promise.reject(error);
   }
 );
+
 
 export default api;

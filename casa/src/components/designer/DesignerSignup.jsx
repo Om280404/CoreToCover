@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./DesignerSignup.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { designerSignup } from "../../api/designer";
 
 const DesignerSignup = () => {
   const navigate = useNavigate();
@@ -13,8 +14,6 @@ const DesignerSignup = () => {
     location: "",
     password: "",
     confirmPassword: "",
-    experience: "",
-    portfolio: "",
   });
 
   const [showPass, setShowPass] = useState(false);
@@ -30,7 +29,7 @@ const DesignerSignup = () => {
   };
 
   /* =========================
-     SUBMIT SIGNUP
+     SUBMIT SIGNUP (API)
   ========================= */
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -44,40 +43,33 @@ const DesignerSignup = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:3001/designer/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullname: form.fullname,
-          email: form.email,
-          mobile: form.mobile,
-          location: form.location,
-          password: form.password,
-        }),
-
+      const data = await designerSignup({
+        fullname: form.fullname,
+        email: form.email,
+        mobile: form.mobile,
+        location: form.location,
+        password: form.password,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Signup failed");
-        setLoading(false);
-        return;
-      }
-
-      // ✅ SUCCESS → go to subscription page
+      // ✅ store designerId
       localStorage.setItem("designerId", data.designer.id);
-      navigate("/designer_profile_setup");
 
+      navigate("/designer_profile_setup");
     } catch (err) {
-      console.error(err);
-      setError("Server error. Please try again.");
+      console.error("DESIGNER SIGNUP ERROR:", err);
+
+      if (err.response?.status === 409) {
+        setError(err.response.data.message); // Email or mobile already registered
+      } else if (err.response?.status === 400) {
+        setError(err.response.data.message);
+      } else {
+        setError("Server error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="designer-auth-page">
@@ -88,7 +80,6 @@ const DesignerSignup = () => {
         {error && <p className="auth-error">{error}</p>}
 
         <form onSubmit={handleSignup} className="auth-form">
-          {/* Full Name */}
           <div className="field">
             <label>Full Name</label>
             <input
@@ -101,7 +92,6 @@ const DesignerSignup = () => {
             />
           </div>
 
-          {/* Email */}
           <div className="field">
             <label>Email</label>
             <input
@@ -114,7 +104,6 @@ const DesignerSignup = () => {
             />
           </div>
 
-          {/* Mobile */}
           <div className="field">
             <label>Mobile Number</label>
             <input
@@ -127,7 +116,6 @@ const DesignerSignup = () => {
             />
           </div>
 
-          {/* Location */}
           <div className="field">
             <label>Location</label>
             <input
@@ -139,7 +127,6 @@ const DesignerSignup = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="field">
             <label>Password</label>
             <div className="password-wrap">
@@ -161,7 +148,6 @@ const DesignerSignup = () => {
             </div>
           </div>
 
-          {/* Confirm Password */}
           <div className="field">
             <label>Confirm Password</label>
             <div className="password-wrap">
@@ -183,27 +169,15 @@ const DesignerSignup = () => {
             </div>
           </div>
 
-          {/* Availability (Locked) */}
           <div className="field full">
             <label>Availability</label>
-            <input
-              type="text"
-              value="Available"
-              disabled
-              className="disabled-field"
-            />
+            <input type="text" value="Available" disabled />
           </div>
 
           <button className="auth-btn" type="submit" disabled={loading}>
             {loading ? "Creating Account..." : "Create Designer Account"}
           </button>
         </form>
-
-        <div className="card-footer">
-          <small>
-            By signing up you agree to our terms. We respect your privacy.
-          </small>
-        </div>
 
         <p className="auth-footer">
           Already registered?{" "}

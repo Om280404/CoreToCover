@@ -104,7 +104,7 @@
 
 /* STATUS BADGE */
 .lux-status {
-  padding: 8px 16px;
+  padding: 8px 46px;
   border-radius: 14px;
   font-weight: bold;
   font-size: 0.85rem;
@@ -170,14 +170,21 @@
   font-size: 1.3rem;
 }
 
-.location{
+.location {
   margin-bottom: 5px;
 }
 
 /* ANIMATION */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
@@ -193,8 +200,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(16, 185, 129, 0.12); /* Soft emerald green */
-  color: #234d23; /* Emerald green */
+  background: rgba(16, 185, 129, 0.12);
+  /* Soft emerald green */
+  color: #234d23;
+  /* Emerald green */
   border-radius: 10px;
   font-size: 1.2rem;
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
@@ -206,3 +215,282 @@
   font-size: 1rem;
 }
 
+/* stars */
+.star {
+  color: #e6eef2;
+}
+
+.star.filled {
+  color:#f59e0b;
+  filter: drop-shadow(0 3px 8px rgba(16, 185, 129, 0.15));
+}
+
+.star.empty {
+  color: #cbd5e1;
+}
+
+/* client summary */
+.client-summary {
+  text-align: right;
+}
+
+.client-avg {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.client-sub {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.client-count {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.client-latest-review {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #334155;
+  opacity: 0.95;
+}
+
+/* given rating */
+.given-rating {
+  margin-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.04);
+  padding-top: 10px;
+}
+
+.given-review {
+  margin-top: 6px;
+  color: #0f172a;
+  font-style: italic;
+}
+
+/* modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 640px;
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.3);
+}
+
+.star-btn:focus {
+  outline: none;
+}
+
+/* =========================================
+   RESPONSIVE — TABLET (≤ 1024px)
+========================================= */
+@media (max-width: 1024px) {
+  .lux-work-page {
+    padding: 40px 5vw;
+  }
+
+  .lux-title {
+    font-size: 2.3rem;
+  }
+
+  .lux-job-card {
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .lux-client-name {
+    font-size: 1.25rem;
+  }
+
+  .lux-card-right {
+    min-width: 220px;
+  }
+
+  .lux-status {
+    padding: 8px 34px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE — SMALL TABLET / LARGE MOBILE
+   (≤ 768px)
+========================================= */
+@media (max-width: 768px) {
+  .lux-work-page {
+    padding: 32px 5vw;
+  }
+
+  .lux-header {
+    margin-bottom: 28px;
+  }
+
+  .lux-title {
+    font-size: 2rem;
+  }
+
+  .lux-sub {
+    font-size: 1rem;
+  }
+
+  .lux-job-card {
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .lux-card-right {
+    text-align: left;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .lux-status {
+    align-self: flex-start;
+    padding: 6px 20px;
+    font-size: 0.8rem;
+  }
+
+  .lux-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .lux-btn {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .client-summary {
+    text-align: left;
+    margin-top: 6px;
+  }
+
+  .client-latest-review {
+    font-size: 12.5px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE — MOBILE (≤ 480px)
+========================================= */
+@media (max-width: 480px) {
+  .lux-work-page {
+    padding: 24px 4vw;
+  }
+
+  .lux-title {
+    font-size: 1.75rem;
+  }
+
+  .lux-sub {
+    font-size: 0.95rem;
+  }
+
+  .lux-job-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .lux-client-name {
+    font-size: 1.15rem;
+    gap: 8px;
+  }
+
+  .lux-field p {
+    font-size: 0.95rem;
+  }
+
+  .lux-field label {
+    font-size: 0.7rem;
+  }
+
+  .lux-message {
+    font-size: 0.9rem;
+  }
+
+  .client-info {
+    gap: 8px;
+  }
+
+  .client-icon.phone {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .client-value {
+    font-size: 0.95rem;
+  }
+
+  .lux-card-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .lux-status {
+    width: fit-content;
+    font-size: 0.75rem;
+  }
+
+  .lux-buttons {
+    flex-direction: column;
+  }
+
+  .lux-btn {
+    width: 100%;
+    padding: 11px;
+    font-size: 0.95rem;
+  }
+
+  .client-summary {
+    margin-top: 8px;
+  }
+
+  .client-avg {
+    font-size: 20px;
+  }
+
+  .client-count,
+  .client-sub {
+    font-size: 11px;
+  }
+
+  .modal-box {
+    padding: 16px;
+    border-radius: 10px;
+  }
+}
+
+/* =========================================
+   EXTRA SMALL DEVICES (≤ 360px)
+========================================= */
+@media (max-width: 360px) {
+  .lux-title {
+    font-size: 1.6rem;
+  }
+
+  .lux-btn {
+    font-size: 0.9rem;
+  }
+
+  .client-value {
+    font-size: 0.9rem;
+  }
+}

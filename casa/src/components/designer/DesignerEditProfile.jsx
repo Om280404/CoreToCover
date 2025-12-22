@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./DesignerEditProfile.css";
 import { FaCamera, FaBars, FaTimes } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  getDesignerEditProfile,
+  updateDesignerEditProfile,
+} from "../../api/designer";
 
 const DesignerEditProfile = () => {
   const navigate = useNavigate();
@@ -35,13 +39,12 @@ const DesignerEditProfile = () => {
   }, [designerId, navigate]);
 
   /* =========================
-     FETCH PROFILE DATA
+     FETCH PROFILE (API)
   ========================= */
   useEffect(() => {
     if (!designerId) return;
 
-    fetch(`http://localhost:3001/designer/${designerId}/edit-profile`)
-      .then((res) => res.json())
+    getDesignerEditProfile(designerId)
       .then((data) => {
         setForm({
           fullname: data.fullname || "",
@@ -65,14 +68,14 @@ const DesignerEditProfile = () => {
   }, [designerId]);
 
   /* =========================
-     HANDLE INPUT CHANGE
+     INPUT CHANGE
   ========================= */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   /* =========================
-     IMAGE UPLOAD
+     IMAGE CHANGE
   ========================= */
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -83,7 +86,7 @@ const DesignerEditProfile = () => {
   };
 
   /* =========================
-     SUBMIT UPDATE
+     SUBMIT UPDATE (API)
   ========================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,34 +96,21 @@ const DesignerEditProfile = () => {
       setLoading(true);
 
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) =>
-        formData.append(key, value)
-      );
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
 
       if (profileImage) {
         formData.append("profileImage", profileImage);
       }
 
-      const res = await fetch(
-        `http://localhost:3001/designer/${designerId}/edit-profile`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Failed to update profile");
-        return;
-      }
+      await updateDesignerEditProfile(designerId, formData);
 
       alert("Profile updated successfully");
       navigate("/designerdashboard");
     } catch (err) {
       console.error(err);
-      setError("Server error. Please try again.");
+      setError(err.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -166,7 +156,7 @@ const DesignerEditProfile = () => {
 
           {error && <p className="form-error">{error}</p>}
 
-          {/* PROFILE IMAGE */}
+          {/* IMAGE */}
           <div className="profile-image-section">
             <div className="image-wrapper">
               {preview ? (
@@ -192,71 +182,37 @@ const DesignerEditProfile = () => {
           <form className="edit-form" onSubmit={handleSubmit}>
             <div className="field">
               <label>Full Name</label>
-              <input
-                name="fullname"
-                value={form.fullname}
-                onChange={handleChange}
-                required
-              />
+              <input name="fullname" value={form.fullname} onChange={handleChange} required />
             </div>
 
             <div className="field">
               <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
+              <input type="email" name="email" value={form.email} onChange={handleChange} required />
             </div>
 
             <div className="field">
               <label>Mobile Number</label>
-              <input
-                type="tel"
-                name="mobile"
-                value={form.mobile}
-                onChange={handleChange}
-                required
-              />
+              <input name="mobile" value={form.mobile} onChange={handleChange} required />
             </div>
 
             <div className="field">
               <label>Location</label>
-              <input
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-              />
+              <input name="location" value={form.location} onChange={handleChange} />
             </div>
 
             <div className="field">
               <label>Experience</label>
-              <input
-                type="number"
-                name="experience"
-                value={form.experience}
-                onChange={handleChange}
-              />
+              <input type="number" name="experience" value={form.experience} onChange={handleChange} />
             </div>
 
             <div className="field">
               <label>Portfolio Link</label>
-              <input
-                name="portfolio"
-                value={form.portfolio}
-                onChange={handleChange}
-              />
+              <input name="portfolio" value={form.portfolio} onChange={handleChange} />
             </div>
 
             <div className="field">
               <label>Bio</label>
-              <textarea
-                name="bio"
-                value={form.bio}
-                onChange={handleChange}
-              />
+              <textarea name="bio" value={form.bio} onChange={handleChange} />
             </div>
 
             <button className="save-btn" disabled={loading}>

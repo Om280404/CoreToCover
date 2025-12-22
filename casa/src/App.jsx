@@ -7,6 +7,7 @@ import ProductListing from "./components/customer/ProductListing";
 import ProductInfo from "./components/customer/Product_Info";
 import UserProfile from "./components/customer/UserProfile";
 import MyOrders from './components/customer/MyOrders';
+import MyHiredDesigners from './components/customer/MyHiredDesigners';
 import SearchResults from './components/customer/SearchResults';
 import Cart from './components/customer/Cart';
 import Contact from './components/customer/Contact';
@@ -76,6 +77,7 @@ function App() {
         <Route path="/productinfo" element={<ProductInfo />} />
         <Route path="/userprofile" element={<AuthRoute element={<UserProfile/>}/>} />
         <Route path="/myorders" element={<AuthRoute element={<MyOrders/>}/>} />
+        <Route path="/myhireddesigners" element={<AuthRoute element={<MyHiredDesigners/>}/>} />
         <Route path="/searchresults" element={<SearchResults />} />
         <Route path="/cart" element={<AuthRoute element={<Cart/>}/>} />
         <Route path="/contact" element={<Contact />} />

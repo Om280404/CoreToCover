@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DesignerPortfolio.css";
+import { saveDesignerPortfolio } from "../../api/designer";
 
 const DesignerPortfolio = () => {
   const navigate = useNavigate();
-
-  // 🔑 get designerId from signup
   const designerId = localStorage.getItem("designerId");
 
   const [works, setWorks] = useState([
@@ -68,7 +67,7 @@ const DesignerPortfolio = () => {
   };
 
   /* =========================
-     SUBMIT PORTFOLIO
+     SUBMIT PORTFOLIO (API)
   ========================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +79,7 @@ const DesignerPortfolio = () => {
     }
 
     if (isFormEmpty) {
-      navigate("/designerdashboard"); // optional skip
+      navigate("/designerdashboard");
       return;
     }
 
@@ -97,23 +96,18 @@ const DesignerPortfolio = () => {
         }
       });
 
-      const res = await fetch("http://localhost:3001/designer/portfolio", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Failed to save portfolio");
-        return;
-      }
+      await saveDesignerPortfolio(formData);
 
       // ✅ SUCCESS
       navigate("/designerdashboard");
     } catch (err) {
-      console.error(err);
-      setError("Server error. Please try again.");
+      console.error("PORTFOLIO ERROR:", err);
+
+      if (err.response?.status === 400 || err.response?.status === 404) {
+        setError(err.response.data.message);
+      } else {
+        setError("Server error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -176,11 +170,7 @@ const DesignerPortfolio = () => {
           ))}
 
           {works.length < 5 && (
-            <button
-              type="button"
-              className="add-more-btn"
-              onClick={addWork}
-            >
+            <button type="button" className="add-more-btn" onClick={addWork}>
               + Add Another Work
             </button>
           )}
