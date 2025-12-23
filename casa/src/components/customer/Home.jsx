@@ -7,6 +7,7 @@ import {
   FaGlobe,
   FaBars,
   FaTimes,
+  FaUserGraduate,
 } from "react-icons/fa";
 import Raw from "../../assets/images/Raw1.png";
 import Raw2 from "../../assets/images/Raw2.png";
@@ -74,7 +75,7 @@ const Home = () => {
 
               <li>
                 <Link to="/myhireddesigners" className="nav-link">
-                  <FaUser /> My Hired Designers
+                  <FaUserGraduate /> My Hired Designers
                 </Link>
               </li>
 
