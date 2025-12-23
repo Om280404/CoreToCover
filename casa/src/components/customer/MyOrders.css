@@ -403,3 +403,18 @@
   background: #fef2f2;
   color: #b91c1c;
 }
+
+.already-rated {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #16a34a; /* green */
+}
+
+.rate-btn.disabled {
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+  box-shadow: none;
+}

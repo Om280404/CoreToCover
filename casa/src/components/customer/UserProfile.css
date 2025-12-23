@@ -2,7 +2,7 @@
    THEME ROOT — CONSTRUCTIFY (Premium Edition)
 ========================================= */
 :root {
-  --page-bg: linear-gradient(180deg, #fafaf8, #f1f1ec);
+  --bg-light: #F3F7EC;
   --surface: #FFFFFF;
 
   --green-dark: #606E52;
@@ -31,11 +31,12 @@
 /* =========================================
    PAGE WRAPPER
 ========================================= */
+.profile{
+  background:var(--bg-light);
+}
 .profile-page {
   min-height: 100vh;
-  background:
-    radial-gradient(1200px 400px at top center, rgba(192,204,164,0.35), transparent 60%),
-    linear-gradient(180deg, var(--page-bg), var(--green-light));
+  background:var(--bg-light);
   padding: 20px;
   display: flex;
   justify-content: center;
@@ -50,7 +51,7 @@
   width: 100%;
   max-width: var(--container);
   display: grid;
-  grid-template-columns: minmax(1px, 360px) 1fr;
+  grid-template-columns: minmax(1px, 96%) 1fr;
   gap: 26px;
   margin: 16px auto 56px;
 }

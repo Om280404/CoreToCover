@@ -49,7 +49,7 @@ const SellerDeliveryDetails = () => {
       });
 
       alert("Delivery details saved ✅");
-      navigate("/sellerbankdetails");
+      navigate("/sellermanagebankdetails");
     } catch {
       alert("Failed to save delivery details");
     }

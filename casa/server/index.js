@@ -314,6 +314,39 @@ app.post("/seller/login", async (req, res) => {
 });
 
 // ============================
+// VERIFY SELLER PASSWORD (for sensitive actions)
+// ============================
+app.post("/seller/verify-password", async (req, res) => {
+  try {
+    const { sellerId, password } = req.body;
+
+    if (!sellerId || !password) {
+      return res.status(400).json({ message: "Missing credentials" });
+    }
+
+    const seller = await prisma.seller.findUnique({
+      where: { id: Number(sellerId) },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    const isValid = await bcrypt.compare(password, seller.password);
+
+    if (!isValid) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    res.json({ verified: true });
+  } catch (err) {
+    console.error("VERIFY PASSWORD ERROR:", err);
+    res.status(500).json({ message: "Verification failed" });
+  }
+});
+
+
+// ============================
 // SEARCH PRODUCTS
 // ============================
 app.get("/products/search", async (req, res) => {
@@ -522,45 +555,109 @@ app.post("/seller/delivery-details", async (req, res) => {
       installationCharge,
     } = req.body;
 
+    /* =========================
+       VALIDATION
+    ========================= */
     if (!sellerId || isNaN(Number(sellerId))) {
       return res.status(400).json({ message: "Invalid seller ID" });
     }
 
+    /* =========================
+       NORMALIZE TYPES (MATCH PRISMA)
+    ========================= */
+
+    // Boolean (Prisma expects Boolean)
+    const normalizedInternationalDelivery =
+      internationalDelivery === true ||
+      internationalDelivery === "true" ||
+      internationalDelivery === "yes" ||
+      internationalDelivery === 1;
+
+    // String (Prisma expects String)
+    const normalizedInstallationAvailable =
+      installationAvailable === true ||
+      installationAvailable === "true" ||
+      installationAvailable === "yes" ||
+      installationAvailable === 1
+        ? "yes"
+        : "no";
+
+    /* =========================
+       NUMBER NORMALIZATION
+    ========================= */
+    const normalizedDeliveryTimeMin =
+      deliveryTimeMin !== "" && deliveryTimeMin !== undefined
+        ? Number(deliveryTimeMin)
+        : null;
+
+    const normalizedDeliveryTimeMax =
+      deliveryTimeMax !== "" && deliveryTimeMax !== undefined
+        ? Number(deliveryTimeMax)
+        : null;
+
+    const normalizedShippingCharge =
+      shippingCharge !== "" && shippingCharge !== undefined
+        ? Number(shippingCharge)
+        : null;
+
+    const normalizedInstallationCharge =
+      normalizedInstallationAvailable === "yes" &&
+      installationCharge !== "" &&
+      installationCharge !== undefined
+        ? Number(installationCharge)
+        : null;
+
+    /* =========================
+       UPSERT
+    ========================= */
     const delivery = await prisma.sellerDeliveryDetails.upsert({
       where: { sellerId: Number(sellerId) },
+
       update: {
         deliveryResponsibility,
         deliveryCoverage,
         deliveryType,
-        deliveryTimeMin: deliveryTimeMin ? Number(deliveryTimeMin) : null,
-        deliveryTimeMax: deliveryTimeMax ? Number(deliveryTimeMax) : null,
+
+        deliveryTimeMin: normalizedDeliveryTimeMin,
+        deliveryTimeMax: normalizedDeliveryTimeMax,
+
         shippingChargeType,
-        shippingCharge: shippingCharge ? Number(shippingCharge) : null,
-        internationalDelivery,
-        installationAvailable,
-        installationCharge: installationCharge ? Number(installationCharge) : null,
+        shippingCharge: normalizedShippingCharge,
+
+        internationalDelivery: normalizedInternationalDelivery, // BOOLEAN ✅
+        installationAvailable: normalizedInstallationAvailable, // STRING ✅
+        installationCharge: normalizedInstallationCharge,
       },
+
       create: {
         sellerId: Number(sellerId),
         deliveryResponsibility,
         deliveryCoverage,
         deliveryType,
-        deliveryTimeMin: deliveryTimeMin ? Number(deliveryTimeMin) : null,
-        deliveryTimeMax: deliveryTimeMax ? Number(deliveryTimeMax) : null,
+
+        deliveryTimeMin: normalizedDeliveryTimeMin,
+        deliveryTimeMax: normalizedDeliveryTimeMax,
+
         shippingChargeType,
-        shippingCharge: shippingCharge ? Number(shippingCharge) : null,
-        internationalDelivery,
-        installationAvailable,
-        installationCharge: installationCharge ? Number(installationCharge) : null,
+        shippingCharge: normalizedShippingCharge,
+
+        internationalDelivery: normalizedInternationalDelivery, // BOOLEAN ✅
+        installationAvailable: normalizedInstallationAvailable, // STRING ✅
+        installationCharge: normalizedInstallationCharge,
       },
     });
 
-    res.json(delivery);
+    res.json({
+      message: "Delivery details saved successfully",
+      delivery,
+    });
   } catch (err) {
     console.error("SAVE DELIVERY ERROR:", err);
     res.status(500).json({ message: "Failed to save delivery details" });
   }
 });
+
+
 
 // =========================
 // GET SELLER DELIVERY DETAILS
@@ -1275,42 +1372,142 @@ app.put("/seller/profile/:id", async (req, res) => {
 });
 
 // ============================
-// GET SELLER ORDERS
+// GET SELLER ORDERS (include totalAmount)
 // ============================
 app.get("/seller/:sellerId/orders", async (req, res) => {
   try {
     const sellerId = Number(req.params.sellerId);
+    if (isNaN(sellerId)) return res.json([]);
 
-    const items = await prisma.orderItem.findMany({
+    const orderItems = await prisma.orderItem.findMany({
       where: { sellerId },
-      orderBy: { createdAt: "desc" },
       include: {
         order: {
           select: {
-            createdAt: true,
             address: true,
             customerName: true,
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    const formatted = items.map((item) => ({
-      id: item.id,
-      customer: item.order.customerName,
-      material: item.materialName,
-      quantity: `${item.quantity} Unit`,
-      time: item.order.createdAt,   // ✅ RAW DATE
-      status: item.status,
-      siteLocation: item.order.address,
-    }));
+    res.json(
+      orderItems.map((item) => ({
+        id: item.id,
+        material: item.materialName,
+        quantity: item.quantity,
 
-    res.json(formatted);
+        // customer/site (snapshot)
+        customer: item.order?.customerName || "Customer",
+        siteLocation: item.order?.address || "Not specified",
+
+        // status/time
+        status: item.status,
+        time: item.createdAt,
+
+        // IMPORTANT: include the per-item amount so frontend can sum earnings
+        totalAmount: item.totalAmount ?? 0,
+        pricePerUnit: item.pricePerUnit ?? null,
+      }))
+    );
   } catch (err) {
-    console.error("SELLER ORDERS ERROR:", err);
+    console.error("FETCH SELLER ORDERS ERROR:", err);
     res.status(500).json([]);
   }
 });
+
+// ============================
+// SELLER DASHBOARD SUMMARY (ordersCount + totalEarnings)
+// ============================
+app.get("/seller/:sellerId/dashboard", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+    if (isNaN(sellerId)) return res.status(400).json({ message: "Invalid sellerId" });
+
+    const orderItems = await prisma.orderItem.findMany({
+      where: { sellerId },
+      select: {
+        status: true,
+        totalAmount: true,
+      },
+    });
+
+    const ordersCount = orderItems.length;
+    const totalEarnings = orderItems
+      .filter((it) => it.status === "fulfilled")
+      .reduce((s, it) => s + Number(it.totalAmount ?? 0), 0);
+
+    res.json({
+      ordersCount,
+      totalEarnings,
+    });
+  } catch (err) {
+    console.error("SELLER DASHBOARD ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch dashboard" });
+  }
+});
+  
+
+
+// ============================
+// GET USER ORDERS
+// ============================
+app.get("/orders/user/:email", async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(404).json([]);
+    }
+
+    const orderItems = await prisma.orderItem.findMany({
+      where: {
+        order: {
+          userId: user.id,
+        },
+      },
+      include: {
+        rating: true,
+        product: true,
+        seller: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(
+      orderItems.map((item) => ({
+        orderItemId: item.id,
+        id: item.orderId,
+        productName: item.product.name,
+        sellerName: item.seller.name,
+        quantity: item.quantity,
+        totalAmount: item.totalPrice,
+        imageUrl: item.product.images?.[0] || null,
+        orderStatus: item.status,
+
+        deliveryTimeMin: item.deliveryTimeMin,
+        deliveryTimeMax: item.deliveryTimeMax,
+        shippingChargeType: item.shippingChargeType,
+        shippingCharge: item.shippingCharge,
+        installationAvailable: item.installationAvailable,
+        installationCharge: item.installationCharge,
+
+        isRated: !!item.rating, // ⭐ SOURCE OF TRUTH
+      }))
+    );
+  } catch (err) {
+    console.error("FETCH USER ORDERS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
 
 // ============================
 // UPDATE ORDER ITEM STATUS
@@ -1415,7 +1612,7 @@ app.patch("/order/:orderId/cancel", async (req, res) => {
 });
 
 // ============================
-// RATE ORDER ITEM
+// RATE ORDER ITEM 
 // ============================
 app.post("/order/item/:orderItemId/rate", async (req, res) => {
   try {
@@ -1436,7 +1633,12 @@ app.post("/order/item/:orderItemId/rate", async (req, res) => {
 
     const orderItem = await prisma.orderItem.findUnique({
       where: { id: orderItemId },
-      include: { rating: true },
+      select: {
+        id: true,
+        status: true,
+        materialId: true,   // ✅ FIXED
+        rating: true,
+      },
     });
 
     if (!orderItem) {
@@ -1457,18 +1659,34 @@ app.post("/order/item/:orderItemId/rate", async (req, res) => {
       data: {
         stars,
         comment: comment || null,
-        userId: user.id,
-        productId: orderItem.materialId,
-        orderItemId: orderItem.id,
+
+        user: {
+          connect: { id: user.id },
+        },
+
+        // ✅ CONNECT TO PRODUCT / MATERIAL
+        product: {
+          connect: { id: orderItem.materialId },
+        },
+
+        orderItem: {
+          connect: { id: orderItem.id },
+        },
       },
     });
 
-    res.status(201).json({ message: "Rating submitted", rating });
+    return res.status(201).json({
+      message: "Rating submitted successfully",
+      rating,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to submit rating" });
+    console.error("RATE ORDER ERROR:", err);
+    return res.status(500).json({ message: "Failed to submit rating" });
   }
 });
+
+
+
 
 // ============================
 // GET PRODUCT RATINGS & REVIEWS

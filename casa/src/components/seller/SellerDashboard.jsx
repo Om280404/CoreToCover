@@ -6,10 +6,7 @@ import Sidebar from "./Sidebar";
 import NotificationButton from "./NotificationButton";
 import "./SellerDashboard.css";
 import { FaShoppingCart, FaRupeeSign } from "react-icons/fa";
-import {
-  getSellerProfile,
-  getSellerOrders,
-} from "../../api/seller";
+import { getSellerProfile, getSellerOrders, getSellerDashboard } from "../../api/seller";
 
 const SellerDashboard = () => {
   const navigate = useNavigate();
@@ -58,21 +55,34 @@ const SellerDashboard = () => {
 
     const loadStats = async () => {
       try {
-        const res = await getSellerOrders(sellerId);
-        const orders = Array.isArray(res.data) ? res.data : [];
+        // preferred: call dashboard endpoint
+        const res = await getSellerDashboard(sellerId);
+        const data = res?.data || {};
 
-        setOrdersCount(orders.length);
-
-        const earnings = orders
-          .filter((o) => o.status === "fulfilled")
-          .reduce(
-            (sum, o) => sum + Number(o.totalAmount || 0),
-            0
-          );
-
-        setTotalEarnings(earnings);
+        setOrdersCount(data.ordersCount ?? 0);
+        setTotalEarnings(data.totalEarnings ?? 0);
       } catch (err) {
         console.error("DASHBOARD ERROR:", err);
+
+        // fallback: fetch orders and compute client-side (keeps backward compatibility)
+        try {
+          const res2 = await getSellerOrders(sellerId);
+          const orders = Array.isArray(res2.data) ? res2.data : [];
+
+          setOrdersCount(orders.length);
+
+          const earnings = orders
+            .filter((o) => (o.status ?? o._status ?? "").toString() === "fulfilled")
+            .reduce(
+              (sum, o) => sum + Number(o.totalAmount ?? o.totalPrice ?? 0),
+              0
+            );
+
+          setTotalEarnings(earnings);
+        } catch (err2) {
+          console.error("DASHBOARD FALLBACK ERROR:", err2);
+          setTotalEarnings(0);
+        }
       } finally {
         setLoading(false);
       }

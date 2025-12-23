@@ -32,6 +32,7 @@ import SellerSignup from './components/seller/SellerSignup';
 import BusinessDetails from './components/seller/BusinessDetails';
 import SellerDeliveryDetails from './components/seller/SellerDeliveryDetails';
 import SellerDeliveryUpdate from './components/seller/SellerDeliveryUpdate';
+import SellerManageBankDetails from './components/seller/SellerManageBankDetails'
 import SellerBankDetails from './components/seller/SellerBankDetails';  
 import SellerProducts from './components/seller/SellerProducts';
 
@@ -103,6 +104,7 @@ function App() {
         <Route path="/businessdetails" element={<BusinessDetails />} />
         <Route path="/deliverydetails" element={<SellerDeliveryDetails/>} />
         <Route path="/sellerdeliveryupdate" element={<AuthRoute element={<SellerDeliveryUpdate/>}/>} />
+        <Route path='sellermanagebankdetails' element={<SellerManageBankDetails/>} />
         <Route path="/sellerbankdetails" element={<AuthRoute element={<SellerBankDetails/>}/>} />
         <Route path="/sellerproducts" element={<AuthRoute element={<SellerProducts/>}/>} />
 

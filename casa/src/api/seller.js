@@ -30,6 +30,16 @@ export const getSellerBankDetails = (sellerId) => {
 };
 
 /* =========================
+   VERIFY SELLER PASSWORD
+========================= */
+export const verifySellerPassword = (sellerId, password) => {
+  return api.post("/seller/verify-password", {
+    sellerId,
+    password,
+  });
+};
+
+/* =========================
    SAVE / UPDATE SELLER BANK DETAILS
 ========================= */
 export const saveSellerBankDetails = (payload) => {
@@ -98,3 +108,7 @@ export const saveSellerDeliveryDetails = (payload) => {
 export const getSellerDeliveryDetails = (sellerId) => {
   return api.get(`/seller/${sellerId}/delivery-details`);
 };
+
+
+export const getSellerDashboard = (sellerId) =>
+  api.get(`/seller/${sellerId}/dashboard`);

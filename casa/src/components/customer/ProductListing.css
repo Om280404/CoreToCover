@@ -116,9 +116,9 @@
   }
 
   .product-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 45px;
-    padding: 40px 4vw;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
   }
 }
 

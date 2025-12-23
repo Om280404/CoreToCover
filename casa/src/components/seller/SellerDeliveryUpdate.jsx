@@ -33,9 +33,26 @@ const SellerDeliveryUpdate = () => {
 
         getSellerDeliveryDetails(sellerId)
             .then((res) => {
-                setDelivery(res.data);
-                setIsEditMode(true); // update mode
+                const data = res.data;
+
+                setDelivery({
+                    ...data,
+                    // ensure STRING for select
+                    installationAvailable:
+                        data.installationAvailable === true ||
+                            data.installationAvailable === "yes"
+                            ? "yes"
+                            : "no",
+
+                    // ensure BOOLEAN for checkbox
+                    internationalDelivery:
+                        data.internationalDelivery === true ||
+                        data.internationalDelivery === "yes",
+                });
+
+                setIsEditMode(true);
             })
+
             .catch(() => {
                 // 404 = first time seller
                 setDelivery(emptyDelivery);

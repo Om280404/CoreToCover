@@ -8,6 +8,7 @@ import {
   FaGlobe,
   FaBars,
   FaTimes,
+  FaUserGraduate,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -85,7 +86,7 @@ const Navbar = () => {
 
               <li>
                 <Link to="/myhireddesigners" className="nav-link">
-                  <FaUser /> My Hired Designers
+                  <FaUserGraduate /> My Hired Designers
                 </Link>
               </li>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar"
 import "./SellerBankDetails.css";
 import {
   getSellerBankDetails,
@@ -75,7 +76,7 @@ const SellerBankDetails = () => {
       });
 
       alert("Bank details saved successfully ✅");
-      navigate("/sellerdashboard");
+      navigate("/sellerbankdetails");
     } catch (err) {
       alert(
         err?.response?.data?.message ||
@@ -90,6 +91,8 @@ const SellerBankDetails = () => {
      UI
   ========================= */
   return (
+    <div className="ms-root">
+      <Sidebar/>
     <div className="bs-layout-root">
       <div className="bs-profile-shell">
         <h1 className="bs-heading">Bank Details</h1>
@@ -138,11 +141,12 @@ const SellerBankDetails = () => {
               className="bs-btn bs-btn--primary"
               disabled={saving}
             >
-              {saving ? "Saving..." : "Save & Go to Dashboard"}
+              {saving ? "Saving..." : "Save "}
             </button>
           </form>
         )}
       </div>
+    </div>
     </div>
   );
 };

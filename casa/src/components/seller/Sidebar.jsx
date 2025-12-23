@@ -7,6 +7,7 @@ import {
   FiX,
   FiPackage,
 } from "react-icons/fi";
+import { PiBank } from "react-icons/pi";
 import { AiOutlineProduct } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import "./Sidebar.css";
@@ -34,6 +35,7 @@ const Sidebar = ({ notificationCount = 0 }) => {
     { icon: <FiPackage />, label: "Add Product", path: "/selleraddproduct" },
     { icon: <AiOutlineProduct />, label: "My Products", path: "/sellerproducts" },
     { icon: <FiUser />, label: "Delivery Settings", path: "/sellerdeliveryupdate" },
+    { icon: <PiBank />, label: "Bank Details", path: "/sellerbankdetails"},
   ];
 
   return (
