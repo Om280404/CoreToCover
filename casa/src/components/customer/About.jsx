@@ -19,7 +19,7 @@ export default function About() {
             </p>
 
             <div className="hero-ctas">
-              <Link to="/home" className="btn btn-primary" aria-label="Explore Marketplace">
+              <Link to="/" className="btn btn-primary" aria-label="Explore Marketplace">
                 Explore Marketplace
               </Link>
               <Link to="/signup" className="btn btn-ghost" aria-label="Create an account">

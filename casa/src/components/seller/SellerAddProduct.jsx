@@ -60,8 +60,8 @@ const SellerAddProduct = () => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    if (images.length + files.length > 5) {
-      alert("You can upload a maximum of 5 images.");
+    if (images.length + files.length > 10) {
+      alert("You can upload a maximum of 10 images.");
       return;
     }
 
@@ -117,8 +117,8 @@ const SellerAddProduct = () => {
     if (!category) return alert("Select category.");
     if (price === "" || Number(price) < 0)
       return alert("Enter a valid price.");
-    if (images.length < 1 || images.length > 5)
-      return alert("Upload 1–5 images.");
+    if (images.length < 1 || images.length > 10)
+      return alert("Upload 1–10 images.");
 
     const sellerId = localStorage.getItem("sellerId");
     if (!sellerId) return alert("Seller not logged in.");
@@ -257,7 +257,7 @@ const SellerAddProduct = () => {
             </label>
 
             <label className="sma-field sma-full">
-              <span className="sma-label">Upload Images (1–5)</span>
+              <span className="sma-label">Upload Images (1–10)</span>
               <input
                 type="file"
                 multiple
@@ -276,7 +276,7 @@ const SellerAddProduct = () => {
             </label>
 
             <label className="sma-field sma-full">
-              <span className="sma-label">Upload Video (optional)</span>
+              <span className="sma-label">Upload Videos (1-5 *optional)</span>
               <input
                 type="file"
                 accept="video/*"

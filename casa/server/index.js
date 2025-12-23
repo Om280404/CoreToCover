@@ -691,8 +691,8 @@ app.get("/seller/:sellerId/delivery-details", async (req, res) => {
 app.post(
   "/seller/product",
   upload.fields([
-    { name: "images", maxCount: 5 },
-    { name: "video", maxCount: 1 },
+    { name: "images", maxCount: 10 },
+    { name: "video", maxCount: 5 },
   ]),
   async (req, res) => {
     try {
