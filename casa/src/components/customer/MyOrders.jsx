@@ -1,5 +1,6 @@
+// File: src/components/customer/MyOrders.jsx
 import React, { useState, useMemo, useEffect } from "react";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaCheck } from "react-icons/fa";
 import "./MyOrders.css";
 import sample from "../../assets/images/sample.jpg";
 import api from "../../api/axios";
@@ -62,12 +63,10 @@ export default function MyOrders() {
         userEmail,
       });
 
-      // mark order as rated
+      // mark order as rated locally
       setOrders((prev) =>
         prev.map((o) =>
-          o.orderItemId === orderItemId
-            ? { ...o, isRated: true }
-            : o
+          o.orderItemId === orderItemId ? { ...o, isRated: true } : o
         )
       );
 
@@ -87,9 +86,7 @@ export default function MyOrders() {
   ========================= */
   const filteredOrders = useMemo(() => {
     return orders.filter((o) =>
-      (o.productName || "")
-        .toLowerCase()
-        .includes(query.toLowerCase())
+      (o.productName || "").toLowerCase().includes(query.toLowerCase())
     );
   }, [orders, query]);
 
@@ -117,9 +114,7 @@ export default function MyOrders() {
             <article key={order.orderItemId} className="order-card">
               <img
                 src={
-                  order.imageUrl
-                    ? `http://localhost:3001/${order.imageUrl}`
-                    : sample
+                  order.imageUrl ? `http://localhost:3001/${order.imageUrl}` : sample
                 }
                 className="order-img"
                 alt={order.productName}
@@ -134,10 +129,18 @@ export default function MyOrders() {
                 </div>
 
                 <div className="order-meta">
-                  <p><strong>Order ID:</strong> {order.id}</p>
-                  <p><strong>Seller:</strong> {order.sellerName}</p>
-                  <p><strong>Quantity:</strong> {order.quantity}</p>
-                  <p><strong>Total:</strong> ₹{order.totalAmount}</p>
+                  <p>
+                    <strong>Order ID:</strong> {order.id}
+                  </p>
+                  <p>
+                    <strong>Seller:</strong> {order.sellerName}
+                  </p>
+                  <p>
+                    <strong>Quantity:</strong> {order.quantity}
+                  </p>
+                  <p>
+                    <strong>Total:</strong> ₹{order.totalAmount}
+                  </p>
                 </div>
 
                 {/* DELIVERY DETAILS */}
@@ -150,17 +153,59 @@ export default function MyOrders() {
                   </p>
                 </div>
 
-                {/* ===== RATING SECTION ===== */}
-                {isDelivered && !openRating[order.orderItemId] && (
+                {/* ===== RATING SECTION (CARD LEVEL) ===== */}
+                {isDelivered && (
                   <>
                     {order.isRated ? (
-                      <button
-                        className="rate-btn disabled"
-                        disabled
-                      >
-                        ⭐ Already rated
-                      </button>
+                      /* ✅ SHOW RATED BADGE INSIDE CARD */
+                      <span className="rated-pill">
+                        ✓ Rated
+                      </span>
+                    ) : openRating[order.orderItemId] ? (
+                      /* Rating form */
+                      <div className="order-rating">
+                        <div>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <FaStar
+                              key={star}
+                              size={18}
+                              style={{ cursor: "pointer", marginRight: 4 }}
+                              color={
+                                (ratings[order.orderItemId] || 0) >= star
+                                  ? "#facc15"
+                                  : "#d1d5db"
+                              }
+                              onClick={() =>
+                                setRatings((p) => ({
+                                  ...p,
+                                  [order.orderItemId]: star,
+                                }))
+                              }
+                            />
+                          ))}
+                        </div>
+
+                        <textarea
+                          className="order-review"
+                          placeholder="Write a review (optional)"
+                          value={reviews[order.orderItemId] || ""}
+                          onChange={(e) =>
+                            setReviews((p) => ({
+                              ...p,
+                              [order.orderItemId]: e.target.value,
+                            }))
+                          }
+                        />
+
+                        <button
+                          className="track-btn"
+                          onClick={() => submitRating(order.orderItemId)}
+                        >
+                          Submit Review
+                        </button>
+                      </div>
                     ) : (
+                      /* Show rate button only if NOT rated */
                       <button
                         className="rate-btn"
                         onClick={() =>
@@ -176,51 +221,6 @@ export default function MyOrders() {
                   </>
                 )}
 
-                {isDelivered && openRating[order.orderItemId] && (
-                  <div className="order-rating">
-                    <div>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FaStar
-                          key={star}
-                          size={18}
-                          style={{ cursor: "pointer", marginRight: 4 }}
-                          color={
-                            (ratings[order.orderItemId] || 0) >= star
-                              ? "#facc15"
-                              : "#d1d5db"
-                          }
-                          onClick={() =>
-                            setRatings((p) => ({
-                              ...p,
-                              [order.orderItemId]: star,
-                            }))
-                          }
-                        />
-                      ))}
-                    </div>
-
-                    <textarea
-                      className="order-review"
-                      placeholder="Write a review (optional)"
-                      value={reviews[order.orderItemId] || ""}
-                      onChange={(e) =>
-                        setReviews((p) => ({
-                          ...p,
-                          [order.orderItemId]: e.target.value,
-                        }))
-                      }
-                    />
-
-                    <button
-                      className="track-btn"
-                      onClick={() =>
-                        submitRating(order.orderItemId)
-                      }
-                    >
-                      Submit Review
-                    </button>
-                  </div>
-                )}
               </div>
             </article>
           );

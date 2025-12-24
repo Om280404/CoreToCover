@@ -1061,7 +1061,10 @@ app.get("/orders/user/:email", async (req, res) => {
       include: {
         items: {
           include: {
-            seller: { select: { name: true } },
+            seller: {
+              select: { name: true },
+            },
+            rating: true, // 🔥 THIS IS THE KEY FIX
           },
         },
       },
@@ -1081,6 +1084,17 @@ app.get("/orders/user/:email", async (req, res) => {
         orderStatus: item.status,
         createdAt: order.createdAt,
 
+        // ✅ THIS FIXES REFRESH ISSUE
+        isRated: Boolean(item.rating),
+
+        // optional (future use)
+        rating: item.rating
+          ? {
+              stars: item.rating.stars,
+              comment: item.rating.comment,
+            }
+          : null,
+
         // ✅ DELIVERY DETAILS FOR UI
         deliveryTimeMin: item.deliveryTimeMin,
         deliveryTimeMax: item.deliveryTimeMax,
@@ -1097,6 +1111,7 @@ app.get("/orders/user/:email", async (req, res) => {
     res.status(500).json([]);
   }
 });
+
 
 // ============================
 // GET PRODUCTS OF A SELLER

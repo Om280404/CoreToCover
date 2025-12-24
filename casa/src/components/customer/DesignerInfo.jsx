@@ -7,27 +7,31 @@ import {
   FaStar,
   FaStarHalfAlt,
   FaRegStar,
+  FaUser,
 } from "react-icons/fa";
 import { LuMapPin } from "react-icons/lu";
 import { useLocation } from "react-router-dom";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { hireDesigner } from "../../api/designer";
 
-
-
 /* =========================
-   Expandable Text
-========================= */
+   Helpers
+======================== */
 const ExpandableText = ({ text = "", limit = 160 }) => {
   const [expanded, setExpanded] = useState(false);
   if (!text) return null;
-
   const isLong = text.length > limit;
   return (
     <p className="expandable-text">
       {expanded || !isLong ? text : `${text.slice(0, limit)}...`}
       {isLong && (
-        <span className="see-more-btn" onClick={() => setExpanded(!expanded)}>
+        <span
+          className="see-more-btn"
+          onClick={() => setExpanded((s) => !s)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && setExpanded((s) => !s)}
+        >
           {expanded ? " See less" : " See more"}
         </span>
       )}
@@ -35,16 +39,11 @@ const ExpandableText = ({ text = "", limit = 160 }) => {
   );
 };
 
-/* =========================
-   Render Stars
-========================= */
 const renderStars = (avg) => {
-  if (!Number.isFinite(avg)) return null;
-
+  if (avg === null || avg === undefined) return null;
   const full = Math.floor(avg);
   const half = avg - full >= 0.5;
   const empty = 5 - full - (half ? 1 : 0);
-
   return (
     <>
       {[...Array(full)].map((_, i) => (
@@ -58,12 +57,16 @@ const renderStars = (avg) => {
   );
 };
 
+/* =========================
+   Component
+======================== */
 const DesignerInfo = () => {
   const location = useLocation();
   const designerId = location.state?.designer?.id;
 
   const [designer, setDesigner] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
+  const [selectedWorkIndex, setSelectedWorkIndex] = useState(-1);
 
   const [ratingsSummary, setRatingsSummary] = useState(null);
   const [reviewsPage, setReviewsPage] = useState(0);
@@ -75,7 +78,6 @@ const DesignerInfo = () => {
   const [hireLoading, setHireLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
-  /* ===== OLD FORM STRUCTURE ===== */
   const [hireForm, setHireForm] = useState({
     fullName: "",
     mobile: "",
@@ -87,9 +89,9 @@ const DesignerInfo = () => {
     description: "",
   });
 
-  /* =========================
-     Fetch Designer Info + Reviews
-  ========================= */
+  const [imagePopupOpen, setImagePopupOpen] = useState(false);
+  const [popupImage, setPopupImage] = useState(null);
+
   useEffect(() => {
     if (!designerId) return;
 
@@ -101,14 +103,39 @@ const DesignerInfo = () => {
           fetch(`http://localhost:3001/designer/${designerId}/ratings`),
         ]);
 
-        if (!infoRes.ok) throw new Error("Failed");
+        if (!infoRes.ok) throw new Error("Failed to load designer info");
 
         const info = await infoRes.json();
         const ratings = ratingsRes.ok ? await ratingsRes.json() : null;
 
-        setDesigner(info);
+        // normalize works array shape if necessary
+        const normalizedWorks = (info.works || []).map((w) => {
+          // server returns { id, img, title, desc } in prior code — support fallback keys
+          return {
+            id: w.id,
+            img: w.img || w.preview || w.image || w.imageUrl || null,
+            title: w.title || (w.description ? w.description.split(".")[0] : "") || "",
+            desc: w.desc || w.description || "",
+            raw: w,
+          };
+        });
+
+        const normalizedInfo = {
+          ...info,
+          works: normalizedWorks,
+        };
+
+        setDesigner(normalizedInfo);
         setRatingsSummary(ratings);
-        if (info.works?.length) setActiveImage(info.works[0].img);
+
+        // set first work (if present) as active; otherwise use designer image
+        if (normalizedWorks.length > 0) {
+          setSelectedWorkIndex(0);
+          setActiveImage(normalizedWorks[0].img);
+        } else {
+          setSelectedWorkIndex(-1);
+          setActiveImage(info.image || null);
+        }
       } catch (err) {
         console.error("DESIGNER LOAD ERROR:", err);
       } finally {
@@ -119,9 +146,9 @@ const DesignerInfo = () => {
     fetchAll();
   }, [designerId]);
 
-  /* =========================
-     Hire Form Handlers
-  ========================= */
+  /* ---------------------------
+     Hire form handlers
+  --------------------------- */
   const handleHireChange = (e) => {
     const { name, value } = e.target;
     setFormError("");
@@ -143,7 +170,7 @@ const DesignerInfo = () => {
       setHireLoading(true);
 
       await hireDesigner(designerId, {
-        userId, // ✅ important
+        userId,
         fullName: hireForm.fullName,
         email: hireForm.email,
         mobile: hireForm.mobile,
@@ -156,8 +183,6 @@ const DesignerInfo = () => {
 
       alert("Request sent successfully!");
       setShowForm(false);
-
-      // optional: reset form
       setHireForm({
         fullName: "",
         mobile: "",
@@ -170,15 +195,64 @@ const DesignerInfo = () => {
       });
     } catch (err) {
       console.error("HIRE ERROR:", err);
-      setFormError(
-        err.response?.data?.message || "Failed to send request"
-      );
+      setFormError(err.response?.data?.message || "Failed to send request");
     } finally {
       setHireLoading(false);
     }
   };
 
+  /* ---------------------------
+     Work click / image popup
+  --------------------------- */
+  const handleWorkClick = (index) => {
+    if (!designer?.works || index < 0 || index >= designer.works.length) return;
+    setSelectedWorkIndex(index);
+    setActiveImage(designer.works[index].img);
+    // optional: focus or scroll thumbnail into view
+    const el = document.getElementById(`portfolio-item-${index}`);
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", inline: "center" });
+  };
 
+  const openImagePopup = (src) => {
+    if (!src) return;
+    setPopupImage(src);
+    setImagePopupOpen(true);
+  };
+
+  const closeImagePopup = () => {
+    setImagePopupOpen(false);
+    setPopupImage(null);
+  };
+
+  /* =========================
+   Expandable Work Description
+========================= */
+  const WorkDescription = ({ text = "", limit = 80 }) => {
+    const [expanded, setExpanded] = useState(false);
+    if (!text) return null;
+
+    const isLong = text.length > limit;
+
+    return (
+      <div className="work_desc">
+        {expanded || !isLong ? text : `${text.slice(0, limit)}...`}
+        {isLong && (
+          <span
+            className="see-more-btn"
+            onClick={(e) => {
+              e.stopPropagation(); // 🔥 IMPORTANT: prevent thumbnail click
+              setExpanded((s) => !s);
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setExpanded((s) => !s)}
+          >
+            {expanded ? " See less" : " See more"}
+          </span>
+        )}
+      </div>
+    );
+  };
 
 
   if (loading) {
@@ -201,7 +275,9 @@ const DesignerInfo = () => {
 
   const reviews = ratingsSummary?.reviews || [];
   const avg = ratingsSummary?.average ?? null;
-  const pages = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
+  const pages = Math.max(1, Math.ceil(reviews.length / REVIEWS_PER_PAGE));
+
+  const selectedWork = designer.works && designer.works[selectedWorkIndex] ? designer.works[selectedWorkIndex] : null;
 
   return (
     <>
@@ -220,10 +296,7 @@ const DesignerInfo = () => {
             <div className="title-row">
               <h1 className="designer-name">{designer.name}</h1>
 
-              <div
-                className={`availability-pill ${designer.availability ? "available" : "busy"
-                  }`}
-              >
+              <div className={`availability-pill ${designer.availability ? "available" : "busy"}`}>
                 <span className="dot" />
                 {designer.availability ? "Available" : "Busy"}
               </div>
@@ -231,15 +304,8 @@ const DesignerInfo = () => {
 
             <h3 className="designer-role">{designer.designerType}</h3>
 
-
-            {/* 🔗 PORTFOLIO LINK */}
             {designer.portfolio && (
-              <a
-                href={designer.portfolio}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="portfolio-link"
-              >
+              <a href={designer.portfolio} target="_blank" rel="noopener noreferrer" className="portfolio-link">
                 View Portfolio <FaExternalLinkAlt />
               </a>
             )}
@@ -252,7 +318,7 @@ const DesignerInfo = () => {
               {avg !== null ? (
                 <>
                   <div className="stars-large">{renderStars(avg)}</div>
-                  <div className="average-number">{avg.toFixed(1)} / 5</div>
+                  <div className="average-number">{Number(avg).toFixed(1)} / 5</div>
                 </>
               ) : (
                 <div className="no-rating">No ratings yet</div>
@@ -265,24 +331,68 @@ const DesignerInfo = () => {
               className={`hire-btn ${!designer.availability ? "disabled" : ""}`}
               onClick={() => setShowForm(true)}
               disabled={!designer.availability}
+              aria-disabled={!designer.availability}
             >
-              {designer.availability
-                ? "Hire This Designer"
-                : "Currently Unavailable"}
+              {designer.availability ? "Hire This Designer" : "Currently Unavailable"}
             </button>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT - MAIN IMAGE */}
           <div className="designer-main-image">
-            {activeImage && <img src={activeImage} alt="work" />}
+            {activeImage ? (
+              <img
+                src={activeImage}
+                alt={selectedWork?.title || "Work preview"}
+                onClick={() => openImagePopup(activeImage)}
+                style={{ cursor: "zoom-in", borderRadius: 12 }}
+              />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", borderRadius: 12 }}>
+                <FaUser size={56} />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* =========================
-            REVIEWS (UNCHANGED)
-        ========================= */}
-        <div className="reviews-section">
-          <h2>Reviews</h2>
+        {/* PORTFOLIO / WORKS */}
+        <section className="portfolio-section">
+          <h2 className="portfolio-title">{designer.name}'s Works</h2>
+
+          {designer.works && designer.works.length > 0 ? (
+            <>
+              <div className="portfolio-row" role="list" aria-label="Designer works">
+                {designer.works.map((w, i) => (
+                  <div
+                    id={`portfolio-item-${i}`}
+                    key={w.id || i}
+                    role="listitem"
+                    className={`portfolio-item ${selectedWorkIndex === i ? "active" : ""}`}
+                    onClick={() => handleWorkClick(i)}
+                    onKeyDown={(e) => e.key === "Enter" && handleWorkClick(i)}
+                    tabIndex={0}
+                  >
+                    {/* ✅ SINGLE GROWING CONTAINER */}
+                    <div className="work-card">
+                      <img src={w.img} alt={w.title || `Work ${i + 1}`} />
+                    </div>
+                      <div className="portfolio-caption">
+                        {w.desc ? <WorkDescription text={w.desc} limit={80} /> : null}
+                      </div>
+                  </div>
+
+                ))}
+              </div>
+
+
+            </>
+          ) : (
+            <p className="empty-text">No works uploaded yet.</p>
+          )}
+        </section>
+
+        {/* REVIEWS */}
+        <section className="reviews-section" aria-labelledby="reviews-title" style={{ marginTop: 28 }}>
+          <h2 id="reviews-title">Reviews</h2>
 
           {reviews.length === 0 ? (
             <p className="empty-text">No reviews yet.</p>
@@ -290,120 +400,77 @@ const DesignerInfo = () => {
             <>
               <ul className="reviews-lists">
                 {reviews
-                  .slice(
-                    reviewsPage * REVIEWS_PER_PAGE,
-                    (reviewsPage + 1) * REVIEWS_PER_PAGE
-                  )
-                  .map((r, i) => (
-                    <li key={i} className="review-item">
-                      <strong>{r.name}</strong>
-                      <div className="review-stars">
-                        {renderStars(r.stars)}
+                  .slice(reviewsPage * REVIEWS_PER_PAGE, (reviewsPage + 1) * REVIEWS_PER_PAGE)
+                  .map((r, idx) => (
+                    <li className="review-item" key={`${r.id || idx}-${idx}`}>
+                      <div className="review-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <div className="reviewer-name">{r.name || r.user || "Reviewer"}</div>
+                          <div className="review-stars" style={{ marginTop: 6 }}>{renderStars(r.stars)}</div>
+                        </div>
+                        <div style={{ color: "var(--text-light)", fontSize: 12 }}>{new Date(r.createdAt).toLocaleDateString()}</div>
                       </div>
+
                       <p>{r.review || <em>No comment</em>}</p>
-                      <div className="review-meta">
-                        {new Date(r.createdAt).toLocaleDateString()}
-                      </div>
+                      <div className="review-meta" style={{ marginTop: 6 }}>{/* extra meta if needed */}</div>
                     </li>
                   ))}
               </ul>
 
               {pages > 1 && (
-                <div className="pagination">
-                  <button
-                    onClick={() => setReviewsPage((p) => Math.max(0, p - 1))}
-                    disabled={reviewsPage === 0}
-                  >
+                <div className="pagination" style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 14 }}>
+                  <button onClick={() => setReviewsPage((p) => Math.max(0, p - 1))} disabled={reviewsPage === 0}>
                     Prev
                   </button>
                   <span>
                     Page {reviewsPage + 1} of {pages}
                   </span>
-                  <button
-                    onClick={() =>
-                      setReviewsPage((p) => Math.min(p + 1, pages - 1))
-                    }
-                    disabled={reviewsPage === pages - 1}
-                  >
+                  <button onClick={() => setReviewsPage((p) => Math.min(p + 1, pages - 1))} disabled={reviewsPage === pages - 1}>
                     Next
                   </button>
                 </div>
               )}
             </>
           )}
-        </div>
+        </section>
 
-        {/* =========================
-            HIRE MODAL (OLD STRUCTURE)
-        ========================= */}
+        {/* HIRE MODAL */}
         {showForm && (
           <div className="modal-overlay" onClick={() => setShowForm(false)}>
             <div className="modal-box" onClick={(e) => e.stopPropagation()}>
               <h2 className="modal-title">Hire This Designer</h2>
 
-              {formError && <p className="form-error">{formError}</p>}
+              {formError && <p className="form-error" style={{ color: "red" }}>{formError}</p>}
 
               <form className="modal-form" onSubmit={handleHireSubmit}>
                 <label>
                   Full Name
-                  <input
-                    name="fullName"
-                    value={hireForm.fullName}
-                    onChange={handleHireChange}
-                    required
-                  />
+                  <input name="fullName" value={hireForm.fullName} onChange={handleHireChange} required />
                 </label>
 
                 <label>
                   Mobile Number
-                  <input
-                    name="mobile"
-                    value={hireForm.mobile}
-                    onChange={handleHireChange}
-                    required
-                  />
+                  <input name="mobile" value={hireForm.mobile} onChange={handleHireChange} required />
                 </label>
 
                 <label>
                   Email
-                  <input
-                    type="email"
-                    name="email"
-                    value={hireForm.email}
-                    onChange={handleHireChange}
-                    required
-                  />
+                  <input type="email" name="email" value={hireForm.email} onChange={handleHireChange} required />
                 </label>
 
                 <label>
                   City / Location
-                  <input
-                    name="location"
-                    value={hireForm.location}
-                    onChange={handleHireChange}
-                    required
-                  />
+                  <input name="location" value={hireForm.location} onChange={handleHireChange} required />
                 </label>
 
                 <label>
                   Budget in Rs
-                  <input
-                    type="number"
-                    name="budget"
-                    value={hireForm.budget}
-                    onChange={handleHireChange}
-                    required
-                  />
+                  <input type="number" name="budget" value={hireForm.budget} onChange={handleHireChange} required />
                 </label>
 
                 <label>
                   Type of Work
-                  <select
-                    name="workType"
-                    value={hireForm.workType}
-                    onChange={handleHireChange}
-                    required
-                  >
+                  <select name="workType" value={hireForm.workType} onChange={handleHireChange} required>
                     <option value="">Select type</option>
                     <option>Interior Design</option>
                     <option>Product Design</option>
@@ -414,40 +481,28 @@ const DesignerInfo = () => {
 
                 <label>
                   Timeline (days)
-                  <input
-                    type="number"
-                    name="timelineDays"
-                    value={hireForm.timelineDays}
-                    onChange={handleHireChange}
-                  />
+                  <input type="number" name="timelineDays" value={hireForm.timelineDays} onChange={handleHireChange} />
                 </label>
 
                 <label className="desc">
                   Project Description
-                  <textarea
-                    name="description"
-                    value={hireForm.description}
-                    onChange={handleHireChange}
-                  />
+                  <textarea name="description" value={hireForm.description} onChange={handleHireChange} />
                 </label>
 
                 <div className="modal-actions">
-                  <button
-                    type="button"
-                    className="cancel-btn"
-                    onClick={() => setShowForm(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="submit-btn"
-                    disabled={hireLoading}
-                  >
-                    {hireLoading ? "Sending..." : "Send Request"}
-                  </button>
+                  <button type="button" className="cancel-btn" onClick={() => setShowForm(false)}>Cancel</button>
+                  <button type="submit" className="submit-btn" disabled={hireLoading}>{hireLoading ? "Sending..." : "Send Request"}</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* IMAGE POPUP */}
+        {imagePopupOpen && popupImage && (
+          <div className="img-overlay" onClick={closeImagePopup}>
+            <div className="img-popup" onClick={(e) => e.stopPropagation()}>
+              <img src={popupImage} alt="enlarged" />
             </div>
           </div>
         )}
