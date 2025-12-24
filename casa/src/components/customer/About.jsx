@@ -146,6 +146,56 @@ export default function About() {
           </ul>
         </section>
 
+        {/* New section: platform features that use the extra info the user provided */}
+        <section className="about-features card">
+          <h2>Key platform features</h2>
+          <p className="muted">Features designed to create trust, fairness, and clarity for both designers and clients.</p>
+
+          <div className="features-grid" role="list">
+            <article className="feature" role="listitem" aria-labelledby="feat-ratings">
+              <h3 id="feat-ratings">Mutual Ratings & Reviews</h3>
+              <p>
+                On Casa both customers and designers can leave ratings and reviews for one another —
+                a two-way feedback system that raises standards and helps everyone make better decisions.
+              </p>
+
+              <ul className="feature-benefits">
+                <li><strong>For designers:</strong> Learn about a client’s working style, communication, and payment reliability before accepting work.</li>
+                <li><strong>For clients:</strong> See verified designer performance, past work quality, and client satisfaction to choose the right match.</li>
+                <li><strong>For the platform:</strong> Reduces mismatches and no-shows, encourages professional behaviour, and powers trust signals used in matching and visibility.</li>
+              </ul>
+            </article>
+
+            <article className="feature" role="listitem" aria-labelledby="feat-subscription">
+              <h3 id="feat-subscription">Subscription-based Designer Memberships</h3>
+              <p>
+                We do not charge per-project commission from designers. Instead Casa offers monthly subscription plans that unlock benefits and a reliable listing environment.
+              </p>
+
+              <ul className="feature-benefits">
+                <li><strong>Predictable costs:</strong> Designers pay a simple monthly fee — no surprise deductions when they get hired.</li>
+                <li><strong>Higher earnings:</strong> Designers keep their project fees intact, encouraging competitive pricing and better profit margins.</li>
+                <li><strong>Premium perks:</strong> Subscribers can get features like priority placement, verified badges, analytics dashboards, and early access to leads.</li>
+                <li><strong>Platform sustainability:</strong> Recurring revenue helps Casa invest in features, support, and marketing that grow demand for designers.</li>
+              </ul>
+            </article>
+
+            <article className="feature" role="listitem" aria-labelledby="feat-agreements">
+              <h3 id="feat-agreements">Automated Legal Agreements (PDF)</h3>
+              <p>
+                For each engagement Casa can generate a clear legal agreement as a downloadable PDF that both parties sign. The agreement captures scope, timelines, deliverables, payment terms, and dispute resolution.
+              </p>
+
+              <ul className="feature-benefits">
+                <li><strong>Clarity & scope:</strong> Prevents misunderstandings by documenting exactly what’s included and excluded in a project.</li>
+                <li><strong>Payment security:</strong> Clear milestones and payment schedules protect both clients and designers.</li>
+                <li><strong>Dispute prevention:</strong> Having an agreed-upon contract reduces friction and provides an enforceable reference if issues arise.</li>
+                <li><strong>Professionalism:</strong> Designers can present formal agreements to clients, improving conversion and perceived legitimacy.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
         <section className="about-cta card">
           <h2>Build your space with Casa</h2>
           <p>
