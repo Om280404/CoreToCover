@@ -393,3 +393,7 @@
     justify-content: flex-start;
   }
 }
+
+.review-card{
+  margin-bottom: 25px;
+}
