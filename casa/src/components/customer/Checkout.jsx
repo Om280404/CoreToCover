@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import {
   getCart,
@@ -13,34 +13,54 @@ import COD from "../../assets/images/COD.png";
 import GooglePay from "../../assets/images/GooglePay.png";
 import Paytm from "../../assets/images/Paytm.png";
 import PhonePe from "../../assets/images/PhonePe.jpg";
+import { getUserCredit } from "../../api/return";
+
+/**
+ * Checkout component
+ * - Supports paying full order with store credit
+ * - Sends `creditUsed` to backend via /order/place
+ * - Expects backend to atomically deduct credit and may return `newCredit`
+ *
+ * Notes:
+ * - This component deliberately only supports "deduct full total with credit"
+ *   (per your request). If you later want partial-credit, we can add a slider/input.
+ */
+
+const formatINR = (n = 0) =>
+  `₹${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
 export default function Checkout() {
   const navigate = useNavigate();
 
   const [items, setItems] = useState([]);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState(localStorage.getItem("userEmail") || "");
+  const [email, setEmail] = useState(
+    localStorage.getItem("userEmail") || ""
+  );
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [loading, setLoading] = useState(false);
 
-  /* ===============================
-     LOAD CART / SINGLE CHECKOUT
-  =============================== */
+  // store credit state
+  const [credit, setCredit] = useState(0);
+  const [useCreditForFullAmount, setUseCreditForFullAmount] = useState(
+    false
+  );
+
+  // on mount: load cart, user info & credit
   useEffect(() => {
     const single = getSingleCheckoutItem();
     const rawItems = single ? [single] : getCart();
 
-    // Normalize items -> ensure consistent shape and `quantity` field
-    const normalized = (Array.isArray(rawItems) ? rawItems : []).map((it) => ({
-      // keep original properties, but ensure a `quantity` field
-      ...it,
-      // prefer existing fields in order: explicit quantity, trips, fallback 1
-      quantity:
-        Number(it.quantity ?? it.trips ?? it.trips === 0 ? it.trips : 1) ||
-        Number(it.trips || it.quantity) ||
-        1,
-    }));
+    const normalized = (Array.isArray(rawItems) ? rawItems : []).map(
+      (it) => ({
+        ...it,
+        quantity:
+          Number(it.quantity ?? it.trips ?? (it.trips === 0 ? it.trips : 1)) ||
+          Number(it.trips || it.quantity) ||
+          1,
+      })
+    );
 
     setItems(normalized);
 
@@ -52,16 +72,22 @@ export default function Checkout() {
           setName(res.data.name || "");
           setAddress(res.data.address || "");
         })
-        .catch(() => {});
+        .catch(() => {
+          // ignore, user can fill manual
+        });
     }
+
+    // fetch credit
+    getUserCredit()
+      .then((res) => {
+        const c = Number(res.data.credit || 0);
+        setCredit(Number.isFinite(c) ? c : 0);
+      })
+      .catch(() => setCredit(0));
   }, []);
 
-  /* ===============================
-     QUANTITY HANDLERS
-  =============================== */
-
+  // Quantity helpers
   const updateQuantity = (index, newQty) => {
-    // ensure integer >= 1
     let q = Number(newQty);
     if (Number.isNaN(q) || q < 1) q = 1;
 
@@ -75,7 +101,10 @@ export default function Checkout() {
   const increment = (index) => {
     setItems((prev) => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], quantity: (Number(copy[index].quantity) || 0) + 1 };
+      copy[index] = {
+        ...copy[index],
+        quantity: (Number(copy[index].quantity) || 0) + 1,
+      };
       return copy;
     });
   };
@@ -89,26 +118,18 @@ export default function Checkout() {
     });
   };
 
-  /* ===============================
-     SUMMARY CALCULATION
-  =============================== */
-  const computeSummary = () => {
+  // summary calculation
+  const computeSummary = useMemo(() => {
     let subtotal = 0;
     let deliveryCharge = 0;
     let installationTotal = 0;
 
     items.forEach((it) => {
-      // Use quantity (normalized above)
       const qty = Number(it.quantity || 1);
-
-      // price per unit / per trip
       const unitPrice = Number(it.amountPerTrip || it.pricePerTrip || it.price || 0);
-
       subtotal += unitPrice * qty;
 
       if (it.shippingChargeType !== "free" && Number(it.shippingCharge) > 0) {
-        // assume shippingCharge is per item (or per order depending on your model)
-        // here we sum per item instance; if shipping is per order, change logic accordingly
         deliveryCharge += Number(it.shippingCharge);
       }
 
@@ -120,45 +141,43 @@ export default function Checkout() {
     const casaCharge = Math.round(subtotal * 0.02); // 2%
     const grandTotal = subtotal + deliveryCharge + installationTotal + casaCharge;
 
-    return {
-      subtotal,
-      deliveryCharge,
-      installationTotal,
-      casaCharge,
-      grandTotal,
-    };
-  };
+    return { subtotal, deliveryCharge, installationTotal, casaCharge, grandTotal };
+  }, [items]);
 
-  /* ===============================
-     PLACE ORDER
-  =============================== */
+  // handle place order
   const handlePlaceOrder = async () => {
     if (!email || !name || !address) {
       alert("Please provide name, email and address.");
       return;
     }
-
-    if (items.length === 0) {
+    if (!items.length) {
       alert("No items to place order.");
       return;
     }
 
-    const summary = computeSummary();
+    const summary = computeSummary;
+
+    // If using credit for full amount, verify credit suffices
+    const creditUsed = useCreditForFullAmount ? Number(summary.grandTotal) : 0;
+    if (useCreditForFullAmount && credit < summary.grandTotal) {
+      alert("Insufficient store credit to cover the total. Uncheck or top up your credit.");
+      return;
+    }
 
     const ordersPayload = items.map((it) => ({
       supplierId: Number(it.supplierId),
       materialId: Number(it.materialId || it.productId || 0),
       materialName: it.name || it.materialName || it.productName || "",
       supplierName: it.supplier || it.supplierName || "",
-      trips: Number(it.quantity || 1), // send chosen quantity
+      trips: Number(it.quantity || 1),
       amountPerTrip: Number(it.amountPerTrip || it.pricePerTrip || it.price || 0),
-      // include delivery/shipping/installation fields if backend expects them per item
       deliveryTimeMin: it.deliveryTimeMin ?? null,
       deliveryTimeMax: it.deliveryTimeMax ?? null,
       shippingChargeType: it.shippingChargeType ?? "free",
       shippingCharge: it.shippingCharge ? Number(it.shippingCharge) : 0,
       installationAvailable: it.installationAvailable ?? "no",
       installationCharge: it.installationCharge ? Number(it.installationCharge) : 0,
+      imageUrl: it.image || null,
     }));
 
     setLoading(true);
@@ -168,109 +187,160 @@ export default function Checkout() {
         checkoutDetails: {
           name,
           address,
-          paymentMethod,
+          paymentMethod: useCreditForFullAmount ? "store_credit" : paymentMethod,
         },
         orders: ordersPayload,
         summary,
+        creditUsed,
       });
 
+      // success path
       if (res?.data?.orderId) {
-        alert("Order placed successfully!");
+        // Prefer authoritative server value
+        if (res.data.newCredit !== undefined && res.data.newCredit !== null) {
+          setCredit(Number(res.data.newCredit));
+        } else if (creditUsed) {
+          // fallback: re-fetch credit from server (safe)
+          getUserCredit()
+            .then((r) => setCredit(Number(r.data.credit || 0)))
+            .catch(() => setCredit((c) => c - creditUsed)); // last resort: optimistic
+        }
+
         clearSingleCheckoutItem();
         clearCart();
+        alert("Order placed successfully!");
         navigate("/userprofile");
       } else {
-        alert("Order placed but response was unexpected.");
+        alert("Order placed but unexpected server response.");
       }
     } catch (err) {
-      console.error(err);
-      alert("Failed to place order. Please try again.");
+      console.error("Place order error:", err);
+      alert(err?.response?.data?.message || "Failed to place order — please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const summary = computeSummary();
+  // disable other payment controls when store credit will be used
+  useEffect(() => {
+    if (useCreditForFullAmount) setPaymentMethod("store_credit");
+  }, [useCreditForFullAmount]);
 
-  /* ===============================
-     UI
-  =============================== */
   return (
     <>
       <Navbar />
+      <main className="checkout-page container">
+        <h1 className="checkout-title">Checkout</h1>
 
-      <div className="checkout-page">
-        <h2>Checkout</h2>
+        <section className="credit-line" aria-live="polite">
+          <div className="credit-left">Store Credit: <strong>{formatINR(credit)}</strong></div>
+          <div className="credit-right">
+            <label className="credit-toggle">
+              <input
+                type="checkbox"
+                checked={useCreditForFullAmount}
+                onChange={(e) => {
+                  const want = e.target.checked;
+                  if (want && credit < computeSummary.grandTotal) {
+                    alert("You don't have enough store credit to cover the total.");
+                    return;
+                  }
+                  setUseCreditForFullAmount(want);
+                }}
+                aria-label="Use store credit to pay full amount"
+              />
+              <span>Deduct total from store credit</span>
+            </label>
+          </div>
+        </section>
 
         <div className="checkout-grid">
-          {/* LEFT */}
-          <div className="checkout-left">
-            {/* FORM */}
-            <div className="checkout-form">
-              <label>
-                Your name
-                <input value={name} onChange={(e) => setName(e.target.value)} />
+          <section className="checkout-left">
+            <div className="checkout-card">
+              <h2>Shipping & Contact</h2>
+
+              <label className="form-row">
+                <span>Full name</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </label>
 
-              <label>
-                Email
-                <input value={email} onChange={(e) => setEmail(e.target.value)} />
+              <label className="form-row">
+                <span>Email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </label>
 
-              <label>
-                Address
-                <textarea value={address} onChange={(e) => setAddress(e.target.value)} />
+              <label className="form-row">
+                <span>Address</span>
+                <textarea
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                  required
+                />
               </label>
             </div>
 
-            {/* PAYMENT METHODS */}
-            <div className="payment-section">
-              <h3 className="payment-title">Payment Method</h3>
+            <div className="checkout-card">
+              <h2>Payment</h2>
 
-              <div className="payment-options">
-                <div
+              <div className={`payment-options ${useCreditForFullAmount ? "muted" : ""}`} aria-hidden={useCreditForFullAmount}>
+                <button
+                  type="button"
                   className={`payment-option ${paymentMethod === "gpay" ? "active" : ""}`}
                   onClick={() => setPaymentMethod("gpay")}
                 >
                   <img src={GooglePay} alt="Google Pay" />
                   <span>Google Pay</span>
-                </div>
+                </button>
 
-                <div
+                <button
+                  type="button"
                   className={`payment-option ${paymentMethod === "phonepe" ? "active" : ""}`}
                   onClick={() => setPaymentMethod("phonepe")}
                 >
                   <img src={PhonePe} alt="PhonePe" />
                   <span>PhonePe</span>
-                </div>
+                </button>
 
-                <div
+                <button
+                  type="button"
                   className={`payment-option ${paymentMethod === "paytm" ? "active" : ""}`}
                   onClick={() => setPaymentMethod("paytm")}
                 >
                   <img src={Paytm} alt="Paytm" />
                   <span>Paytm</span>
-                </div>
+                </button>
 
-                <div
+                <button
+                  type="button"
                   className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
                   onClick={() => setPaymentMethod("cod")}
                 >
                   <img src={COD} alt="Cash on Delivery" />
                   <span>Cash on Delivery</span>
-                </div>
+                </button>
               </div>
             </div>
 
-            {/* ITEMS */}
-            <h3 style={{ marginTop: 20 }}>Items</h3>
-            <div className="checkout-items">
+            <div className="checkout-card">
+              <h2>Items</h2>
               {items.length === 0 ? (
-                <p>No items to checkout.</p>
+                <p className="muted">No items to checkout.</p>
               ) : (
                 items.map((it, idx) => (
                   <div key={idx} className="checkout-item">
                     <img
+                      className="checkout-item-img"
                       src={
                         it.image
                           ? it.image.startsWith("http")
@@ -278,140 +348,93 @@ export default function Checkout() {
                             : `http://localhost:3001/${it.image}`
                           : "/assets/images/sample.jpg"
                       }
-                      alt={it.name}
+                      alt={it.name || "item"}
                     />
-
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div style={{ fontWeight: 600 }}>{it.name}</div>
-                        <div style={{ fontSize: 14, color: "#6b7280" }}>₹{Number(it.amountPerTrip || it.pricePerTrip || it.price || 0).toLocaleString()}</div>
+                    <div className="checkout-item-main">
+                      <div className="checkout-item-top">
+                        <div className="checkout-item-title">{it.name}</div>
+                        <div className="checkout-item-price">{formatINR(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0))}</div>
                       </div>
 
-                      <div style={{ marginTop: 6, fontSize: 13 }}>
-                        <div>Seller: {it.supplier}</div>
+                      <div className="checkout-item-meta">
+                        <div>Seller: {it.supplier || it.supplierName || "—"}</div>
+                        <div>Shipping: {it.shippingChargeType === "free" ? "Free" : `₹${it.shippingCharge ?? 0}`}</div>
+                        <div>Installation: {it.installationAvailable === "yes" ? (it.installationCharge > 0 ? `₹${it.installationCharge}` : "Free") : "No"}</div>
                       </div>
 
-                      {/* QUANTITY CONTROLS */}
-                      <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <button
-                            type="button"
-                            onClick={() => decrement(idx)}
-                            style={{
-                              width: 34,
-                              height: 34,
-                              borderRadius: 6,
-                              border: "1px solid #ddd",
-                              background: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            −
-                          </button>
+                      <div className="checkout-quantity">
+                        <button onClick={() => decrement(idx)} aria-label="Decrease quantity">−</button>
+                        <input type="number" min="1" value={it.quantity} onChange={(e) => updateQuantity(idx, e.target.value)} aria-label="Quantity" />
+                        <button onClick={() => increment(idx)} aria-label="Increase quantity">+</button>
 
-                          <input
-                            type="number"
-                            min={1}
-                            value={it.quantity}
-                            onChange={(e) => updateQuantity(idx, e.target.value)}
-                            style={{
-                              width: 64,
-                              textAlign: "center",
-                              padding: "6px 8px",
-                              borderRadius: 6,
-                              border: "1px solid #eee",
-                            }}
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() => increment(idx)}
-                            style={{
-                              width: 34,
-                              height: 34,
-                              borderRadius: 6,
-                              border: "1px solid #ddd",
-                              background: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <div style={{ marginLeft: 12, color: "#6b7280", fontSize: 13 }}>
-                          <div>Subtotal: ₹{(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0) * Number(it.quantity || 1)).toLocaleString()}</div>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: 8, fontSize: 13 }}>
-                        <div>
-                          <strong>Estimated delivery:</strong>{" "}
-                          {it.deliveryTimeMin || it.deliveryTimeMax
-                            ? `${it.deliveryTimeMin ?? "—"} to ${it.deliveryTimeMax ?? "—"} days`
-                            : "Not specified"}
-                        </div>
-                        <div>
-                          <strong>Shipping:</strong>{" "}
-                          {it.shippingChargeType === "free" ? "Free" : `₹${it.shippingCharge ?? 0}`}
-                        </div>
-                        <div>
-                          <strong>Installation:</strong>{" "}
-                          {it.installationAvailable === "yes"
-                            ? it.installationCharge > 0
-                              ? `Available (₹${it.installationCharge})`
-                              : "Available (Free)"
-                            : "Not available"}
-                        </div>
+                        <div className="checkout-item-subtotal">Subtotal: {formatINR(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0) * Number(it.quantity || 1))}</div>
                       </div>
                     </div>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          </section>
 
-          {/* RIGHT – SUMMARY */}
-          <aside className="checkout-right">
-            <h3>Summary</h3>
+          <aside className="checkout-right" aria-label="Order summary">
+            <div className="summary-card">
+              <h2>Summary</h2>
 
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <div className="summary-row">
                 <span>Subtotal</span>
-                <span>₹{summary.subtotal.toLocaleString()}</span>
+                <span>{formatINR(computeSummary.subtotal)}</span>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <div className="summary-row">
                 <span>Delivery</span>
-                <span>₹{summary.deliveryCharge.toLocaleString()}</span>
+                <span>{formatINR(computeSummary.deliveryCharge)}</span>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <div className="summary-row">
                 <span>Installation</span>
-                <span>₹{summary.installationTotal.toLocaleString()}</span>
+                <span>{formatINR(computeSummary.installationTotal)}</span>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+              <div className="summary-row">
                 <span>Casa charges</span>
-                <span>₹{summary.casaCharge.toLocaleString()}</span>
+                <span>{formatINR(computeSummary.casaCharge)}</span>
               </div>
 
-              <div style={{ fontWeight: 700, display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+              <hr />
+
+              <div className="summary-row total">
                 <span>Total</span>
-                <span>₹{summary.grandTotal.toLocaleString()}</span>
+                <span>{formatINR(computeSummary.grandTotal)}</span>
               </div>
+
+              {useCreditForFullAmount && (
+                <>
+                  <div className="summary-row credit-applied">
+                    <span>Paid with store credit</span>
+                    <span className="credit-amount">{formatINR(computeSummary.grandTotal)}</span>
+                  </div>
+
+                  <div className="summary-row amount-to-pay">
+                    <span>Amount to pay</span>
+                    <span>{formatINR(0)}</span>
+                  </div>
+                </>
+              )}
 
               <button
                 className="place-order-btn"
                 onClick={handlePlaceOrder}
                 disabled={loading || items.length === 0}
+                aria-disabled={loading || items.length === 0}
               >
-                {loading ? "Placing order..." : "Place order"}
+                {loading ? "Placing order..." : (useCreditForFullAmount ? "Pay with Store Credit" : "Place order")}
               </button>
+
+              <p className="checkout-footnote muted">You can use store credit to buy more items in the future. Store credit is not refundable as cash.</p>
             </div>
           </aside>
         </div>
-      </div>
+      </main>
     </>
   );
 }

@@ -7,6 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ReturnStatus {
+  NONE
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum RefundStatus {
+  NONE
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -16,9 +32,12 @@ model User {
   address   String?
   createdAt DateTime @default(now())
 
-  orders       Order[]
-  ratings      Rating[]
-  hireRequests DesignerHireRequest[]
+  credit Float @default(0)
+
+  orders         Order[]
+  ratings        Rating[]
+  hireRequests   DesignerHireRequest[]
+  returnRequests ReturnRequest[]
 }
 
 /// =========================
@@ -167,7 +186,17 @@ model OrderItem {
   pricePerUnit Float
   totalAmount  Float
 
-  status String @default("pending") // ✅ ADD THIS
+  status String @default("pending") // existing
+
+  // NEW: return and refund fields
+  returnStatus      ReturnStatus @default(NONE)
+  returnReason      String?
+  returnRequestedAt DateTime?
+  returnResolvedAt  DateTime?
+
+  refundAmount      Float?
+  refundStatus      RefundStatus @default(NONE)
+  refundProcessedAt DateTime?
 
   // ✅ DELIVERY SNAPSHOT
   deliveryTimeMin       Int?
@@ -179,6 +208,9 @@ model OrderItem {
 
   createdAt DateTime @default(now())
   rating    Rating?
+
+  // relation to ReturnRequest (one-to-one)
+  returnRequest ReturnRequest?
 }
 
 model Rating {
@@ -257,23 +289,22 @@ model DesignerHireRequest {
   designer   Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
 
   // SNAPSHOT (for display only)
-  fullName     String
-  email        String
-  mobile       String
-  location     String
+  fullName String
+  email    String
+  mobile   String
+  location String
 
   budget       Int
   workType     String
   timelineDays Int?
   description  String?
-  status       String @default("pending")
+  status       String  @default("pending")
 
   createdAt DateTime @default(now())
 
   rating     DesignerRating?
   userRating UserRating?
 }
-
 
 model DesignerRating {
   id            Int @id @default(autoincrement())
@@ -302,4 +333,35 @@ model UserRating {
   // relations
   hireRequest DesignerHireRequest @relation(fields: [hireRequestId], references: [id], onDelete: Cascade)
   designer    Designer?           @relation(fields: [designerId], references: [id], onDelete: Cascade)
+}
+
+model ReturnRequest {
+  id          Int       @id @default(autoincrement())
+  orderItemId Int       @unique
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // snapshot
+  productName String
+  sellerId    Int
+  sellerName  String?
+
+  reason String
+  note   String?
+  images String[] // optional photo evidence
+
+  requestedAt  DateTime     @default(now())
+  status       ReturnStatus @default(REQUESTED) // current state of this return request
+  decidedBy    String? // seller/admin name/email who decided
+  decisionNote String?
+  decidedAt    DateTime?
+
+  refundAmount  Float?
+  refundStatus  RefundStatus @default(NONE)
+  refundDetails String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

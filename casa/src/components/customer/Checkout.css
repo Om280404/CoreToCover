@@ -1,369 +1,339 @@
-/* =========================================
-   CASA CHECKOUT – FULL THEME
-========================================= */
+/* =========================================================
+   CASA THEME — Checkout.css
+   Warm, earthy, premium interior design style
+   ========================================================= */
 
 :root {
-  --casa-dark: #5f6f52;
-  --casa-mid: #91a56e;
-  --casa-light: #c0cca4;
-
-  --bg-main: #f3f7ec;
-  --bg-card: #ffffff;
-
-  --text-dark: #2f2f2f;
-  --text-muted: #7a7a7a;
-
-  --border: rgba(95, 111, 82, 0.25);
-  --radius: 14px;
-  --shadow: 0 14px 36px rgba(95, 111, 82, 0.15);
-
-  --transition: all 0.25s ease;
-  --font-ui: "Helvetica", Arial, sans-serif;
-  --font-heading: "Playfair Display", serif;
+  --ivory: #faf9f7;
+  --sand: #e8e4dc;
+  --warm-gray: #8f8b84;
+  --charcoal: #2f2f2f;
+  --olive: #606e52;
+  --olive-dark: #4e5a44;
+  --border-soft: #e3dfd6;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
-/* =========================================
-   PAGE
-========================================= */
-
-.checkout-page {
-  background: var(--bg-main);
-  min-height: 100vh;
-  padding: 40px 5vw 80px;
-  font-family: var(--font-ui);
-  color: var(--text-dark);
+/* ===============================
+   PAGE CONTAINER
+=============================== */
+.container {
+  padding: 28px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--ivory);
+  box-sizing: border-box;
 }
 
-.checkout-page h2 {
-  font-size: 32px;
-  font-family: var(--font-heading);
-  color: var(--casa-dark);
-  margin-bottom: 28px;
+/* ===============================
+   TITLE
+=============================== */
+.checkout-title {
+  font-size: 1.9rem;
+  margin-bottom: 18px;
+  color: var(--charcoal);
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
-/* =========================================
+/* ===============================
+   CREDIT BAR
+=============================== */
+.credit-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.credit-left {
+  font-weight: 600;
+  color: var(--olive);
+}
+
+.credit-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: var(--charcoal);
+}
+
+/* ===============================
    GRID
-========================================= */
-
+=============================== */
 .checkout-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: 32px;
-  align-items: flex-start;
-}
-
-/* =========================================
-   LEFT
-========================================= */
-
-.checkout-left {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: 1fr 360px;
   gap: 28px;
 }
 
-/* =========================================
-   FORM CARD
-========================================= */
-
-.checkout-form {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 22px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-
-  display: grid;
-  gap: 14px;
-}
-
-.checkout-form label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--casa-dark);
-  display: flex;
-  flex-direction: column;
-}
-
-.checkout-form input,
-.checkout-form textarea,
-.checkout-form select {
-  margin-top: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  font-size: 14px;
-  background: #f7fbf2;
-  color: var(--text-dark);
-  transition: var(--transition);
-}
-
-.checkout-form textarea {
-  min-height: 90px;
-  resize: none;
-}
-
-.checkout-form input:focus,
-.checkout-form textarea:focus,
-.checkout-form select:focus {
-  outline: none;
-  border-color: var(--casa-mid);
-  box-shadow: 0 0 0 3px rgba(145, 165, 110, 0.25);
-}
-
-/* =========================================
-   ITEMS
-========================================= */
-
-.checkout-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* reduced gap */
-}
-
-.checkout-item {
-  background: var(--bg-card);
-  border-radius: 12px;          
-  padding: 12px;               
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 20px rgba(95,111,82,0.12); 
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.checkout-item img {
-  width: 64px;                
-  height: 64px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-}
-
-.checkout-item strong {
-  color: var(--casa-dark);
-}
-
-.checkout-item div {
-  font-size: 13px;            
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.checkout-item div:first-child {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-
-/* =========================================
-   DELIVERY DETAILS
-========================================= */
-
-.checkout-item > div > div:last-child {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-/* =========================================
-   RIGHT – SUMMARY
-========================================= */
-
-.checkout-right {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 22px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  position: sticky;
-  top: 100px;
-}
-
-.checkout-right h3 {
-  font-family: var(--font-heading);
-  font-size: 22px;
-  color: var(--casa-dark);
-  margin-bottom: 16px;
-}
-
-/* =========================================
-   SUMMARY ROWS
-========================================= */
-
-.checkout-right > div > div {
-  font-size: 15px;
-  color: var(--text-dark);
-}
-
-.checkout-right span {
-  font-weight: 500;
-}
-
-.checkout-right div[style*="font-weight: 700"] {
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
-  margin-top: 10px;
-  font-size: 17px;
-  color: var(--casa-dark);
-}
-
-/* =========================================
-   PLACE ORDER BUTTON
-========================================= */
-
-.place-order-btn {
-  width: 100%;
-  padding: 14px;
-  margin-top: 16px;
-  border-radius: 14px;
-  border: none;
-  background: linear-gradient(
-    90deg,
-    var(--casa-dark),
-    var(--casa-mid)
-  );
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.place-order-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px rgba(95, 111, 82, 0.3);
-}
-
-.place-order-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
   .checkout-grid {
     grid-template-columns: 1fr;
   }
-
-  .checkout-right {
-    position: relative;
-    top: 0;
-  }
 }
 
-@media (max-width: 600px) {
-  .checkout-page {
-    padding-bottom: 120px;
-  }
-
-  .place-order-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 5%;
-    width: 90%;
-    z-index: 999;
-  }
+/* ===============================
+   CARDS
+=============================== */
+.checkout-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 22px;
+  border: 1px solid var(--border-soft);
 }
 
-/* =========================================
-   PAYMENT METHODS
-========================================= */
-
-.payment-section {
-  margin-top: 20px;
+/* ===============================
+   FORM
+=============================== */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  font-size: 14px;
 }
 
-.payment-title {
-  font-size: 18px;
-  font-family: var(--font-heading);
-  color: var(--casa-dark);
-  margin-bottom: 12px;
+.form-row span {
+  margin-bottom: 6px;
+  color: var(--warm-gray);
+  font-weight: 500;
 }
 
+.form-row input,
+.form-row textarea {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+  background: #ffffff;
+  color: var(--charcoal);
+}
+
+.form-row input:focus,
+.form-row textarea:focus {
+  border-color: var(--olive);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 110, 82, 0.12);
+}
+
+/* ===============================
+   PAYMENT OPTIONS
+=============================== */
 .payment-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .payment-option {
-  background: #f7fbf2;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dark);
-  transition: var(--transition);
-}
-
-.payment-option:hover {
-  border-color: var(--casa-mid);
-  background: #eef7e8;
-}
-
-.payment-option.active {
-  border-color: var(--casa-dark);
-  background: linear-gradient(
-    90deg,
-    rgba(95,111,82,0.15),
-    rgba(145,165,110,0.25)
-  );
-  color: var(--casa-dark);
-  box-shadow: var(--shadow);
-}
-
-/* =========================================
-   PAYMENT OPTIONS (WITH LOGOS)
-========================================= */
-
-.payment-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
-}
-
-.payment-option {
-  background: #f7fbf2;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dark);
-  transition: var(--transition);
+  background: #ffffff;
+  min-width: 140px;
+  transition: all 0.25s ease;
 }
 
 .payment-option img {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 26px;
   object-fit: contain;
 }
 
+.payment-option span {
+  font-size: 14px;
+  color: var(--charcoal);
+}
+
 .payment-option:hover {
-  border-color: var(--casa-mid);
-  background: #eef7e8;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .payment-option.active {
-  border-color: var(--casa-dark);
-  background: linear-gradient(
-    90deg,
-    rgba(95,111,82,0.15),
-    rgba(145,165,110,0.25)
-  );
-  box-shadow: var(--shadow);
-  color: var(--casa-dark);
+  border-color: var(--olive);
+  background: rgba(96, 110, 82, 0.05);
+}
+
+/* muted when credit applied */
+.payment-options.muted {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ===============================
+   ITEMS
+=============================== */
+.checkout-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 14px;
+  background: #ffffff;
+}
+
+.checkout-item-img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+}
+
+.checkout-item-main {
+  flex: 1;
+}
+
+.checkout-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checkout-item-title {
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.checkout-item-price {
+  font-size: 14px;
+  color: var(--warm-gray);
+}
+
+.checkout-item-meta {
+  font-size: 13px;
+  color: var(--warm-gray);
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* ===============================
+   QUANTITY
+=============================== */
+.checkout-quantity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkout-quantity button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--charcoal);
+}
+
+.checkout-quantity button:hover {
+  background: var(--sand);
+}
+
+.checkout-quantity input {
+  width: 64px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+/* ===============================
+   SUMMARY
+=============================== */
+.summary-card {
+  position: sticky;
+  top: 18px;
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--warm-gray);
+  font-size: 14px;
+}
+
+.summary-row.total {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--charcoal);
+  margin-top: 6px;
+}
+
+.credit-applied {
+  color: var(--olive);
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.amount-to-pay {
+  font-weight: 700;
+  margin-top: 10px;
+  color: var(--charcoal);
+}
+
+/* ===============================
+   CTA BUTTON
+=============================== */
+.place-order-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--olive);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+}
+
+.place-order-btn:hover {
+  background: var(--olive-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(96, 110, 82, 0.25);
+}
+
+.place-order-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   FOOTNOTE
+=============================== */
+.checkout-footnote {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--warm-gray);
+}
+
+/* helpers */
+.muted {
+  color: var(--warm-gray);
 }

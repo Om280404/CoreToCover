@@ -25,6 +25,7 @@ import SellerNotifications from './components/seller/Notifications';
 import Orders from './components/seller/Orders';
 import SellerAddProduct from './components/seller/SellerAddProduct';
 import SellerDashboard from './components/seller/SellerDashboard';
+import SellerReturns from './components/seller/SellerReturns';
 import Sidebar from './components/seller/Sidebar';
 import SellerProfile from './components/seller/SellerProfile';
 import SellerLogin from './components/seller/SellerLogin';
@@ -96,6 +97,7 @@ function App() {
         <Route path="/sellernotifications" element={<SellerNotifications />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/selleraddproduct" element={<AuthRoute element={<SellerAddProduct/>}/>} />
+        <Route path="/sellerreturns" element={<AuthRoute element={<SellerReturns/>}/>} />
         <Route path="/sellerdashboard" element={<AuthRoute element={<SellerDashboard/>}/>} />
         <Route path='/sidebar' element={<Sidebar />} />
         <Route path="/sellerprofile" element={<AuthRoute element={<SellerProfile/>}/>} />

@@ -9,7 +9,7 @@ export default function Footer() {
         {/* Brand */}
         <div className="footer-brand">
           <h2 className="footer-logo">CASA</h2>
-          <p className="footer-tagline">Reliable materials, delivered fast.</p>
+          <p className="footer-tagline">Everything your interior project needs, in one place.</p>
         </div>
 
         {/* Links */}

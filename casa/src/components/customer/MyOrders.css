@@ -75,7 +75,8 @@
 /* =========================================
    ORDERS LIST
 ========================================= */
-.orders-list {
+.orders-lists {
+    margin-top: 10px;
     width: 100%;
     max-width: 1000px;
     display: flex;
@@ -555,7 +556,7 @@
 }
 
 .track-btn {
-    background: var(--accent, #91A56E);
+    background: #91A56E;
     color: #fff;
     border: none;
     padding: 8px 12px;
@@ -601,4 +602,32 @@
   background: #ecfdf5;
   border: 1px solid #86efac;
   border-radius: 999px;
+}
+
+.rated-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.status-return-requested {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.status-returned {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.status-return-rejected {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
-import { upload, uploadDesignerProfile, uploadDesignerPortfolio } from "./multer.js";
+import { upload, uploadDesignerProfile, uploadDesignerPortfolio, uploadReturnImages } from "./multer.js";
 import path from "path";
 
 
@@ -56,6 +56,11 @@ app.use(
 app.use(
   "/designers/portfolio",
   express.static(path.join(process.cwd(), "uploads/designers/portfolio"))
+);
+
+app.use(
+  "/returns/images",
+  express.static(path.join(process.cwd(), "uploads/returns/images"))
 );
 
 
@@ -576,9 +581,9 @@ app.post("/seller/delivery-details", async (req, res) => {
     // String (Prisma expects String)
     const normalizedInstallationAvailable =
       installationAvailable === true ||
-      installationAvailable === "true" ||
-      installationAvailable === "yes" ||
-      installationAvailable === 1
+        installationAvailable === "true" ||
+        installationAvailable === "yes" ||
+        installationAvailable === 1
         ? "yes"
         : "no";
 
@@ -602,8 +607,8 @@ app.post("/seller/delivery-details", async (req, res) => {
 
     const normalizedInstallationCharge =
       normalizedInstallationAvailable === "yes" &&
-      installationCharge !== "" &&
-      installationCharge !== undefined
+        installationCharge !== "" &&
+        installationCharge !== undefined
         ? Number(installationCharge)
         : null;
 
@@ -936,7 +941,13 @@ app.get("/products", async (req, res) => {
 
 app.post("/order/place", async (req, res) => {
   try {
-    const { customerEmail, checkoutDetails, orders, summary } = req.body;
+    const {
+      customerEmail,
+      checkoutDetails,
+      orders,
+      summary,
+      creditUsed = 0, // ✅ NEW
+    } = req.body;
 
     if (!customerEmail || !orders?.length) {
       return res.status(400).json({ message: "Invalid order data" });
@@ -950,91 +961,131 @@ app.post("/order/place", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    /* =========================
-       CREATE ORDER
-    ========================= */
-    const order = await prisma.order.create({
-      data: {
-        userId: user.id,
-        customerEmail,
-        customerName: checkoutDetails.name,
-        address: checkoutDetails.address,
-        paymentMethod: checkoutDetails.paymentMethod,
-        subtotal: summary.subtotal,
-        casaCharge: summary.casaCharge,
-        deliveryCharge: summary.deliveryCharge,
-        grandTotal: summary.grandTotal,
-      },
-    });
+    const creditToUse = Number(creditUsed || 0);
 
-    /* =========================
-       FETCH SELLER DELIVERY SNAPSHOTS
-    ========================= */
-    const sellerDeliveryMap = {};
-
-    for (const item of orders) {
-      if (!sellerDeliveryMap[item.supplierId]) {
-        sellerDeliveryMap[item.supplierId] =
-          await prisma.sellerDeliveryDetails.findUnique({
-            where: { sellerId: item.supplierId },
-          });
+    // ✅ CREDIT VALIDATION
+    if (creditToUse > 0) {
+      if (user.credit < creditToUse) {
+        return res.status(400).json({
+          message: "Insufficient store credit",
+        });
       }
     }
 
     /* =========================
-       CREATE ORDER ITEMS
+       USE TRANSACTION
     ========================= */
-    const orderItemsData = await Promise.all(
-      orders.map(async (item) => {
-        const product = await prisma.product.findUnique({
-          where: { id: item.materialId },
+    const result = await prisma.$transaction(async (tx) => {
+      /* =========================
+         CREATE ORDER
+      ========================= */
+      const order = await tx.order.create({
+        data: {
+          userId: user.id,
+          customerEmail,
+          customerName: checkoutDetails.name,
+          address: checkoutDetails.address,
+
+          // ✅ PAYMENT METHOD
+          paymentMethod:
+            creditToUse > 0
+              ? "store_credit"
+              : checkoutDetails.paymentMethod,
+
+          subtotal: summary.subtotal,
+          casaCharge: summary.casaCharge,
+          deliveryCharge: summary.deliveryCharge,
+          grandTotal: summary.grandTotal,
+        },
+      });
+
+      /* =========================
+         FETCH SELLER DELIVERY SNAPSHOTS
+      ========================= */
+      const sellerDeliveryMap = {};
+
+      for (const item of orders) {
+        if (!sellerDeliveryMap[item.supplierId]) {
+          sellerDeliveryMap[item.supplierId] =
+            await tx.sellerDeliveryDetails.findUnique({
+              where: { sellerId: item.supplierId },
+            });
+        }
+      }
+
+      /* =========================
+         CREATE ORDER ITEMS
+      ========================= */
+      const orderItemsData = await Promise.all(
+        orders.map(async (item) => {
+          const product = await tx.product.findUnique({
+            where: { id: item.materialId },
+          });
+
+          const delivery = sellerDeliveryMap[item.supplierId];
+
+          return {
+            orderId: order.id,
+
+            materialId: item.materialId,
+            materialName: item.materialName,
+            supplierName: item.supplierName,
+
+            sellerId: item.supplierId,
+            quantity: item.trips,
+            pricePerUnit: item.amountPerTrip,
+            totalAmount: item.amountPerTrip * item.trips,
+
+            imageUrl: product?.images?.[0] || null,
+
+            deliveryTimeMin: delivery?.deliveryTimeMin || null,
+            deliveryTimeMax: delivery?.deliveryTimeMax || null,
+            shippingChargeType:
+              delivery?.shippingChargeType ?? "free",
+            shippingCharge:
+              delivery?.shippingCharge ?? 0,
+            installationAvailable:
+              delivery?.installationAvailable ?? "no",
+            installationCharge:
+              delivery?.installationCharge ?? 0,
+          };
+        })
+      );
+
+      await tx.orderItem.createMany({
+        data: orderItemsData,
+      });
+
+      /* =========================
+         💳 DEDUCT STORE CREDIT
+      ========================= */
+      if (creditToUse > 0) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            credit: {
+              decrement: creditToUse,
+            },
+          },
         });
+      }
 
-        const delivery = sellerDeliveryMap[item.supplierId];
+      return order;
+    });
 
-        return {
-          orderId: order.id,
-
-          materialId: item.materialId,
-          materialName: item.materialName,
-          supplierName: item.supplierName,
-
-          sellerId: item.supplierId,
-          quantity: item.trips,
-          pricePerUnit: item.amountPerTrip,
-
-          // keep totalAmount as calculated per item (same behavior as before)
-          totalAmount: item.amountPerTrip * item.trips,
-
-          imageUrl: product?.images?.[0] || null,
-
-          // ✅ DELIVERY SNAPSHOT (IMMUTABLE)
-          deliveryTimeMin: delivery?.deliveryTimeMin || null,
-          deliveryTimeMax: delivery?.deliveryTimeMax || null,
-          shippingChargeType:
-            delivery?.shippingChargeType ?? "free",
-
-          shippingCharge:
-            delivery?.shippingCharge ?? 0,
-
-          installationAvailable:
-            delivery?.installationAvailable ?? "no",
-
-          installationCharge:
-            delivery?.installationCharge ?? 0,
-
-        };
-      })
-    );
-
-    await prisma.orderItem.createMany({
-      data: orderItemsData,
+    // after the transaction completes (result is the created order)
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { credit: true },
     });
 
     return res.status(201).json({
       message: "Order placed successfully",
-      orderId: order.id,
+      orderId: result.id,
+      creditUsed: creditToUse,
+      newCredit: updatedUser?.credit ?? 0, // return the updated credit
     });
+
   } catch (error) {
     console.error("ORDER PLACE ERROR:", error);
     return res.status(500).json({
@@ -1042,6 +1093,7 @@ app.post("/order/place", async (req, res) => {
     });
   }
 });
+
 
 app.get("/orders/user/:email", async (req, res) => {
   try {
@@ -1090,9 +1142,9 @@ app.get("/orders/user/:email", async (req, res) => {
         // optional (future use)
         rating: item.rating
           ? {
-              stars: item.rating.stars,
-              comment: item.rating.comment,
-            }
+            stars: item.rating.stars,
+            comment: item.rating.comment,
+          }
           : null,
 
         // ✅ DELIVERY DETAILS FOR UI
@@ -1462,7 +1514,7 @@ app.get("/seller/:sellerId/dashboard", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch dashboard" });
   }
 });
-  
+
 
 
 // ============================
@@ -1736,6 +1788,335 @@ app.get("/product/:productId/ratings", async (req, res) => {
     res.json({ avgRating: 0, count: 0, reviews: [] });
   }
 });
+
+// ===============================
+// RETURN ORDER API (INLINE)
+// ===============================
+app.post(
+  "/api/returns",
+  uploadReturnImages.array("images", 5),
+  async (req, res) => {
+    try {
+      const { orderItemId, reason, note } = req.body;
+      const userEmail = req.headers["x-user-email"];
+
+      if (!userEmail) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email: userEmail },
+      });
+
+      const item = await prisma.orderItem.findUnique({
+        where: { id: Number(orderItemId) },
+        include: { order: true, seller: true },
+      });
+
+      if (!item || item.order.userId !== user.id) {
+        return res.status(403).json({ message: "Invalid order" });
+      }
+
+      if (item.status !== "fulfilled") {
+        return res.status(400).json({
+          message: "Only delivered items can be returned",
+        });
+      }
+
+      // ✅ map uploaded images
+      const images = (req.files || []).map(
+        (file) => `/returns/images/${file.filename}`
+      );
+
+
+      const returnRequest = await prisma.returnRequest.create({
+        data: {
+          orderItemId: item.id,
+          userId: user.id,
+          productName: item.materialName,
+          sellerId: item.sellerId,
+          sellerName: item.seller?.name,
+          reason,
+          note,
+          images,
+          refundAmount: item.totalAmount,
+        },
+      });
+
+      await prisma.orderItem.update({
+        where: { id: item.id },
+        data: {
+          returnStatus: "REQUESTED",
+          returnRequestedAt: new Date(),
+          status: "return_requested",
+        },
+      });
+
+      res.json({
+        message: "Return requested",
+        returnRequest,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: err.message });
+    }
+  }
+);
+
+
+// USER RETURNS
+app.get("/api/returns/user", async (req, res) => {
+  try {
+    const userEmail = req.headers["x-user-email"];
+    if (!userEmail) return res.status(401).json({ message: "Unauthorized" });
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    const returns = await prisma.returnRequest.findMany({
+      where: { userId: user.id },
+      include: { orderItem: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json({ returns });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ===============================
+// USER CREDIT API
+// ===============================
+app.get("/api/returns/credit", async (req, res) => {
+  try {
+    const userEmail = req.headers["x-user-email"];
+    if (!userEmail) return res.status(401).json({ message: "Unauthorized" });
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+      select: { credit: true },
+    });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ credit: user.credit });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// CANCEL RETURN
+app.patch("/api/returns/:id/cancel", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const userEmail = req.headers["x-user-email"];
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    const rr = await prisma.returnRequest.findUnique({ where: { id } });
+
+    if (!rr || rr.userId !== user.id) {
+      return res.status(404).json({ message: "Return not found" });
+    }
+
+    if (rr.status !== "REQUESTED") {
+      return res.status(400).json({ message: "Cannot cancel now" });
+    }
+
+    await prisma.returnRequest.update({
+      where: { id },
+      data: {
+        status: "CANCELLED",
+        decidedAt: new Date(),
+        decisionNote: "Cancelled by user",
+      },
+    });
+
+    await prisma.orderItem.update({
+      where: { id: rr.orderItemId },
+      data: {
+        returnStatus: "CANCELLED",
+      },
+    });
+
+    res.json({ message: "Return cancelled" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ===============================
+// SELLER RETURN REQUESTS
+// ===============================
+app.get("/api/returns/seller", async (req, res) => {
+  try {
+    const sellerEmail = req.headers["x-seller-email"];
+    if (!sellerEmail) return res.status(401).json({ message: "Unauthorized" });
+
+    const seller = await prisma.seller.findUnique({
+      where: { email: sellerEmail },
+    });
+
+    if (!seller) return res.status(404).json({ message: "Seller not found" });
+
+    const returns = await prisma.returnRequest.findMany({
+      where: { sellerId: seller.id },
+      include: {
+        orderItem: true,
+        user: { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json({ returns });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// ===============================
+// APPROVE RETURN (SELLER / ADMIN)
+// ===============================
+app.post("/api/returns/:id/approve", async (req, res) => {
+  try {
+    const returnId = Number(req.params.id);
+
+    const rr = await prisma.returnRequest.findUnique({
+      where: { id: returnId },
+      include: { orderItem: true },
+    });
+
+    if (!rr) {
+      return res.status(404).json({ message: "Return request not found" });
+    }
+
+    if (rr.status !== "REQUESTED") {
+      return res.status(400).json({ message: "Return already processed" });
+    }
+
+    /* ===============================
+       1️⃣ MARK RETURN AS APPROVED
+    =============================== */
+    await prisma.returnRequest.update({
+      where: { id: returnId },
+      data: {
+        status: "APPROVED",
+        decidedAt: new Date(),
+        refundStatus: "COMPLETED",
+      },
+    });
+
+    await prisma.orderItem.update({
+      where: { id: rr.orderItemId },
+      data: {
+        returnStatus: "APPROVED",
+        refundAmount: rr.refundAmount,
+        refundStatus: "COMPLETED",
+        status: "returned",
+        returnResolvedAt: new Date(),
+      },
+    });
+
+    /* ===============================
+       2️⃣ 💰 CREDIT USER (THIS IS IT)
+    =============================== */
+    await prisma.user.update({
+      where: { id: rr.userId },
+      data: {
+        credit: {
+          increment: rr.refundAmount,
+        },
+      },
+    });
+
+    res.json({
+      message: "Return approved and credit added",
+      creditedAmount: rr.refundAmount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ===============================
+// REJECT RETURN (SELLER / ADMIN)
+// ===============================
+app.post("/api/returns/:id/reject", async (req, res) => {
+  try {
+    const returnId = Number(req.params.id);
+    const { decisionNote } = req.body;
+
+    const sellerEmail = req.headers["x-seller-email"];
+    if (!sellerEmail) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const seller = await prisma.seller.findUnique({
+      where: { email: sellerEmail },
+    });
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    const rr = await prisma.returnRequest.findUnique({
+      where: { id: returnId },
+      include: { orderItem: true },
+    });
+
+    if (!rr) {
+      return res.status(404).json({ message: "Return request not found" });
+    }
+
+    if (rr.sellerId !== seller.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    if (rr.status !== "REQUESTED") {
+      return res.status(400).json({
+        message: "Return already processed",
+      });
+    }
+
+    /* ===============================
+       1️⃣ UPDATE RETURN REQUEST
+    =============================== */
+    await prisma.returnRequest.update({
+      where: { id: returnId },
+      data: {
+        status: "REJECTED",
+        decisionNote: decisionNote || "Rejected by seller",
+        decidedAt: new Date(),
+        decidedBy: seller.email,
+      },
+    });
+
+    /* ===============================
+       2️⃣ UPDATE ORDER ITEM
+    =============================== */
+    await prisma.orderItem.update({
+      where: { id: rr.orderItemId },
+      data: {
+        returnStatus: "REJECTED",
+        returnResolvedAt: new Date(),
+      },
+    });
+
+    res.json({ message: "Return rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 
 /* ============================
    DESIGNER SIGNUP
