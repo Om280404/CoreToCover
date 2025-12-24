@@ -115,10 +115,21 @@
 /* ===============================
    STOCK COLORS
 ================================ */
-.stock-available strong { color: #16a34a; }
-.stock-out_of_stock strong { color: #dc2626; }
-.stock-low_stock strong { color: #ca8a04; }
-.stock-discontinued strong { color: #6b7280; }
+.stock-available strong {
+  color: #16a34a;
+}
+
+.stock-out_of_stock strong {
+  color: #dc2626;
+}
+
+.stock-low_stock strong {
+  color: #ca8a04;
+}
+
+.stock-discontinued strong {
+  color: #6b7280;
+}
 
 /* ===============================
    ACTION BUTTONS
@@ -140,11 +151,9 @@
 
 /* Primary */
 .ms-btn--primary {
-  background: linear-gradient(
-    90deg,
-    var(--ms-primary),
-    var(--ms-primary-dark)
-  );
+  background: linear-gradient(90deg,
+      var(--ms-primary),
+      var(--ms-primary-dark));
   color: #fff;
 }
 
@@ -294,7 +303,7 @@
   border-radius: 10px;
   object-fit: cover;
   border: 1px solid var(--ms-border);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 /* ===============================
@@ -314,6 +323,7 @@
   .ms-main {
     margin-left: 0;
     padding: 16px;
+    padding-left: 260px;
   }
 
   .ms-actions {
@@ -326,6 +336,13 @@
 
   .ms-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 642px){
+  .ms-main {
+    margin-left: 0;
+    padding: 16px;
   }
 }
 
@@ -360,7 +377,8 @@
 
 /* Stars */
 .ms-stars svg {
-  color: #facc15; /* gold */
+  color: #facc15;
+  /* gold */
   font-size: 1.05rem;
 }
 
