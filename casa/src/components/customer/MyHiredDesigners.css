@@ -396,4 +396,8 @@
 
 .review-card{
   margin-bottom: 25px;
+  border: 2px solid var(--casa-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--casa-surface);
 }
