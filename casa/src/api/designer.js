@@ -193,3 +193,10 @@ export const rateUser = async (designerId, payload) => {
   return res.data;
 };
 
+/* ============================
+   GET ALL RATINGS FOR A CLIENT
+============================ */
+export const getClientRatings = async (email) => {
+  const res = await api.get(`/client/${encodeURIComponent(email)}/ratings`);
+  return res.data;
+};

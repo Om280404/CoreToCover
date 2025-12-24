@@ -2826,6 +2826,53 @@ app.post("/designer/:id/rate-user", async (req, res) => {
   }
 });
 
+// GET /client/:email/ratings
+app.get("/client/:email/ratings", async (req, res) => {
+  try {
+    const raw = decodeURIComponent(req.params.email || "").trim();
+    if (!raw) return res.status(400).json({ message: "Email required" });
+
+    // case-insensitive match (Prisma 'mode' works on supported DBs)
+    const ratings = await prisma.userRating.findMany({
+      where: {
+        hireRequest: {
+          email: { equals: raw, mode: "insensitive" },
+        },
+      },
+      include: {
+        designer: {
+          select: {
+            id: true,
+            fullname: true,
+            profile: { select: { profileImage: true } },
+          },
+        },
+        hireRequest: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formatted = ratings.map((r) => ({
+      id: r.id,
+      stars: r.stars,
+      review: r.review,
+      reviewerName: r.reviewerName || r.designer?.fullname || "Designer",
+      designerId: r.designer?.id || null,
+      designerName: r.designer?.fullname || null,
+      designerImage: r.designer?.profile?.profileImage
+        ? `http://localhost:3001/${r.designer.profile.profileImage}`
+        : null,
+      hireRequestId: r.hireRequestId,
+      clientEmail: r.hireRequest?.email || null,
+      createdAt: r.createdAt,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("FETCH CLIENT RATINGS ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch client ratings" });
+  }
+});
 
 
 
