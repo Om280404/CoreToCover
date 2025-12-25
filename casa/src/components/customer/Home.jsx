@@ -9,6 +9,9 @@ import {
   FaTimes,
   FaUserGraduate,
 } from "react-icons/fa";
+import Sofa from "../../assets/images/Sofa.jpeg";
+import Lamp from "../../assets/images/Lamp.jpg"
+import Bathroom from "../../assets/images/Bathroom.webp"
 import Raw from "../../assets/images/Raw1.png";
 import Raw2 from "../../assets/images/Raw2.png";
 import Raw3 from "../../assets/images/Raw3.png";
@@ -112,15 +115,15 @@ const Home = () => {
 
           {/* Card 1 */}
           <Card
-            title="Readymade Products"
+            title="Finished Products"
             images={[
-              "https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=800", // sofa interior
-              "https://images.pexels.com/photos/3076899/pexels-photo-3076899.jpeg?auto=compress&cs=tinysrgb&w=800", // luxury lamp + modern interior
-              "https://images.pexels.com/photos/1571461/pexels-photo-1571461.jpeg?auto=compress&cs=tinysrgb&w=800"  // modern wooden chair product
+              Sofa, // sofa interior
+              Lamp, // luxury lamp + modern interior
+              Bathroom  // modern bathroom product
             ]}
 
 
-            onClick={() => navigate("/productlisting", { state: { page: "Readymade Products", desc: "Find the perfect product that enhances your quality of living." } })}
+            onClick={() => navigate("/productlisting", { state: { page: "Finished Products", desc: "Find the perfect product that enhances your quality of living." } })}
           />
 
           {/* Card 2 */}
