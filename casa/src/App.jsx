@@ -53,6 +53,7 @@ import DesignerSubscription from "./components/designer/DesignerSubscription";
 const AuthRoute = ({ element, type }) => {
   const isUserLoggedIn = localStorage.getItem("userLoggedIn") === "true";
   const isSellerLoggedIn = localStorage.getItem("sellerLoggedIn") === "true";
+  const isDesignerLoggedIn = localStorage.getItem("designerLoggedIn") === "true"
 
   if (type === "user" && !isUserLoggedIn) {
     return <Navigate to="/" replace />;
@@ -60,6 +61,10 @@ const AuthRoute = ({ element, type }) => {
 
   if (type === "seller" && !isSellerLoggedIn) {
     return <Navigate to="/sellerlogin" replace />;
+  }
+
+  if (type === "designer" && !isDesignerLoggedIn){
+    return <Navigate to="/designerlogin" replace />
   }
 
   return element;
@@ -114,7 +119,7 @@ function App() {
         <Route path="/designerlogin" element={<DesignerLogin />} />
         <Route path="/designersignup" element={<DesignerSignup />} />
         <Route path="/designerportfolio" element={<DesignerPortfolio />} />
-        <Route path="/designerdashboard" element={<DesignerDashboard />} />
+        <Route path="/designerdashboard" element={<AuthRoute element={<DesignerDashboard /> }/>} />
         <Route path="/designerexperience" element={<DesignerExperience />} />
         <Route path="/designerworkreceived" element={<DesignerWorkReceived />} />
         <Route path="/designereditprofile" element={<DesignerEditProfile />} />
