@@ -117,26 +117,31 @@ const DesignerWorkReceived = () => {
   };
 
   /* ===========================================
-     NEW: Fetch all ratings designers gave to client
+     Fetch all ratings designers gave to client
      Endpoint: GET /client/:email/ratings  (getClientRatings)
   ============================================*/
-  const openClientRatings = async (email) => {
-    if (!email) {
-      alert("Client email not available");
+  const openClientRatings = async (userId) => {
+    if (!userId) {
+      alert("Client ID not available");
       return;
     }
+
     try {
       setRatingsLoading(true);
-      const data = await getClientRatings(email);
+      const data = await getClientRatings(userId);
       setClientRatings(Array.isArray(data) ? data : []);
       setClientRatingsModalOpen(true);
     } catch (err) {
       console.error("fetch client ratings failed", err);
-      alert("Failed to load client ratings");
+      alert("Failed to load client reviews");
     } finally {
       setRatingsLoading(false);
     }
   };
+
+
+
+
 
   const closeClientRatings = () => {
     setClientRatingsModalOpen(false);
@@ -317,7 +322,7 @@ const DesignerWorkReceived = () => {
                   {/* NEW: open full client ratings across platform */}
                   <button
                     className="lux-btn secondary"
-                    onClick={() => openClientRatings(job.email)}
+                    onClick={() => openClientRatings(job.userId)}
                     style={{ marginTop: 10 }}
                   >
                     View Client Reviews
@@ -459,46 +464,126 @@ const DesignerWorkReceived = () => {
             ) : clientRatings.length === 0 ? (
               <p>No ratings yet for this client.</p>
             ) : (
-              <div style={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 8 }}>
-                {clientRatings.map((r) => (
-                  <div key={r.id} style={{ marginBottom: 14, borderBottom: "1px solid #eee", paddingBottom: 10 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      {r.designerImage ? (
-                        <img src={r.designerImage} alt={r.designerName} style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: 6, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <FaUser />
+              <>
+                {/* Aggregate summary */}
+                <div style={{ marginBottom: 12 }}>
+                  {(() => {
+                    const count = clientRatings.length;
+                    const avg =
+                      count === 0
+                        ? 0
+                        : clientRatings.reduce((s, r) => s + (r.stars || 0), 0) / count;
+                    const rounded = Math.round(avg * 10) / 10; // one decimal
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div>
+                          <strong style={{ fontSize: 18 }}>{rounded}</strong>
+                          <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <FaStar
+                                key={i}
+                                color={i < Math.round(avg) ? "#f59e0b" : "#e5e7eb"}
+                              />
+                            ))}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#6b7280" }}>
+                            {count} review{count > 1 ? "s" : ""}
+                          </div>
                         </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* List */}
+                <div style={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 8 }}>
+                  {clientRatings.map((r) => (
+                    <div
+                      key={r.id}
+                      style={{
+                        marginBottom: 14,
+                        borderBottom: "1px solid #eee",
+                        paddingBottom: 10,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {r.designerImage ? (
+                          <img
+                            src={r.designerImage}
+                            alt={r.designerName}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 6,
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 6,
+                              background: "#eee",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FaUser />
+                          </div>
+                        )}
+                        <div>
+                          <strong>{r.reviewerName}</strong>
+                          {r.designerName && (
+                            <div style={{ fontSize: 12, color: "#6b7280" }}>
+                              {r.designerName}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            marginLeft: "auto",
+                            display: "flex",
+                            gap: 4,
+                            alignItems: "center",
+                          }}
+                        >
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <FaStar
+                              key={i}
+                              color={i < r.stars ? "#f59e0b" : "#e5e7eb"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {r.review ? (
+                        <p style={{ marginTop: 8, fontStyle: "italic" }}>
+                          “{r.review}”
+                        </p>
+                      ) : (
+                        <p style={{ marginTop: 8, color: "#6b7280" }}>No comment</p>
                       )}
-                      <div>
-                        <strong>{r.reviewerName}</strong>
-                        {r.designerName && <div style={{ fontSize: 12, color: "#6b7280" }}>{r.designerName}</div>}
-                      </div>
-                      <div style={{ marginLeft: "auto", display: "flex", gap: 4, alignItems: "center" }}>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <FaStar key={i} color={i < r.stars ? "#f59e0b" : "#e5e7eb"} />
-                        ))}
-                      </div>
+
+                      <small style={{ color: "#9ca3af" }}>
+                        {formatDate(r.createdAt)}
+                      </small>
                     </div>
-
-                    {r.review ? (
-                      <p style={{ marginTop: 8, fontStyle: "italic" }}>“{r.review}”</p>
-                    ) : (
-                      <p style={{ marginTop: 8, color: "#6b7280" }}>No comment</p>
-                    )}
-
-                    <small style={{ color: "#9ca3af" }}>{formatDate(r.createdAt)}</small>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
-              <button className="lux-btn decline" onClick={closeClientRatings}>Close</button>
+              <button className="lux-btn decline" onClick={closeClientRatings}>
+                Close
+              </button>
             </div>
           </div>
         </div>
       )}
+
     </>
   );
 };
