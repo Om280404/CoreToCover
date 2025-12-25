@@ -192,6 +192,7 @@ const MyHiredDesigners = () => {
                     {d.status === "pending" && "Awaiting Response"}
                     {d.status === "accepted" && "In Progress"}
                     {d.status === "completed" && "Completed"}
+                    {d.status === "rejected" && "Rejected"}
                   </span>
 
                   {/* RATE DESIGNER */}
