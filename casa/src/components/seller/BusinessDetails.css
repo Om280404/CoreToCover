@@ -36,6 +36,17 @@
   box-sizing: border-box;
 }
 
+.business_container{
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0px 32vw 0px;
+
+}
+
 /* =========================================
    CARD
 ========================================= */
@@ -271,6 +282,10 @@
 @media (max-width: 600px) {
   .business-card {
     padding: 22px 18px;
+  }
+
+  .business_container{
+    padding: 70px 18px;
   }
 
   .grid-2 {

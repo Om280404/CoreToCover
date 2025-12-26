@@ -20,8 +20,6 @@ import Signup from './components/customer/Signup';
 import Checkout from './components/customer/Checkout';
 
 {/* Seller Imports */ }
-import NotificationButton from './components/seller/NotificationButton';
-import SellerNotifications from './components/seller/Notifications';
 import Orders from './components/seller/Orders';
 import SellerAddProduct from './components/seller/SellerAddProduct';
 import SellerDashboard from './components/seller/SellerDashboard';
@@ -31,6 +29,7 @@ import SellerProfile from './components/seller/SellerProfile';
 import SellerLogin from './components/seller/SellerLogin';
 import SellerSignup from './components/seller/SellerSignup';
 import BusinessDetails from './components/seller/BusinessDetails';
+import EditBusinessDetails from './components/seller/EditBusinessDetails';
 import SellerDeliveryDetails from './components/seller/SellerDeliveryDetails';
 import SellerDeliveryUpdate from './components/seller/SellerDeliveryUpdate';
 import SellerManageBankDetails from './components/seller/SellerManageBankDetails'
@@ -98,8 +97,6 @@ function App() {
 
 
         {/* Routes for seller side */}
-        <Route path="/notifications" element={<NotificationButton />} />
-        <Route path="/sellernotifications" element={<SellerNotifications />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/selleraddproduct" element={<AuthRoute element={<SellerAddProduct/>}/>} />
         <Route path="/sellerreturns" element={<AuthRoute element={<SellerReturns/>}/>} />
@@ -109,9 +106,10 @@ function App() {
         <Route path="/sellerlogin" element={<SellerLogin />} />
         <Route path="/sellersignup" element={<SellerSignup />} />
         <Route path="/businessdetails" element={<BusinessDetails />} />
+        <Route path="/editbusinessdetails" element={<EditBusinessDetails/>} />
         <Route path="/deliverydetails" element={<SellerDeliveryDetails/>} />
         <Route path="/sellerdeliveryupdate" element={<AuthRoute element={<SellerDeliveryUpdate/>}/>} />
-        <Route path='sellermanagebankdetails' element={<SellerManageBankDetails/>} />
+        <Route path='/sellermanagebankdetails' element={<SellerManageBankDetails/>} />
         <Route path="/sellerbankdetails" element={<AuthRoute element={<SellerBankDetails/>}/>} />
         <Route path="/sellerproducts" element={<AuthRoute element={<SellerProducts/>}/>} />
 

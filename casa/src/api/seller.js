@@ -23,11 +23,27 @@ export const createSellerBusinessDetails = (payload) => {
 };
 
 /* =========================
+   GET SELLER BUSINESS DETAILS
+========================= */
+export const getSellerBusinessDetails = (sellerId) => {
+  return api.get(`/seller/${sellerId}/business-details`);
+};
+
+
+/* =========================
+   UPDATE SELLER BUSINESS DETAILS
+========================= */
+export const updateSellerBusinessDetails = (sellerId, payload) => {
+  return api.put(`/seller/${sellerId}/business-details`, payload);
+};
+
+/* =========================
    GET SELLER BANK DETAILS
 ========================= */
 export const getSellerBankDetails = (sellerId) => {
   return api.get(`/seller/${sellerId}/bank-details`);
 };
+
 
 /* =========================
    VERIFY SELLER PASSWORD

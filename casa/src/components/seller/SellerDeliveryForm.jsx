@@ -1,6 +1,5 @@
 import React from "react";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 
 const SellerDeliveryForm = ({ delivery, setDelivery, onSubmit, submitLabel }) => {
     const handleChange = (e) => {
@@ -15,7 +14,6 @@ const SellerDeliveryForm = ({ delivery, setDelivery, onSubmit, submitLabel }) =>
         <>
             <div className="ms-root">
                 <Sidebar />
-                <NotificationButton />
             <form onSubmit={onSubmit}>
                 <div className="input-group">
                     <label>Who will deliver the product? *</label>

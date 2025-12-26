@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import "./Orders.css";
 import {
   getSellerOrders,
@@ -201,7 +200,6 @@ const SellerOrders = () => {
   return (
     <div className="orders-layout">
       <Sidebar />
-      <NotificationButton />
       <div className="notification-scrollable" />
 
       <div className="orders-content">
@@ -283,13 +281,36 @@ const SellerOrders = () => {
                     )}
 
                     {order._status === "confirmed" && (
-                      <button onClick={() => updateStatus(order._orderItemId ?? order.id, "fulfilled")} className="fulfill-btn">
-                        Mark as Delivered
+                      <>
+                        <button
+                          onClick={() =>
+                            updateStatus(order._orderItemId ?? order.id, "out_for_delivery")
+                          }
+                          className="confirm-btn"
+                        >
+                          Out For Delivery
+                        </button>
+                      </>
+                    )}
+
+                    {order._status === "out_for_delivery" && (
+                      <button
+                        onClick={() =>
+                          updateStatus(order._orderItemId ?? order.id, "fulfilled")
+                        }
+                        className="fulfill-btn"
+                      >
+                        ✅ Mark as Delivered
                       </button>
                     )}
 
                     {order._status === "fulfilled" && <span className="badge fulfilled">Delivered</span>}
                     {order._status === "rejected" && <span className="badge rejected">Rejected</span>}
+
+                    {order._status === "cancelled" && (
+                      <span className="badge rejected">Cancelled by customer</span>
+                    )}
+
                   </div>
                 </div>
               </li>

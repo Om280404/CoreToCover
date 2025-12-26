@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SellerProfile.css";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import { getSellerProfile, updateSellerProfile } from "../../api/seller";
 
 
@@ -108,8 +107,6 @@ const SellerProfile = () => {
   return (
     <div className="bs-layout-root">
       <Sidebar />
-      <NotificationButton />
-
       <div className="bs-profile-shell">
         <h1 className="bs-heading">Seller Profile</h1>
 

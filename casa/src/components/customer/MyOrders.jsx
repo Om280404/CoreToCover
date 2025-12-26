@@ -4,6 +4,9 @@ import { FaStar } from "react-icons/fa";
 import "./MyOrders.css";
 import sample from "../../assets/images/sample.jpg";
 import api from "../../api/axios";
+import { cancelOrder } from "../../api/order";
+import { GiSandsOfTime } from "react-icons/gi";
+
 
 /* =========================
    🔹 RETURN APIs
@@ -19,16 +22,29 @@ import {
 ========================= */
 const getOrderStatusMeta = (status) => {
   switch (status) {
-    case "fulfilled":
-      return { text: "Delivered", className: "status-delivered" };
-    case "rejected":
-      return { text: "Cancelled", className: "status-cancelled" };
+    case "pending":
+      return { text: "Processing", className: "status-processing" };
+
     case "confirmed":
       return { text: "Confirmed", className: "status-confirmed" };
+
+    case "out_for_delivery":
+      return { text: "Out for Delivery", className: "status-out-for-delivery" };
+
+    case "fulfilled":
+      return { text: "Delivered", className: "status-delivered" };
+
+    case "rejected":
+      return { text: "Rejected", className: "status-cancelled" };
+
+    case "cancelled":
+      return { text: "Cancelled", className: "status-cancelled" };
+
     default:
       return { text: "Processing", className: "status-processing" };
   }
 };
+
 
 const getFinalOrderStatus = (orderStatus, returnInfo) => {
   if (!returnInfo) return getOrderStatusMeta(orderStatus);
@@ -42,9 +58,13 @@ const getFinalOrderStatus = (orderStatus, returnInfo) => {
 
     case "APPROVED":
       return {
-        text: "Returned",
+        text:
+          returnInfo.refundMethod === "STORE_CREDIT"
+            ? "Returned (Store Credit)"
+            : "Returned (Refund Processing)",
         className: "status-returned",
       };
+
 
     case "REJECTED":
       return {
@@ -88,6 +108,8 @@ export default function MyOrders() {
   const [returnReason, setReturnReason] = useState({});
   const [openReturnBox, setOpenReturnBox] = useState({});
   const [returnImages, setReturnImages] = useState({});
+  const [refundMethod, setRefundMethod] = useState({});
+
 
 
   /* =========================
@@ -96,6 +118,47 @@ export default function MyOrders() {
   const [credit, setCredit] = useState(0);
 
   const userEmail = localStorage.getItem("userEmail");
+
+  const canCancelOrder = (order) => {
+    // ❌ Cannot cancel once out for delivery or delivered
+    if (
+      order.orderStatus !== "confirmed" ||
+      order.orderStatus === "out_for_delivery"
+    ) {
+      return false;
+    }
+
+    const orderDate = new Date(order.createdAt);
+    const diffDays = (Date.now() - orderDate.getTime()) / MS_IN_DAY;
+
+    return diffDays <= RETURN_LIMIT_DAYS;
+  };
+
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    try {
+      await cancelOrder(orderId);
+
+      // ✅ Update UI immediately
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === orderId
+            ? { ...o, orderStatus: "rejected" }
+            : o
+        )
+
+      );
+
+
+      alert("Order cancelled successfully");
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to cancel order");
+    }
+  };
+
+
 
   /* =========================
      FETCH USER ORDERS
@@ -114,9 +177,6 @@ export default function MyOrders() {
   /* =========================
      FETCH USER RETURNS
   ========================= */
-  /* =========================
-   FETCH USER RETURNS
-======================== */
   useEffect(() => {
     if (!userEmail) return;
 
@@ -184,8 +244,15 @@ export default function MyOrders() {
   ========================= */
   const handleReturnSubmit = async (order) => {
     const reason = returnReason[order.orderItemId];
+    const method = refundMethod[order.orderItemId];
+
     if (!reason) {
       alert("Please select a return reason");
+      return;
+    }
+
+    if (!method) {
+      alert("Please select refund preference");
       return;
     }
 
@@ -200,6 +267,8 @@ export default function MyOrders() {
     const formData = new FormData();
     formData.append("orderItemId", order.orderItemId);
     formData.append("reason", reason);
+    formData.append("refundMethod", method);
+
 
     (returnImages[order.orderItemId] || []).forEach((file) => {
       formData.append("images", file);
@@ -319,13 +388,39 @@ export default function MyOrders() {
                   <p><strong>Total:</strong> ₹{order.totalAmount}</p>
                 </div>
 
+                {/* ===== CANCEL ORDER BUTTON ===== */}
+                {canCancelOrder(order) && (
+                  <button
+                    className="cancel-btn"
+                    onClick={() => handleCancelOrder(order.id)}
+                  >
+                    Cancel Order
+                  </button>
+                )}
+
+
                 {/* ===== RETURN SECTION (ADDED SAFELY) ===== */}
                 {isDelivered && (
                   <>
                     {/* ✅ RETURN ALREADY REQUESTED / PROCESSED */}
                     {returnInfo ? (
                       <div className="rated-pill">
-                        {returnInfo.status === "REQUESTED" && "Return requested ⏳"}
+                        {returnInfo.status === "REQUESTED" && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              color: "#92400e",
+                              fontWeight: 500,
+                            }}
+                          >
+                            Return requested
+                            <GiSandsOfTime size={18} />
+                          </span>
+                        )}
+
+
 
                         {returnInfo.status === "APPROVED" && (
                           <span style={{ color: "#047857" }}>
@@ -335,7 +430,7 @@ export default function MyOrders() {
 
                         {returnInfo.status === "REJECTED" && (
                           <span style={{ color: "#b91c1c" }}>
-                            Return rejected ❌
+                            Return rejected
                           </span>
                         )}
                       </div>
@@ -359,6 +454,41 @@ export default function MyOrders() {
                             </option>
                           ))}
                         </select>
+                        {/* ===== REFUND METHOD ===== */}
+                        <div className="refund-method">
+                          <label>
+                            <input
+                              type="radio"
+                              name={`refund-${order.orderItemId}`}
+                              value="STORE_CREDIT"
+                              checked={refundMethod[order.orderItemId] === "STORE_CREDIT"}
+                              onChange={() =>
+                                setRefundMethod((p) => ({
+                                  ...p,
+                                  [order.orderItemId]: "STORE_CREDIT",
+                                }))
+                              }
+                            />
+                            Store Credit (Instant)
+                          </label>
+
+                          <label style={{ marginLeft: 12 }}>
+                            <input
+                              type="radio"
+                              name={`refund-${order.orderItemId}`}
+                              value="ORIGINAL_PAYMENT"
+                              checked={refundMethod[order.orderItemId] === "ORIGINAL_PAYMENT"}
+                              onChange={() =>
+                                setRefundMethod((p) => ({
+                                  ...p,
+                                  [order.orderItemId]: "ORIGINAL_PAYMENT",
+                                }))
+                              }
+                            />
+                            Original Payment
+                          </label>
+                        </div>
+
 
                         <input
                           type="file"

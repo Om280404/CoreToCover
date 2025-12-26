@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import "./SellerProducts.css";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
@@ -283,7 +282,6 @@ const SellerProducts = () => {
   return (
     <div className="ms-root">
       <Sidebar />
-      <NotificationButton />
 
       <main className="ms-main">
         <h1 className="ms-title">My Products</h1>

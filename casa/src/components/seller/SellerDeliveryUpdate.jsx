@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./SellerDeliveryUpdate.css";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import {
     getSellerDeliveryDetails,
     saveSellerDeliveryDetails,
@@ -93,7 +92,6 @@ const SellerDeliveryUpdate = () => {
     return (
         <div className="ms-root">
             <Sidebar />
-            <NotificationButton />
 
             <div className="delivery-container">
                 <div className="delivery-card">

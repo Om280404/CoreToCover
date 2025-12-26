@@ -23,6 +23,11 @@ enum RefundStatus {
   FAILED
 }
 
+enum RefundMethod {
+  STORE_CREDIT
+  ORIGINAL_PAYMENT
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -358,6 +363,7 @@ model ReturnRequest {
   decisionNote String?
   decidedAt    DateTime?
 
+  refundMethod RefundMethod?
   refundAmount  Float?
   refundStatus  RefundStatus @default(NONE)
   refundDetails String?

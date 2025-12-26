@@ -6,7 +6,6 @@ import {
     rejectReturn,
 } from "../../api/sellerReturn";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 
 export default function SellerReturns() {
     const [returns, setReturns] = useState([]);
@@ -81,7 +80,6 @@ export default function SellerReturns() {
     return (
         <div className="ms-root">
             <Sidebar />
-            <NotificationButton />
 
             <div className="seller-returns-page">
                 <h2 className="page-title">Return Requests</h2>

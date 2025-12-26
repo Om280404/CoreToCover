@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import "./SellerDashboard.css";
 import { FaShoppingCart, FaRupeeSign } from "react-icons/fa";
 import { getSellerProfile, getSellerOrders, getSellerDashboard } from "../../api/seller";
@@ -105,7 +104,6 @@ const SellerDashboard = () => {
   return (
     <div className="dashboard-wrapper">
       <Sidebar />
-      <NotificationButton />
 
       <div className="dashboard-main">
         <h1 className="dashboard-title">

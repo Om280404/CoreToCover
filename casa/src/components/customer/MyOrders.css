@@ -211,7 +211,6 @@
 }
 
 .rate-btn:hover {
-    background: rgba(96, 110, 82, 0.08);
     transform: translateY(-2px);
 }
 
@@ -630,4 +629,32 @@
   background: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
+}
+
+.cancel-btn {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.cancel-btn:hover {
+  background: #fecaca;
+}
+
+.refund-method {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  margin: 6px 0;
+}
+
+.status-out-for-delivery {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
 }

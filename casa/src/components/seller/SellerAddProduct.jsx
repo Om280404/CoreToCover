@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import NotificationButton from "./NotificationButton";
 import "./SellerAddProduct.css";
 import { addSellerProduct } from "../../api/seller";
 
@@ -172,8 +171,6 @@ const SellerAddProduct = () => {
   return (
     <div className="sma-root">
       <Sidebar />
-      <NotificationButton />
-
       <main className="sma-main">
         <form className="sma-card" onSubmit={handleSubmit}>
           <h2 className="sma-title">➕ Add New Product</h2>

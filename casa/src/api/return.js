@@ -31,8 +31,9 @@ export const cancelReturn = (id) =>
 export const getSellerReturns = () =>
   axios.get("/api/returns/seller", { headers: sellerHeaders() });
 
-export const approveReturn = (id) =>
-  axios.post(`/api/returns/${id}/approve`, null, { headers: sellerHeaders() });
+export const approveReturn = (id, refundMethod) =>
+  axios.post(`/api/returns/${id}/approve`, { refundMethod }, { headers: sellerHeaders() });
+
 
 export const rejectReturn = (id, decisionNote) =>
   axios.post(`/api/returns/${id}/reject`, { decisionNote }, { headers: sellerHeaders() });

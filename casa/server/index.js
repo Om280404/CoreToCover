@@ -542,6 +542,56 @@ app.get("/seller/:sellerId/business-details", async (req, res) => {
 });
 
 /* =========================
+   UPDATE SELLER BUSINESS DETAILS
+========================= */
+app.put("/seller/:sellerId/business-details", async (req, res) => {
+  try {
+    const sellerId = Number(req.params.sellerId);
+    const {
+      businessName,
+      sellerType,
+      address,
+      city,
+      state,
+      pincode,
+      gst,
+    } = req.body;
+
+    const existing = await prisma.sellerBusinessDetails.findUnique({
+      where: { sellerId },
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        message: "Business details not found",
+      });
+    }
+
+    const updated = await prisma.sellerBusinessDetails.update({
+      where: { sellerId },
+      data: {
+        businessName,
+        sellerType,
+        address,
+        city,
+        state,
+        pincode,
+        gst,
+      },
+    });
+
+    res.json({
+      message: "Business details updated successfully",
+      updated,
+    });
+  } catch (error) {
+    console.error("Update business error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+/* =========================
    POST SELLER DELIVERY DETAILS
 ========================= */
 app.post("/seller/delivery-details", async (req, res) => {
@@ -1124,7 +1174,8 @@ app.get("/orders/user/:email", async (req, res) => {
 
     const formatted = orders.flatMap((order) =>
       order.items.map((item) => ({
-        id: `ORD-${order.id}`,
+        id: order.id,   
+        displayId: `ORD-${order.id}`,
         orderItemId: item.id,
 
         productName: item.materialName,
@@ -1585,7 +1636,7 @@ app.patch("/seller/order/:orderItemId/status", async (req, res) => {
     const orderItemId = Number(req.params.orderItemId);
 
     // 🔒 Validate allowed statuses
-    const allowed = ["pending", "confirmed", "rejected", "fulfilled"];
+    const allowed = ["pending", "confirmed","out_for_delivery", "rejected", "fulfilled", "cancelled"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
@@ -1665,7 +1716,7 @@ app.patch("/order/:orderId/cancel", async (req, res) => {
     ========================= */
     await prisma.orderItem.updateMany({
       where: { orderId },
-      data: { status: "rejected" }, // unified cancel state
+      data: { status: "cancelled" }, // unified cancel state
     });
 
     return res.json({ ok: true });
@@ -1797,11 +1848,15 @@ app.post(
   uploadReturnImages.array("images", 5),
   async (req, res) => {
     try {
-      const { orderItemId, reason, note } = req.body;
+      const { orderItemId, reason, note, refundMethod } = req.body;
       const userEmail = req.headers["x-user-email"];
 
       if (!userEmail) {
         return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      if (!["STORE_CREDIT", "ORIGINAL_PAYMENT"].includes(refundMethod)) {
+        return res.status(400).json({ message: "Invalid refund method" });
       }
 
       const user = await prisma.user.findUnique({
@@ -1823,11 +1878,20 @@ app.post(
         });
       }
 
-      // ✅ map uploaded images
+      // 🚫 Prevent duplicate return
+      const existing = await prisma.returnRequest.findUnique({
+        where: { orderItemId: item.id },
+      });
+
+      if (existing) {
+        return res.status(400).json({
+          message: "Return already requested for this item",
+        });
+      }
+
       const images = (req.files || []).map(
         (file) => `/returns/images/${file.filename}`
       );
-
 
       const returnRequest = await prisma.returnRequest.create({
         data: {
@@ -1839,6 +1903,7 @@ app.post(
           reason,
           note,
           images,
+          refundMethod,              // ✅ STORE USER CHOICE
           refundAmount: item.totalAmount,
         },
       });
@@ -1848,7 +1913,7 @@ app.post(
         data: {
           returnStatus: "REQUESTED",
           returnRequestedAt: new Date(),
-          status: "return_requested",
+          status: "fulfilled", // ⚠️ KEEP ORIGINAL STATUS
         },
       });
 
@@ -1857,11 +1922,12 @@ app.post(
         returnRequest,
       });
     } catch (err) {
-      console.error(err);
+      console.error("RETURN REQUEST ERROR:", err);
       res.status(500).json({ message: err.message });
     }
   }
 );
+
 
 
 // USER RETURNS
@@ -1913,13 +1979,12 @@ app.patch("/api/returns/:id/cancel", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const userEmail = req.headers["x-user-email"];
+    if (!userEmail) return res.status(401).json({ message: "Unauthorized" });
 
-    const user = await prisma.user.findUnique({
-      where: { email: userEmail },
-    });
+    const user = await prisma.user.findUnique({ where: { email: userEmail } });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const rr = await prisma.returnRequest.findUnique({ where: { id } });
-
     if (!rr || rr.userId !== user.id) {
       return res.status(404).json({ message: "Return not found" });
     }
@@ -1928,27 +1993,35 @@ app.patch("/api/returns/:id/cancel", async (req, res) => {
       return res.status(400).json({ message: "Cannot cancel now" });
     }
 
-    await prisma.returnRequest.update({
-      where: { id },
-      data: {
-        status: "CANCELLED",
-        decidedAt: new Date(),
-        decisionNote: "Cancelled by user",
-      },
-    });
-
-    await prisma.orderItem.update({
-      where: { id: rr.orderItemId },
-      data: {
-        returnStatus: "CANCELLED",
-      },
-    });
+    await prisma.$transaction([
+      prisma.returnRequest.update({
+        where: { id },
+        data: {
+          status: "CANCELLED",
+          decidedAt: new Date(),
+          decisionNote: "Cancelled by user",
+          decidedBy: user.email,
+        },
+      }),
+      prisma.orderItem.update({
+        where: { id: rr.orderItemId },
+        data: {
+          returnStatus: "CANCELLED",
+          // revert the item status to delivered (adjust if you track previous status)
+          status: "fulfilled",
+          // optionally clear returnRequestedAt
+          returnRequestedAt: null,
+        },
+      }),
+    ]);
 
     res.json({ message: "Return cancelled" });
   } catch (err) {
+    console.error("CANCEL RETURN ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 });
+
 
 // ===============================
 // SELLER RETURN REQUESTS
@@ -1987,63 +2060,78 @@ app.post("/api/returns/:id/approve", async (req, res) => {
   try {
     const returnId = Number(req.params.id);
 
+    const sellerEmail = req.headers["x-seller-email"];
+    if (!sellerEmail) return res.status(401).json({ message: "Unauthorized" });
+
+    const seller = await prisma.seller.findUnique({
+      where: { email: sellerEmail },
+    });
+    if (!seller) return res.status(404).json({ message: "Seller not found" });
+
     const rr = await prisma.returnRequest.findUnique({
       where: { id: returnId },
       include: { orderItem: true },
     });
 
-    if (!rr) {
-      return res.status(404).json({ message: "Return request not found" });
+    if (!rr) return res.status(404).json({ message: "Return request not found" });
+
+    if (rr.sellerId !== seller.id) {
+      return res.status(403).json({ message: "Not authorized" });
     }
 
     if (rr.status !== "REQUESTED") {
       return res.status(400).json({ message: "Return already processed" });
     }
 
-    /* ===============================
-       1️⃣ MARK RETURN AS APPROVED
-    =============================== */
-    await prisma.returnRequest.update({
-      where: { id: returnId },
-      data: {
-        status: "APPROVED",
-        decidedAt: new Date(),
-        refundStatus: "COMPLETED",
-      },
-    });
+    const refundMethod = rr.refundMethod;
+    const refundAmount = Number(rr.refundAmount ?? rr.orderItem.totalAmount);
 
-    await prisma.orderItem.update({
-      where: { id: rr.orderItemId },
-      data: {
-        returnStatus: "APPROVED",
-        refundAmount: rr.refundAmount,
-        refundStatus: "COMPLETED",
-        status: "returned",
-        returnResolvedAt: new Date(),
-      },
-    });
-
-    /* ===============================
-       2️⃣ 💰 CREDIT USER (THIS IS IT)
-    =============================== */
-    await prisma.user.update({
-      where: { id: rr.userId },
-      data: {
-        credit: {
-          increment: rr.refundAmount,
+    await prisma.$transaction(async (tx) => {
+      await tx.returnRequest.update({
+        where: { id: returnId },
+        data: {
+          status: "APPROVED",
+          refundStatus:
+            refundMethod === "STORE_CREDIT" ? "COMPLETED" : "PENDING",
+          decidedAt: new Date(),
+          decidedBy: seller.email,
+          decisionNote: "Approved by seller",
         },
-      },
+      });
+
+      await tx.orderItem.update({
+        where: { id: rr.orderItemId },
+        data: {
+          status: "returned",
+          returnStatus: "APPROVED",
+          returnResolvedAt: new Date(),
+        },
+      });
+
+      if (refundMethod === "STORE_CREDIT") {
+        await tx.user.update({
+          where: { id: rr.userId },
+          data: {
+            credit: { increment: refundAmount },
+          },
+        });
+      }
     });
 
     res.json({
-      message: "Return approved and credit added",
-      creditedAmount: rr.refundAmount,
+      message:
+        refundMethod === "STORE_CREDIT"
+          ? "Return approved & store credit issued"
+          : "Return approved & refund initiated",
+      refundMethod,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    console.error("APPROVE RETURN ERROR:", err);
+    res.status(500).json({ message: "Failed to approve return" });
   }
 });
+
+
 
 // ===============================
 // REJECT RETURN (SELLER / ADMIN)

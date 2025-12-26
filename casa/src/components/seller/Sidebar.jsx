@@ -11,6 +11,7 @@ import { PiBank } from "react-icons/pi";
 import { AiOutlineProduct } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { FiRotateCcw } from "react-icons/fi";
+import { IoBusinessOutline } from "react-icons/io5";
 import "./Sidebar.css";
 
 const Sidebar = ({ notificationCount = 0 }) => {
@@ -36,6 +37,7 @@ const Sidebar = ({ notificationCount = 0 }) => {
     { icon: <FiPackage />, label: "Add Product", path: "/selleraddproduct" },
     { icon: <AiOutlineProduct />, label: "My Products", path: "/sellerproducts" },
     { icon: <FiUser />, label: "Delivery Settings", path: "/sellerdeliveryupdate" },
+    { icon: <IoBusinessOutline/>, label: "Business Details", path: "/editbusinessdetails"},
     { icon: <PiBank />, label: "Bank Details", path: "/sellerbankdetails"},
     { icon: <FiRotateCcw />, label: "Return Requests", path: "/sellerreturns"},
   ];
