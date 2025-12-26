@@ -96,7 +96,6 @@ const SellerProfile = () => {
     return (
       <div className="bs-layout-root">
         <Sidebar />
-        <NotificationButton />
         <div className="bs-profile-shell">
           <h2>Loading profile…</h2>
         </div>
