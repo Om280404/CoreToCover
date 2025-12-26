@@ -1878,7 +1878,7 @@ app.post(
         });
       }
 
-      // 🚫 Prevent duplicate return
+      //  Prevent duplicate return
       const existing = await prisma.returnRequest.findUnique({
         where: { orderItemId: item.id },
       });
@@ -1913,7 +1913,7 @@ app.post(
         data: {
           returnStatus: "REQUESTED",
           returnRequestedAt: new Date(),
-          status: "fulfilled", // ⚠️ KEEP ORIGINAL STATUS
+          status: "fulfilled", //  KEEP ORIGINAL STATUS
         },
       });
 
