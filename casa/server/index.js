@@ -3354,6 +3354,63 @@ app.get("/client/:userId/ratings", async (req, res) => {
   }
 });
 
+// ============================
+// CONTACT FORM (PRODUCTION READY)
+// ============================
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    /* =========================
+       VALIDATION
+    ========================= */
+    if (
+      !name?.trim() ||
+      !email?.trim() ||
+      !message?.trim()
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    // basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Invalid email address",
+      });
+    }
+
+    // prevent very large messages
+    if (message.length > 2000) {
+      return res.status(400).json({
+        message: "Message is too long",
+      });
+    }
+
+    /* =========================
+       SAVE MESSAGE
+    ========================= */
+    await prisma.contactMessage.create({
+      data: {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        message: message.trim(),
+      },
+    });
+
+    res.status(201).json({
+      message: "Message received successfully",
+    });
+  } catch (err) {
+    console.error("CONTACT FORM ERROR:", err);
+    res.status(500).json({
+      message: "Failed to send message. Please try again later.",
+    });
+  }
+});
+
 
 
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "./Navbar";
 import "./Contact.css";
+import { sendContactMessage } from "../../api/contact";
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -13,14 +14,24 @@ const Contact = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!formData.name || !formData.email || !formData.message) {
             alert("Please fill in all fields before submitting.");
             return;
         }
-        alert("Thank you for reaching out! We'll get back to you soon.");
-        setFormData({ name: "", email: "", message: "" });
+
+        try {
+            await sendContactMessage(formData);
+            alert("Thank you for reaching out! We'll get back to you soon.");
+            setFormData({ name: "", email: "", message: "" });
+        } catch (err) {
+            alert(
+                err?.response?.data?.message ||
+                "Failed to send message. Please try again."
+            );
+        }
     };
 
     return (
@@ -78,17 +89,17 @@ const Contact = () => {
                             </button>
 
                         </form>
-                            <a href="tel:+919322611145">
-                                <button className="pd-btn pd-btn-call">📞 Call Us</button>
-                            </a>
+                        <a href="tel:+919322611145">
+                            <button className="pd-btn pd-btn-call">📞 Call Us</button>
+                        </a>
                     </div>
 
                     <div className="contact-right">
                         <h3>Get in Touch</h3>
-                        <p><strong>Email:</strong> support@constructify.in</p>
-                        <p><strong>Phone:</strong> +91 98765 43210</p>
+                        <p><strong>Email:</strong> team.casa.in@gmail.com</p>
+                        {/* <p><strong>Phone:</strong> +91 98765 43210</p> */}
                         <p><strong>Office Address:</strong>
-                            24 Industrial Lane, Sangli, Maharashtra, India
+                            Vishrambag, Sangli, Maharashtra, India
                         </p>
 
                         <div className="contact-map">
