@@ -7,7 +7,7 @@ import { getSellerProfile, updateSellerProfile } from "../../api/seller";
 
 const SellerProfile = () => {
   const navigate = useNavigate();
-  const sellerId = localStorage.getItem("sellerId");
+  const sellerId = Number(localStorage.getItem("sellerId"));
 
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const SellerProfile = () => {
      FETCH SELLER PROFILE
   ========================= */
   useEffect(() => {
-    if (!sellerId) {
+    if (!sellerId || isNaN(sellerId)) {
       navigate("/sellerlogin");
       return;
     }
@@ -40,6 +40,8 @@ const SellerProfile = () => {
         });
       } catch (err) {
         alert("Failed to load profile");
+        localStorage.removeItem("sellerId");
+        navigate("/sellerlogin", { replace: true });
       } finally {
         setLoading(false);
       }
