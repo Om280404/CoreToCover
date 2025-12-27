@@ -2,7 +2,7 @@
 SETLOCAL
 
 :: Define server directories
-SET SUPPLIER_DIR=C:\Users\bhosa\OneDrive\Documents\GitHub\Casa
+SET SUPPLIER_DIR=C:\Users\bhosa\OneDrive\Documents\GitHub\Casa\casa
 SET MAIN_DIR=C:\Users\bhosa\OneDrive\Documents\GitHub\Casa\server
 
 :: Menu
