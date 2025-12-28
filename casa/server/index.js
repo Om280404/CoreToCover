@@ -268,44 +268,53 @@ app.post("/seller/signup", async (req, res) => {
       return res.status(400).json({ message: "All fields required" });
     }
 
+    const emailNormalized = email.trim().toLowerCase();
+
+    // ✅ VERIFY EMAIL OTP ONLY
     const verifiedOtp = await prisma.sellerOtp.findFirst({
-      where: { email },
+      where: { email: emailNormalized, verified: true },
       orderBy: { createdAt: "desc" },
     });
 
-    if (!verifiedOtp || !verifiedOtp.verified) {
+    if (!verifiedOtp) {
       return res.status(403).json({ message: "Email not verified" });
     }
 
+    const existingSeller = await prisma.seller.findUnique({
+      where: { email: emailNormalized },
+    });
 
-    if (!verifiedOtp || !verifiedOtp.verified) {
-      return res.status(403).json({ message: "Phone not verified" });
-    }
-
-    const existingSeller = await prisma.seller.findUnique({ where: { email } });
     if (existingSeller) {
-      return res.status(409).json({ message: "Seller already exists" });
-    }
+  return res.status(409).json({
+    message: "Account already exists. Please login.",
+    redirect: "/seller/login",
+  });
+}
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const seller = await prisma.seller.create({
       data: {
         name,
-        email,
+        email: emailNormalized,
         phone,
         password: hashedPassword,
       },
     });
 
-    await prisma.sellerOtp.deleteMany({ where: { phone } });
+    // ✅ CLEANUP OTPs CORRECTLY
+    await prisma.sellerOtp.deleteMany({
+      where: { email: emailNormalized },
+    });
 
     res.status(201).json({ sellerId: seller.id });
   } catch (err) {
-    console.error("SIGNUP ERROR:", err);
-    res.status(500).json({ message: err.message });
+    console.error("SELLER SIGNUP ERROR:", err);
+    res.status(500).json({ message: "Signup failed" });
   }
 });
+
 
 /* ===============
    OTP via API

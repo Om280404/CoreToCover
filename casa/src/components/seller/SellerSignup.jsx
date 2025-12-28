@@ -88,8 +88,18 @@ const SellerSignup = () => {
 
       navigate("/businessdetails");
     } catch (err) {
-      alert(err?.response?.data?.message || "Signup failed");
-    } finally {
+      const status = err?.response?.status;
+
+      if (status === 409) {
+        alert("Account already exists. Please login.");
+        navigate("/sellerlogin");
+      } else if (status === 403) {
+        alert("Please verify your email before signup.");
+      } else {
+        alert(err?.response?.data?.message || "Signup failed");
+      }
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -145,7 +155,7 @@ const SellerSignup = () => {
               className="otp-btn"
               type="button"
               onClick={sendOtp}
-              disabled={otpSent || sendingOtp}
+              disabled={otpSent || sendingOtp || emailVerified}
             >
               {otpSent ? "OTP Sent" : sendingOtp ? "Sending..." : "Send OTP"}
             </button>
