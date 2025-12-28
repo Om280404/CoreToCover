@@ -8,6 +8,18 @@ export const designerSignup = async (payload) => {
   return res.data;
 };
 
+/* ============================
+   DESIGNER OTP PART
+============================ */
+export const sendDesignerOtp = (email) => {
+  return api.post("/designer/send-otp", { email });
+};
+
+export const verifyDesignerOtp = (email, otp) => {
+  return api.post("/designer/verify-otp", { email, otp });
+};
+
+
 /* =========================
    DESIGNER LOGIN
 ========================= */

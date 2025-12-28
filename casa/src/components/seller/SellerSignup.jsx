@@ -22,59 +22,64 @@ const SellerSignup = () => {
 
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
+  // Send OTP to email
   const sendOtp = async () => {
-    if (!form.phone) return alert("Enter phone number");
-
+    if (!form.email) return alert("Enter email");
+    setSendingOtp(true);
     try {
-      const res = await sendSellerOtp(form.phone);
-
-      // SHOW OTP IN ALERT (DEV ONLY)
-      alert(`Your OTP is: ${res.data.otp}`);
-
+      await sendSellerOtp(form.email.trim().toLowerCase());
       setOtpSent(true);
+      alert("OTP sent to your email. Check inbox / spam.");
     } catch (err) {
       alert(err?.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
-
+  // Verify OTP for email
   const verifyOtp = async () => {
+    if (!otp) return alert("Enter OTP");
+    setVerifyingOtp(true);
     try {
-      await verifySellerOtp(form.phone, otp);
-      setPhoneVerified(true);
-      alert("Phone verified ✅");
+      await verifySellerOtp(form.email.trim().toLowerCase(), otp.trim());
+      setEmailVerified(true);
+      alert("Email verified ✅");
     } catch (err) {
       alert(err?.response?.data?.message || "Invalid OTP");
+    } finally {
+      setVerifyingOtp(false);
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.terms) return alert("Accept terms");
-    if (!phoneVerified) return alert("Verify phone");
-    if (form.password !== form.confirmPassword)
-      return alert("Passwords do not match");
+    if (!emailVerified) return alert("Verify email");
+    if (form.password !== form.confirmPassword) return alert("Passwords do not match");
 
     setLoading(true);
 
     try {
       const res = await sellerSignup({
         name: form.name,
-        email: form.email,
-        phone: form.phone,
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
         password: form.password,
       });
 
@@ -103,6 +108,7 @@ const SellerSignup = () => {
             <input
               name="name"
               placeholder="Full Name"
+              value={form.name}
               onChange={handleChange}
               required
             />
@@ -115,6 +121,7 @@ const SellerSignup = () => {
               type="email"
               name="email"
               placeholder="Email"
+              value={form.email}
               onChange={handleChange}
               required
             />
@@ -126,6 +133,7 @@ const SellerSignup = () => {
             <input
               name="phone"
               placeholder="Phone"
+              value={form.phone}
               onChange={handleChange}
               required
             />
@@ -137,28 +145,32 @@ const SellerSignup = () => {
               className="otp-btn"
               type="button"
               onClick={sendOtp}
-              disabled={otpSent}
+              disabled={otpSent || sendingOtp}
             >
-              {otpSent ? "OTP Sent" : "Send OTP"}
+              {otpSent ? "OTP Sent" : sendingOtp ? "Sending..." : "Send OTP"}
             </button>
 
-
-            {otpSent && !phoneVerified && (
+            {otpSent && !emailVerified && (
               <>
                 <input
                   className="otp-btn primary"
                   placeholder="Enter OTP"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.trim())}
+                  onChange={(e) => setOtp(e.target.value.replace(/\s/g, ""))}
                 />
                 <button
                   className="otp-btn"
                   type="button"
                   onClick={verifyOtp}
+                  disabled={verifyingOtp}
                 >
-                  Verify OTP
+                  {verifyingOtp ? "Verifying..." : "Verify OTP"}
                 </button>
               </>
+            )}
+
+            {emailVerified && (
+              <span style={{ color: "green", marginLeft: 8 }}>Verified ✓</span>
             )}
           </div>
 
@@ -170,6 +182,7 @@ const SellerSignup = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
+                value={form.password}
                 onChange={handleChange}
                 required
               />
@@ -190,6 +203,7 @@ const SellerSignup = () => {
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 placeholder="Confirm Password"
+                value={form.confirmPassword}
                 onChange={handleChange}
                 required
               />
@@ -209,6 +223,7 @@ const SellerSignup = () => {
             <input
               type="checkbox"
               name="terms"
+              checked={form.terms}
               onChange={handleChange}
             />
             I agree to the <Link to="/terms">Terms & Conditions</Link>
@@ -218,7 +233,7 @@ const SellerSignup = () => {
           <button
             type="submit"
             className="signup-btn"
-            disabled={loading || !otpSent || !phoneVerified}
+            disabled={loading || !otpSent || !emailVerified}
           >
             {loading ? "Creating..." : "Continue"}
           </button>

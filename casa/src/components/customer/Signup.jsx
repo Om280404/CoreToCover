@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
-import { customerSignup } from "../../api/auth";
+import {
+  customerSignup,
+  sendCustomerOtp,
+  verifyCustomerOtp,
+} from "../../api/auth";
 import "./Signup.css";
 
 export default function Signup() {
@@ -16,16 +20,33 @@ export default function Signup() {
     confirmPassword: "",
   });
 
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [errors, setErrors] = useState({});
 
+  /* =========================
+     HANDLE INPUT CHANGE
+  ========================= */
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  /* =========================
+     VALIDATION
+  ========================= */
   const validate = () => {
     const e = {};
+
     if (!form.name.trim()) e.name = "Full name is required";
     if (!form.email.trim()) e.email = "Email is required";
+    if (!emailVerified) e.email = "Email must be verified";
     if (!form.phone.match(/^[0-9]{10}$/))
       e.phone = "Enter a valid 10-digit phone number";
     if (!form.address.trim()) e.address = "Address is required";
@@ -39,16 +60,60 @@ export default function Signup() {
     return Object.keys(e).length === 0;
   };
 
+  /* =========================
+     SEND OTP
+  ========================= */
+  const handleSendOtp = async () => {
+    if (!form.email.trim()) {
+      setErrors({ email: "Enter email first" });
+      return;
+    }
+
+    try {
+      setSendingOtp(true);
+      await sendCustomerOtp(form.email.trim().toLowerCase());
+      setOtpSent(true);
+      alert("OTP sent to your email");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  /* =========================
+     VERIFY OTP
+  ========================= */
+  const handleVerifyOtp = async () => {
+    if (!otp.trim()) return;
+
+    try {
+      setVerifyingOtp(true);
+      await verifyCustomerOtp(
+        form.email.trim().toLowerCase(),
+        otp.trim()
+      );
+      setEmailVerified(true);
+      alert("Email verified successfully");
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid OTP");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  /* =========================
+     SUBMIT SIGNUP
+  ========================= */
   const handleSignup = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
-
     try {
       await customerSignup({
         name: form.name.trim(),
-        email: form.email.trim(),
+        email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
         address: form.address.trim(),
         password: form.password,
@@ -57,14 +122,11 @@ export default function Signup() {
       alert("Account created successfully. Please login.");
       navigate("/login");
     } catch (err) {
-      alert(err.message || "Signup failed");
+      alert(err.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
 
   return (
     <div className="signup-page">
@@ -81,9 +143,55 @@ export default function Signup() {
 
           <div className="field">
             <label>Email</label>
-            <input name="email" value={form.email} onChange={handleChange} />
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              disabled={emailVerified}
+            />
             {errors.email && <small className="error"><FaTimes /> {errors.email}</small>}
           </div>
+
+          {!emailVerified && (
+            <div className="field full">
+              <button
+                type="button"
+                className={`otp-btn ${otpSent ? "sent" : ""}`}
+                onClick={handleSendOtp}
+                disabled={otpSent || sendingOtp || emailVerified}
+              >
+                {emailVerified
+                  ? "Email Verified"
+                  : otpSent
+                    ? "OTP Sent"
+                    : sendingOtp
+                      ? "Sending..."
+                      : "Send OTP"}
+              </button>
+
+
+              {otpSent && (
+                <>
+                  <input
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyOtp}
+                    disabled={verifyingOtp}
+                  >
+                    {verifyingOtp ? "Verifying..." : "Verify OTP"}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {emailVerified && (
+            <p style={{ color: "green" }}>Email verified ✓</p>
+          )}
 
           <div className="field">
             <label>Phone</label>
@@ -135,8 +243,9 @@ export default function Signup() {
             />
             I agree to terms
           </label>
+          {errors.terms && <small className="error"><FaTimes /> {errors.terms}</small>}
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading || !emailVerified}>
             {loading ? "Creating..." : "Create Account"}
           </button>
 

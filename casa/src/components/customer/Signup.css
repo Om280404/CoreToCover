@@ -246,3 +246,99 @@
     transition: none !important;
   }
 }
+
+/* =========================
+   OTP SECTION — CASA THEME
+========================= */
+
+.field.full {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* SEND / VERIFY OTP BUTTON */
+.field.full button {
+  background: linear-gradient(
+    135deg,
+    var(--green-mid),
+    var(--green-dark)
+  );
+  color: #fff;
+  border: none;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: transform var(--ease),
+              box-shadow var(--ease),
+              opacity var(--ease);
+  box-shadow: 0 10px 26px rgba(96, 110, 82, 0.25);
+}
+
+/* HOVER */
+.field.full button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(96, 110, 82, 0.35);
+}
+
+/* ACTIVE */
+.field.full button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 8px 20px rgba(96, 110, 82, 0.28);
+}
+
+/* DISABLED (OTP SENT / VERIFIED) */
+.field.full button:disabled {
+  background: linear-gradient(
+    135deg,
+    var(--green-light),
+    var(--green-mid)
+  );
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+/* OTP INPUT */
+.field.full input {
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 15px;
+  text-align: center;
+  letter-spacing: 6px;
+  background: var(--card-bg);
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color var(--ease),
+              box-shadow var(--ease);
+}
+
+/* OTP INPUT FOCUS */
+.field.full input:focus {
+  border-color: var(--green-mid);
+  box-shadow: 0 0 0 3px rgba(145, 165, 110, 0.25);
+}
+
+/* VERIFIED TEXT */
+.otp-verified {
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.otp-btn.sent {
+  background: linear-gradient(
+    135deg,
+    var(--green-light),
+    var(--green-mid)
+  );
+  color: var(--text-muted);
+}

@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -5,10 +8,27 @@ import { PrismaClient } from "@prisma/client";
 import { upload, uploadDesignerProfile, uploadDesignerPortfolio, uploadReturnImages } from "./multer.js";
 import path from "path";
 
+import crypto from "crypto";
+import nodemailer from "nodemailer";
+
 
 
 const app = express();
 const prisma = new PrismaClient();
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
+  secure: Number(process.env.EMAIL_PORT) === 465,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const hashOtp = (otp) =>
+  crypto.createHash("sha256").update(otp).digest("hex");
+
 
 app.use(
   cors({
@@ -76,27 +96,41 @@ app.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Check if user exists
+    const emailNormalized = email.trim().toLowerCase();
+
+    // 🔐 EMAIL MUST BE VERIFIED
+    const verifiedOtp = await prisma.customerOtp.findFirst({
+      where: { email: emailNormalized, verified: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!verifiedOtp) {
+      return res.status(403).json({ message: "Email not verified" });
+    }
+
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: emailNormalized },
     });
 
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: emailNormalized,
         phone,
         address,
         password: hashedPassword,
       },
+    });
+
+    // 🧹 cleanup OTPs
+    await prisma.customerOtp.deleteMany({
+      where: { email: emailNormalized },
     });
 
     res.status(201).json({
@@ -112,6 +146,81 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ message: "Signup failed" });
   }
 });
+
+
+/* ============================
+   CUSTOMER OTP
+============================ */
+app.post("/customer/send-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email required" });
+
+    const emailNormalized = email.trim().toLowerCase();
+
+    await prisma.customerOtp.deleteMany({
+      where: { email: emailNormalized },
+    });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await prisma.customerOtp.create({
+      data: {
+        email: emailNormalized,
+        otpHash: hashOtp(otp),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: emailNormalized,
+      subject: "Casa Email Verification",
+      html: `
+        <h2>Verify your email</h2>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 5 minutes.</p>
+      `,
+    });
+
+    res.json({ message: "OTP sent" });
+  } catch (err) {
+    console.error("CUSTOMER SEND OTP ERROR:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+});
+
+
+app.post("/customer/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp)
+      return res.status(400).json({ message: "Email & OTP required" });
+
+    const record = await prisma.customerOtp.findFirst({
+      where: {
+        email: email.trim().toLowerCase(),
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!record || record.otpHash !== hashOtp(otp)) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    await prisma.customerOtp.update({
+      where: { id: record.id },
+      data: { verified: true },
+    });
+
+    res.json({ message: "Email verified" });
+  } catch (err) {
+    console.error("CUSTOMER VERIFY OTP ERROR:", err);
+    res.status(500).json({ message: "OTP verification failed" });
+  }
+});
+
 
 // ============================
 // LOGIN
@@ -160,9 +269,14 @@ app.post("/seller/signup", async (req, res) => {
     }
 
     const verifiedOtp = await prisma.sellerOtp.findFirst({
-      where: { phone },
+      where: { email },
       orderBy: { createdAt: "desc" },
     });
+
+    if (!verifiedOtp || !verifiedOtp.verified) {
+      return res.status(403).json({ message: "Email not verified" });
+    }
+
 
     if (!verifiedOtp || !verifiedOtp.verified) {
       return res.status(403).json({ message: "Phone not verified" });
@@ -181,7 +295,6 @@ app.post("/seller/signup", async (req, res) => {
         email,
         phone,
         password: hashedPassword,
-        phoneVerified: true,
       },
     });
 
@@ -199,65 +312,62 @@ app.post("/seller/signup", async (req, res) => {
 ==================*/
 app.post("/seller/send-otp", async (req, res) => {
   try {
-    // ✅ STEP 1: Extract phone properly
-    const { phone } = req.body;
+    const { email } = req.body;
 
-    if (!phone) {
-      return res.status(400).json({ message: "Phone required" });
+    if (!email) {
+      return res.status(400).json({ message: "Email required" });
     }
 
-    // ✅ STEP 2: Normalize phone
-    const phoneNormalized = phone.trim();
+    const emailNormalized = email.trim().toLowerCase();
 
-    // ✅ STEP 3: Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // ✅ STEP 4: Delete old OTPs
+    // delete old OTPs
     await prisma.sellerOtp.deleteMany({
-      where: { phone: phoneNormalized },
+      where: { email: emailNormalized },
     });
 
-    // ✅ STEP 5: Save new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     await prisma.sellerOtp.create({
       data: {
-        phone: phoneNormalized,
-        otp,
+        email: emailNormalized,
+        otpHash: hashOtp(otp),
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
     });
 
-    // ✅ DEV ONLY
-    console.log("OTP:", otp);
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: emailNormalized,
+      subject: "Casa Seller Verification Code",
+      html: `
+        <h2>Casa Seller Verification</h2>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 5 minutes.</p>
+      `,
+    });
 
-    // ✅ STEP 6: Send response
-    res.json({ message: "OTP sent", otp });
+    res.json({ message: "OTP sent to email" });
   } catch (err) {
-    console.error("SEND OTP ERROR:", err);
+    console.error("EMAIL OTP ERROR:", err);
     res.status(500).json({ message: "Failed to send OTP" });
   }
 });
+
 
 /*========
 VERIFY OTP
 ==========*/
 app.post("/seller/verify-otp", async (req, res) => {
   try {
-    // ✅ STEP 1: Extract from request body
-    const { phone, otp } = req.body;
+    const { email, otp } = req.body;
 
-    if (!phone || !otp) {
-      return res.status(400).json({ message: "Phone and OTP are required" });
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP required" });
     }
 
-    // ✅ STEP 2: Normalize values
-    const phoneNormalized = phone.trim();
-    const otpNormalized = otp.toString().trim();
-
-    // ✅ STEP 3: Find latest valid OTP
     const record = await prisma.sellerOtp.findFirst({
       where: {
-        phone: phoneNormalized,
-        otp: otpNormalized,
+        email: email.trim().toLowerCase(),
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: "desc" },
@@ -267,22 +377,22 @@ app.post("/seller/verify-otp", async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    if (record.verified) {
-      return res.json({ message: "OTP already verified" });
+    if (record.otpHash !== hashOtp(otp)) {
+      return res.status(400).json({ message: "Incorrect OTP" });
     }
 
-    // ✅ STEP 4: Mark OTP as verified
     await prisma.sellerOtp.update({
       where: { id: record.id },
       data: { verified: true },
     });
 
-    res.json({ message: "OTP verified" });
+    res.json({ message: "Email verified successfully" });
   } catch (err) {
     console.error("VERIFY OTP ERROR:", err);
     res.status(500).json({ message: "OTP verification failed" });
   }
 });
+
 
 /* ======================
    SELLER LOGIN
@@ -1174,7 +1284,7 @@ app.get("/orders/user/:email", async (req, res) => {
 
     const formatted = orders.flatMap((order) =>
       order.items.map((item) => ({
-        id: order.id,   
+        id: order.id,
         displayId: `ORD-${order.id}`,
         orderItemId: item.id,
 
@@ -1636,7 +1746,7 @@ app.patch("/seller/order/:orderItemId/status", async (req, res) => {
     const orderItemId = Number(req.params.orderItemId);
 
     // 🔒 Validate allowed statuses
-    const allowed = ["pending", "confirmed","out_for_delivery", "rejected", "fulfilled", "cancelled"];
+    const allowed = ["pending", "confirmed", "out_for_delivery", "rejected", "fulfilled", "cancelled"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
@@ -2217,16 +2327,36 @@ app.post("/designer/signup", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Check email
+    const emailNormalized = email.trim().toLowerCase();
+
+    /* =========================
+       CHECK EMAIL OTP VERIFIED
+    ========================= */
+    const verifiedOtp = await prisma.designerOtp.findFirst({
+      where: { email: emailNormalized },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!verifiedOtp || !verifiedOtp.verified) {
+      return res.status(403).json({
+        message: "Email not verified",
+      });
+    }
+
+    /* =========================
+       CHECK EXISTING EMAIL
+    ========================= */
     const existingEmail = await prisma.designer.findUnique({
-      where: { email },
+      where: { email: emailNormalized },
     });
 
     if (existingEmail) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    // Check mobile
+    /* =========================
+       CHECK EXISTING MOBILE
+    ========================= */
     const existingMobile = await prisma.designer.findUnique({
       where: { mobile },
     });
@@ -2235,25 +2365,125 @@ app.post("/designer/signup", async (req, res) => {
       return res.status(409).json({ message: "Mobile already registered" });
     }
 
+    /* =========================
+       HASH PASSWORD
+    ========================= */
     const passwordHash = await bcrypt.hash(password, 10);
 
+    /* =========================
+       CREATE DESIGNER
+    ========================= */
     const designer = await prisma.designer.create({
       data: {
         fullname,
-        email,
+        email: emailNormalized,
         mobile,
         location,
         passwordHash,
       },
     });
 
+    /* =========================
+       CLEANUP OTP RECORDS
+    ========================= */
+    await prisma.designerOtp.deleteMany({
+      where: { email: emailNormalized },
+    });
+
     res.status(201).json({
-      message: "Designer created",
+      message: "Designer created successfully",
       designer: { id: designer.id },
     });
   } catch (err) {
     console.error("DESIGNER SIGNUP ERROR:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+/* ============================
+   DESIGNER OTP
+============================ */
+app.post("/designer/send-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email required" });
+    }
+
+    const emailNormalized = email.trim().toLowerCase();
+
+    // Remove old OTPs
+    await prisma.designerOtp.deleteMany({
+      where: { email: emailNormalized },
+    });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await prisma.designerOtp.create({
+      data: {
+        email: emailNormalized,
+        otpHash: hashOtp(otp),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: emailNormalized,
+      subject: "Casa Designer Email Verification",
+      html: `
+        <h2>Verify your Designer account</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP expires in 5 minutes.</p>
+      `,
+    });
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    console.error("DESIGNER EMAIL OTP ERROR:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
+});
+
+/* ============================
+   DESIGNER VERIFY OTP
+============================ */
+app.post("/designer/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP required" });
+    }
+
+    const record = await prisma.designerOtp.findFirst({
+      where: {
+        email: email.trim().toLowerCase(),
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!record) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    if (record.otpHash !== hashOtp(otp)) {
+      return res.status(400).json({ message: "Incorrect OTP" });
+    }
+
+    await prisma.designerOtp.update({
+      where: { id: record.id },
+      data: { verified: true },
+    });
+
+    res.json({ message: "Email verified" });
+  } catch (err) {
+    console.error("DESIGNER VERIFY OTP ERROR:", err);
+    res.status(500).json({ message: "OTP verification failed" });
   }
 });
 

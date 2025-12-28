@@ -45,6 +45,18 @@ model User {
   returnRequests ReturnRequest[]
 }
 
+model CustomerOtp {
+  id        String   @id @default(uuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+
 /// =========================
 /// SELLER (ACCOUNT)
 /// =========================
@@ -66,11 +78,13 @@ model Seller {
 ///SELLER OTP
 model SellerOtp {
   id        String   @id @default(uuid())
-  phone     String
-  otp       String
+  email     String
+  otpHash   String
   expiresAt DateTime
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([email])
 }
 
 /// =========================
@@ -253,6 +267,18 @@ model Designer {
   updatedAt   DateTime     @updatedAt
   userRatings UserRating[]
 }
+
+model DesignerOtp {
+  id        String   @id @default(uuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 
 model DesignerProfile {
   id         Int @id @default(autoincrement())
