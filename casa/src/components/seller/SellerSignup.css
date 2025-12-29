@@ -216,28 +216,56 @@
    PRIMARY BUTTON
 ========================================= */
 .signup-btn {
-  margin-top: 8px;
-  height: 46px;
-  border-radius: 12px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+  height: 50px;
+  border-radius: 14px;
   border: none;
-  background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
+  width: 100%;
+
+  background: linear-gradient(
+    135deg,
+    var(--green-dark),
+    var(--green-mid)
+  );
+
   color: #fff;
-  font-weight: 800;
-  font-size: 1rem;
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.4px;
+
   cursor: pointer;
-  box-shadow: 0 14px 40px rgba(96, 110, 82, 0.35);
-  transition: transform var(--ease), box-shadow var(--ease);
+
+  transition:
+    transform var(--ease),
+    box-shadow var(--ease),
+    filter var(--ease);
 }
 
 .signup-btn:disabled {
-  opacity: 0.6;
+  background: linear-gradient(
+    135deg,
+    rgba(96, 110, 82, 0.45),
+    rgba(145, 165, 110, 0.45)
+  );
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
 }
 
 .signup-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 22px 60px rgba(96, 110, 82, 0.45);
+  filter: brightness(1.05);
+  box-shadow:
+    0 18px 50px rgba(96, 110, 82, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.signup-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 28px rgba(96, 110, 82, 0.4),
+    inset 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* =========================================
@@ -298,4 +326,27 @@
   * {
     transition: none !important;
   }
+}
+
+/* reveal animation for hidden section (password/terms/submit) */
+.reveal {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 360ms var(--ease), opacity 260ms var(--ease);
+  /* keep spacing consistent when hidden */
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.reveal.show {
+  max-height: 800px; /* large enough to contain the revealed content */
+  opacity: 1;
+  margin-top: 12px;
+  pointer-events: auto;
+}
+
+/* ensure inputs inside reveal keep same padding behavior */
+.reveal .input-group {
+  margin-top: 8px;
 }

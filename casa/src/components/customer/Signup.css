@@ -85,7 +85,6 @@
 
 /* Inputs */
 .signup-form input {
-  /* height: 44px; */
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -109,147 +108,8 @@
 }
 
 /* =========================================
-   PASSWORD FIELDS
-========================================= */
-.passwordwrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.passwordwrap input {
-  width: 100%;
-  padding-right: 44px;
-}
-
-.passwordwrap button {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 1rem;
-  padding: 6px;
-  border-radius: 8px;
-  transition: color var(--ease), background var(--ease);
-}
-
-.passwordwrap button:hover {
-  color: var(--green-dark);
-  background: rgba(145, 165, 110, 0.12);
-}
-
-/* =========================================
-   TERMS
-========================================= */
-.terms {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.terms input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--green-dark);
-  cursor: pointer;
-}
-
-/* =========================================
-   SUBMIT BUTTON
-========================================= */
-.signup-form button[type="submit"] {
-  margin-top: 6px;
-  height: 48px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(
-    90deg,
-    var(--green-dark),
-    var(--green-mid)
-  );
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 1rem;
-  cursor: pointer;
-  box-shadow: 0 14px 40px rgba(96, 110, 82, 0.35);
-  transition: transform var(--ease), box-shadow var(--ease);
-}
-
-.signup-form button[type="submit"]:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 22px 60px rgba(96, 110, 82, 0.45);
-}
-
-.signup-form button[disabled] {
-  opacity: 0.65;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* =========================================
-   LINKS
-========================================= */
-.links {
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.links a {
-  color: var(--green-dark);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.links a:hover {
-  text-decoration: underline;
-}
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-@media (max-width: 480px) {
-  .signup-box {
-    padding: 24px 18px;
-  }
-
-  .brand-heading {
-    font-size: 1.65rem;
-  }
-
-  .signup-title {
-    font-size: 1.2rem;
-  }
-}
-
-/* =========================================
-   ACCESSIBILITY
-========================================= */
-.signup-box :focus-visible {
-  outline: 3px solid rgba(145, 165, 110, 0.45);
-  outline-offset: 4px;
-}
-
-/* =========================================
-   REDUCED MOTION
-========================================= */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-  }
-}
-
-/* =========================
    OTP SECTION — CASA THEME
-========================= */
+========================================= */
 
 .field.full {
   display: flex;
@@ -283,12 +143,6 @@
 .field.full button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 14px 34px rgba(96, 110, 82, 0.35);
-}
-
-/* ACTIVE */
-.field.full button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 8px 20px rgba(96, 110, 82, 0.28);
 }
 
 /* DISABLED (OTP SENT / VERIFIED) */
@@ -341,4 +195,200 @@
     var(--green-mid)
   );
   color: var(--text-muted);
+}
+
+/* =========================================
+   PASSWORD FIELDS (PREMIUM)
+========================================= */
+
+/* container */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* input style */
+.password-wrap input {
+  width: 100%;
+  padding: 13px 46px 13px 14px; /* space for eye toggle */
+  border-radius: 12px;
+  border: 1.5px solid var(--green-light);
+  background: linear-gradient(180deg, #ffffff, #f7f9f4);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  outline: none;
+  transition:
+    border-color var(--ease),
+    box-shadow var(--ease),
+    transform var(--ease);
+}
+
+/* focus */
+.password-wrap input:focus {
+  border-color: var(--green-dark);
+  box-shadow:
+    0 0 0 3px rgba(96, 110, 82, 0.18),
+    0 10px 30px rgba(96, 110, 82, 0.25);
+  transform: translateY(-1px);
+}
+
+/* eye toggle */
+.pw-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background var(--ease),
+    color var(--ease),
+    transform var(--ease);
+}
+
+.pw-toggle:hover {
+  background: rgba(96, 110, 82, 0.12);
+  color: var(--green-dark);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.pw-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* mismatch / error state example */
+.password-error input {
+  border-color: #c23b3b;
+  box-shadow: 0 0 0 3px rgba(194, 59, 59, 0.12);
+}
+
+/* =========================================
+   REVEAL (HIDES UNTIL VERIFIED)
+========================================= */
+.pw-reveal {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 360ms var(--ease), opacity 240ms var(--ease), margin-top var(--ease);
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.pw-reveal.show {
+  max-height: 900px;
+  opacity: 1;
+  margin-top: 14px;
+  pointer-events: auto;
+}
+
+/* =========================================
+   TERMS
+========================================= */
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.terms input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green-dark);
+  cursor: pointer;
+}
+
+/* =========================================
+   SUBMIT BUTTON
+========================================= */
+.create-btn {
+  margin-top: 6px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 14px 40px rgba(96, 110, 82, 0.35);
+  transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.create-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 60px rgba(96, 110, 82, 0.45);
+}
+
+.create-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* =========================================
+   ERRORS / LINKS / RESPONSIVE
+========================================= */
+.error {
+  color: #c23b3b;
+  display: block;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.links {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.links a {
+  color: var(--green-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+/* mobile */
+@media (max-width: 480px) {
+  .signup-box {
+    padding: 24px 18px;
+  }
+
+  .brand-heading {
+    font-size: 1.65rem;
+  }
+
+  .signup-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* accessibility focus */
+.signup-box :focus-visible {
+  outline: 3px solid rgba(145, 165, 110, 0.45);
+  outline-offset: 4px;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }

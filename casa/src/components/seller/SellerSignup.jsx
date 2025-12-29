@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import {
@@ -30,6 +30,16 @@ const SellerSignup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ref to focus password after verification
+  const passwordRef = useRef(null);
+
+  useEffect(() => {
+    if (emailVerified) {
+      // small timeout so transition finishes and input is visible
+      setTimeout(() => passwordRef.current?.focus(), 160);
+    }
+  }, [emailVerified]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -184,75 +194,84 @@ const SellerSignup = () => {
             )}
           </div>
 
-          {/* Password */}
-          <div className="input-group password-group">
-            <label>Password</label>
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div className="input-group password-group">
-            <label>Confirm Password</label>
-            <div className="password-wrapper">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-              >
-                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-
-          {/* Terms */}
-          <label className="terms">
-            <input
-              type="checkbox"
-              name="terms"
-              checked={form.terms}
-              onChange={handleChange}
-            />
-            I agree to the <Link to="/terms">Terms & Conditions</Link>
-          </label>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            className="signup-btn"
-            disabled={loading || !otpSent || !emailVerified}
+          {/* Hidden until verified: Passwords, Terms, Submit */}
+          <div
+            className={`reveal ${emailVerified ? "show" : ""}`}
+            aria-hidden={!emailVerified}
           >
-            {loading ? "Creating..." : "Continue"}
-          </button>
+            {/* Password */}
+            <div className="input-group password-group">
+              <label>Password</label>
+              <div className="password-wrapper">
+                <input
+                  ref={passwordRef}
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
 
-          {/* Login */}
-          <p className="login-link">
-            Already have an account?{" "}
-            <Link to="/sellerlogin">Login</Link>
-          </p>
+            {/* Confirm Password */}
+            <div className="input-group password-group">
+              <label>Confirm Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <label className="terms">
+              <input
+                type="checkbox"
+                name="terms"
+                checked={form.terms}
+                onChange={handleChange}
+              />
+              I agree to the <Link to="/terms">Terms & Conditions</Link>
+            </label>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="signup-btn"
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Continue"}
+            </button>
+
+            {/* Login */}
+            <p className="login-link">
+              Already have an account?{" "}
+              <Link to="/sellerlogin">Login</Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>

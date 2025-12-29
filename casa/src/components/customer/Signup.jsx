@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 import {
@@ -31,6 +31,16 @@ export default function Signup() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // ref to autofocus the password input after verification
+  const passwordRef = useRef(null);
+
+  useEffect(() => {
+    if (emailVerified) {
+      // small delay so animation finishes before focusing
+      setTimeout(() => passwordRef.current?.focus(), 160);
+    }
+  }, [emailVerified]);
 
   /* =========================
      HANDLE INPUT CHANGE
@@ -75,7 +85,7 @@ export default function Signup() {
       setOtpSent(true);
       alert("OTP sent to your email");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to send OTP");
+      alert(err?.response?.data?.message || "Failed to send OTP");
     } finally {
       setSendingOtp(false);
     }
@@ -96,7 +106,7 @@ export default function Signup() {
       setEmailVerified(true);
       alert("Email verified successfully");
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid OTP");
+      alert(err?.response?.data?.message || "Invalid OTP");
     } finally {
       setVerifyingOtp(false);
     }
@@ -122,7 +132,7 @@ export default function Signup() {
       alert("Account created successfully. Please login.");
       navigate("/login");
     } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
+      alert(err?.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -152,6 +162,19 @@ export default function Signup() {
             {errors.email && <small className="error"><FaTimes /> {errors.email}</small>}
           </div>
 
+
+          <div className="field">
+            <label>Phone</label>
+            <input name="phone" value={form.phone} onChange={handleChange} />
+            {errors.phone && <small className="error"><FaTimes /> {errors.phone}</small>}
+          </div>
+
+          <div className="field">
+            <label>Address</label>
+            <input name="address" value={form.address} onChange={handleChange} />
+            {errors.address && <small className="error"><FaTimes /> {errors.address}</small>}
+          </div>
+
           {!emailVerified && (
             <div className="field full">
               <button
@@ -169,7 +192,6 @@ export default function Signup() {
                       : "Send OTP"}
               </button>
 
-
               {otpSent && (
                 <>
                   <input
@@ -181,6 +203,7 @@ export default function Signup() {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={verifyingOtp}
+                    className="otp-verify-btn"
                   >
                     {verifyingOtp ? "Verifying..." : "Verify OTP"}
                   </button>
@@ -190,64 +213,68 @@ export default function Signup() {
           )}
 
           {emailVerified && (
-            <p style={{ color: "green" }}>Email verified ✓</p>
+            <p className="otp-verified">Email verified ✓</p>
           )}
 
-          <div className="field">
-            <label>Phone</label>
-            <input name="phone" value={form.phone} onChange={handleChange} />
-            {errors.phone && <small className="error"><FaTimes /> {errors.phone}</small>}
-          </div>
-
-          <div className="field">
-            <label>Address</label>
-            <input name="address" value={form.address} onChange={handleChange} />
-            {errors.address && <small className="error"><FaTimes /> {errors.address}</small>}
-          </div>
-
-          <div className="field">
-            <label>Password</label>
-            <div className="password-wrap">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+          {/* reveal until emailVerified */}
+          <div className={`pw-reveal ${emailVerified ? "show" : ""}`} aria-hidden={!emailVerified}>
+            <div className="field">
+              <label>Password</label>
+              <div className="password-wrap">
+                <input
+                  ref={passwordRef}
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="pw-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {errors.password && <small className="error"><FaTimes /> {errors.password}</small>}
             </div>
-          </div>
 
-          <div className="field">
-            <label>Confirm Password</label>
-            <div className="password-wrap">
-              <input
-                type={showConfirm ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-              />
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)}>
-                {showConfirm ? <FaEyeSlash /> : <FaEye />}
-              </button>
+            <div className="field">
+              <label>Confirm Password</label>
+              <div className="password-wrap">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="pw-toggle"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {errors.confirmPassword && <small className="error"><FaTimes /> {errors.confirmPassword}</small>}
             </div>
+
+            <label className="terms">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              I agree to terms
+            </label>
+            {errors.terms && <small className="error"><FaTimes /> {errors.terms}</small>}
+
+            <button type="submit" disabled={loading || !emailVerified} className="create-btn">
+              {loading ? "Creating..." : "Create Account"}
+            </button>
           </div>
-
-          <label className="terms">
-            <input
-              type="checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-            />
-            I agree to terms
-          </label>
-          {errors.terms && <small className="error"><FaTimes /> {errors.terms}</small>}
-
-          <button type="submit" disabled={loading || !emailVerified}>
-            {loading ? "Creating..." : "Create Account"}
-          </button>
 
           <p className="links">
             Already have an account? <Link to="/login">Sign in</Link>
