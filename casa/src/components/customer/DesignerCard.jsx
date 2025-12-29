@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./ProductCard.css";
 import { useNavigate } from "react-router-dom";
-import Sample from "../../assets/images/sample.jpg";
+// import Sample from "../../assets/images/sample.jpg";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 /**
@@ -24,7 +24,7 @@ const DesignerCard = ({
   ratingSummary = null,
 }) => {
   const navigate = useNavigate();
-  const finalImage = image || Sample;
+  const finalImage = image ;
   const [ratings, setRatings] = useState(ratingSummary);
   const [loadingRatings, setLoadingRatings] = useState(false);
 
