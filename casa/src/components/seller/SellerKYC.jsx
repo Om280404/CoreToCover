@@ -187,8 +187,13 @@ const SellerKYC = () => {
                     <label>
                         I confirm the above details are accurate and belong to me
                     </label>
+
                 </div>
                 {errors.declaration && <span>{errors.declaration}</span>}
+                <p className="subtitle">🔒 Your documents are securely handled and used solely for identity verification purposes.
+                    We do not display or sell your personal information and share it only with trusted verification
+                    and infrastructure providers when required to operate our services.
+                </p>
 
                 <button className="submit-btn">Submit</button>
             </form>
