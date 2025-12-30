@@ -8,7 +8,7 @@
 }
 
 /* Page */
-.casa-kyc-page {
+.seller-kyc-page {
   min-height: 100vh;
   background: #f5f4ee;
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 /* Card */
-.casa-kyc-card {
+.seller-kyc-card {
   max-width: 540px;
   width: 100%;
   background: var(--white);
@@ -27,14 +27,14 @@
   box-shadow: 0 16px 48px rgba(60, 80, 60, 0.12);
 }
 
-/* Headings */
-h1 {
+/* Titles */
+.seller-kyc-title {
   font-family: "Big Caslon", serif;
   font-size: 32px;
   color: var(--dark-gray);
 }
 
-.subtitle {
+.seller-kyc-subtitle {
   font-family: Helvetica, sans-serif;
   font-size: 14px;
   color: var(--warm-gray);
@@ -42,21 +42,22 @@ h1 {
 }
 
 /* Fields */
-.field,
-.file-field {
+.seller-kyc-field,
+.seller-kyc-file {
   display: flex;
   flex-direction: column;
   margin-bottom: 22px;
 }
 
-label {
+.seller-kyc-field label,
+.seller-kyc-file label {
   font-family: Helvetica, sans-serif;
   font-size: 13px;
   margin-bottom: 6px;
 }
 
-input[type="text"],
-input[type="file"] {
+.seller-kyc-field input,
+.seller-kyc-file input {
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid #ddd;
@@ -64,14 +65,15 @@ input[type="file"] {
   font-size: 14px;
 }
 
-input:focus {
+.seller-kyc-field input:focus,
+.seller-kyc-file input:focus {
   outline: none;
   border-color: var(--sage);
   background: var(--white);
 }
 
 /* PAN Row */
-.pan-row {
+.seller-kyc-pan-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
@@ -79,7 +81,7 @@ input:focus {
 }
 
 /* Verify Button */
-.verify-btn {
+.seller-kyc-verify-btn {
   height: 46px;
   padding: 0 18px;
   border-radius: 14px;
@@ -90,38 +92,46 @@ input:focus {
   cursor: pointer;
 }
 
-.verify-btn.verifying {
+.seller-kyc-verify-btn.verifying {
   background: var(--warm-gray);
 }
 
-.verify-btn.verified {
+.seller-kyc-verify-btn.verified {
   background: var(--sage);
 }
 
-.verify-btn.failed {
+.seller-kyc-verify-btn.failed {
   background: #b64545;
 }
 
 /* Checkbox */
-.checkbox {
+.seller-kyc-checkbox {
   display: flex;
   gap: 10px;
   margin: 26px 0 8px;
   font-size: 13px;
 }
 
-/* Errors */
-span {
+/* Error */
+.seller-kyc-error {
   font-size: 12px;
   color: #b64545;
   margin-top: 4px;
 }
 
+/* Security note */
+.seller-kyc-note {
+  font-size: 12px;
+  color: var(--warm-gray);
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
 /* Submit */
-.submit-btn {
+.seller-kyc-submit {
   width: 100%;
   padding: 15px;
-  margin-top: 20px;
+  margin-top: 22px;
   border-radius: 16px;
   border: none;
   background: var(--olive);
@@ -130,6 +140,6 @@ span {
   cursor: pointer;
 }
 
-.submit-btn:hover {
+.seller-kyc-submit:hover {
   background: var(--sage);
 }
