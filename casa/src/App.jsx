@@ -30,6 +30,7 @@ import SellerLogin from './components/seller/SellerLogin';
 import SellerSignup from './components/seller/SellerSignup';
 import BusinessDetails from './components/seller/BusinessDetails';
 import EditBusinessDetails from './components/seller/EditBusinessDetails';
+import SellerKYC from './components/seller/SellerKYC';
 import SellerDeliveryDetails from './components/seller/SellerDeliveryDetails';
 import SellerDeliveryUpdate from './components/seller/SellerDeliveryUpdate';
 import SellerManageBankDetails from './components/seller/SellerManageBankDetails'
@@ -107,6 +108,7 @@ function App() {
         <Route path="/sellersignup" element={<SellerSignup />} />
         <Route path="/businessdetails" element={<BusinessDetails />} />
         <Route path="/editbusinessdetails" element={<EditBusinessDetails/>} />
+        <Route path="/sellerKYC" element={<SellerKYC/>} />
         <Route path="/deliverydetails" element={<SellerDeliveryDetails/>} />
         <Route path="/sellerdeliveryupdate" element={<AuthRoute element={<SellerDeliveryUpdate/>}/>} />
         <Route path='/sellermanagebankdetails' element={<SellerManageBankDetails/>} />

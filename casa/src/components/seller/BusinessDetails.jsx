@@ -57,7 +57,7 @@ const BusinessDetails = () => {
       });
 
       alert("Business details saved successfully ✅");
-      navigate("/deliverydetails");
+      navigate("/sellerKYC");
     } catch (err) {
       alert(
         err?.response?.data?.message ||

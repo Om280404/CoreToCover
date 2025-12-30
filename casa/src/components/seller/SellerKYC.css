@@ -1,0 +1,135 @@
+:root {
+  --dark-gray: #474747;
+  --warm-gray: #8f8b84;
+  --olive: #606e52;
+  --sage: #91a56e;
+  --light-sage: #c0cca4;
+  --white: #ffffff;
+}
+
+/* Page */
+.casa-kyc-page {
+  min-height: 100vh;
+  background: #f5f4ee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+/* Card */
+.casa-kyc-card {
+  max-width: 540px;
+  width: 100%;
+  background: var(--white);
+  padding: 38px 34px;
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(60, 80, 60, 0.12);
+}
+
+/* Headings */
+h1 {
+  font-family: "Big Caslon", serif;
+  font-size: 32px;
+  color: var(--dark-gray);
+}
+
+.subtitle {
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+  color: var(--warm-gray);
+  margin-bottom: 30px;
+}
+
+/* Fields */
+.field,
+.file-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 22px;
+}
+
+label {
+  font-family: Helvetica, sans-serif;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="file"] {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-size: 14px;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--sage);
+  background: var(--white);
+}
+
+/* PAN Row */
+.pan-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+/* Verify Button */
+.verify-btn {
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: none;
+  background: var(--olive);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.verify-btn.verifying {
+  background: var(--warm-gray);
+}
+
+.verify-btn.verified {
+  background: var(--sage);
+}
+
+.verify-btn.failed {
+  background: #b64545;
+}
+
+/* Checkbox */
+.checkbox {
+  display: flex;
+  gap: 10px;
+  margin: 26px 0 8px;
+  font-size: 13px;
+}
+
+/* Errors */
+span {
+  font-size: 12px;
+  color: #b64545;
+  margin-top: 4px;
+}
+
+/* Submit */
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 16px;
+  border: none;
+  background: var(--olive);
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: var(--sage);
+}
