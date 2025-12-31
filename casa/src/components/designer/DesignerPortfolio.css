@@ -10,7 +10,8 @@
   --ease: 260ms cubic-bezier(.2,.9,.3,1);
 }
 
-.portfolio-page {
+/* Page */
+.dp-page {
   min-height: 100vh;
   background: var(--bg);
   display: flex;
@@ -19,7 +20,8 @@
   padding: 50px 20px;
 }
 
-.portfolio-box {
+/* Container */
+.dp-box {
   width: 100%;
   max-width: 650px;
   background: var(--white);
@@ -29,33 +31,37 @@
   font-family: var(--font-ui);
 }
 
-.portfolio-title {
+/* Header */
+.dp-title {
   text-align: center;
   font-size: 1.9rem;
   font-weight: 800;
   color: var(--green-dark);
 }
 
-.portfolio-sub {
+.dp-subtitle {
   text-align: center;
   color: #777;
   margin-bottom: 24px;
 }
 
-.portfolio-form {
+/* Form */
+.dp-form {
   display: flex;
   flex-direction: column;
   gap: 22px;
 }
 
-.work-block {
+/* Work block */
+.dp-work {
   background: #fafbf8;
   padding: 18px;
   border-radius: 12px;
   border: 1px solid var(--green-light);
 }
 
-.upload-placeholder {
+/* Upload */
+.dp-upload-placeholder {
   display: block;
   padding: 20px;
   background: var(--green-light);
@@ -66,11 +72,11 @@
   cursor: pointer;
 }
 
-.upload-placeholder input {
+.dp-upload-placeholder input {
   display: none;
 }
 
-.work-preview {
+.dp-preview {
   width: 100%;
   height: 220px;
   border-radius: 10px;
@@ -78,7 +84,8 @@
   border: 2px solid var(--green-light);
 }
 
-.work-desc {
+/* Description */
+.dp-description {
   width: 96.5%;
   margin-top: 12px;
   border-radius: 10px;
@@ -94,12 +101,13 @@
   transition: var(--ease);
 }
 
-.work-desc:focus {
+.dp-description:focus {
   border-color: var(--green-dark);
   box-shadow: 0 0 0 2px rgba(96,110,82,0.25);
 }
 
-.add-more-btn {
+/* Add more */
+.dp-add-btn {
   background: transparent;
   color: var(--green-dark);
   font-weight: 700;
@@ -110,12 +118,18 @@
   transition: var(--ease);
 }
 
-.add-more-btn:hover {
+.dp-add-btn:hover {
   background: var(--green-light);
   color: #fff;
 }
 
-.submit-portfolio-btn {
+/* Actions */
+.dp-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.dp-submit {
   margin-top: 10px;
   padding: 12px;
   border-radius: 12px;
@@ -127,12 +141,22 @@
   transition: var(--ease);
 }
 
-.submit-portfolio-btn:hover {
+.dp-submit:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(96,110,82,0.25);
 }
 
-.skip-btn {
+.dp-submit.dp-disabled,
+.dp-submit[disabled] {
+  opacity: 0.48;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Skip */
+.dp-skip {
   margin-top: 6px;
   background: transparent;
   color: var(--green-dark);
@@ -144,44 +168,25 @@
   text-decoration: underline;
 }
 
-.skip-btn:hover {
+.dp-skip:hover {
   opacity: 0.7;
 }
 
-.save-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+/* Error */
+.dp-error {
+  color: #c0392b;
+  text-align: center;
+  font-weight: 600;
 }
-
-/* make disabled obvious and non-interactive */
-.submit-portfolio-btn.disabled,
-.submit-portfolio-btn[disabled] {
-  opacity: 0.48;
-  cursor: not-allowed;
-  pointer-events: none; /* 100% prevents clicks */
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-/* Ensure file input label is keyboard accessible (optional) */
-.upload-placeholder {
-  /* display: inline-block; */
-  cursor: pointer;
-}
-
-
-
 
 /* Animation */
-.reveal {
+.dp-reveal {
   opacity: 0;
   transform: translateY(18px);
-  animation: revealFade 0.7s ease forwards;
+  animation: dpRevealFade 0.7s ease forwards;
 }
 
-@keyframes revealFade {
+@keyframes dpRevealFade {
   to {
     opacity: 1;
     transform: translateY(0);

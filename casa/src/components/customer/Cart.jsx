@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import "./Cart.css";
 import sample from "../../assets/images/sample.jpg";
 import {
@@ -72,7 +73,7 @@ const Cart = () => {
   );
 
   /* ===============================
-     CHECKOUT NAVIGATION (FIXED)
+     CHECKOUT NAVIGATION 
      - Save cart under the same key utils/cart.js uses: "casa_cart"
      - Clear singleCheckoutItem so Checkout reads the full cart
   =============================== */
@@ -96,9 +97,6 @@ const Cart = () => {
     navigate("/checkout");
   };
 
-  /* ===============================
-     UI
-  =============================== */
   return (
     <>
       <Navbar />
@@ -194,6 +192,7 @@ const Cart = () => {
           </aside>
         </section>
       </main>
+      <Footer/>
     </>
   );
 };

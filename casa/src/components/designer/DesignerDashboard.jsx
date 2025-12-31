@@ -121,7 +121,10 @@ const DesignerDashboard = () => {
               </li>
             </ul>
 
-            <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+            <div
+              className="hamburger"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
               {menuOpen ? <FaTimes /> : <FaBars />}
             </div>
           </div>
@@ -129,42 +132,42 @@ const DesignerDashboard = () => {
       </header>
 
       {/* DASHBOARD */}
-      <div className="designer-dashboard">
-        <div className="dash-header reveal">
-          <div className="dash-header-left">
-            <h1 className="dash-title">Welcome, {designerName}</h1>
-            <p className="dash-sub">
+      <div className="dd-dashboard">
+        <div className="dd-header dd-reveal">
+          <div className="dd-header-left">
+            <h1 className="dd-title">Welcome, {designerName}</h1>
+            <p className="dd-sub">
               Manage your portfolio, view client requests and grow your design
               presence.
             </p>
           </div>
 
           {/* TOP-RIGHT: average rating (added) */}
-          <div className="dash-header-right">
+          <div className="dd-header-right">
             {ratingsSummary ? (
-              <div className="top-rating-card" title={`${ratingsSummary.count} reviews`}>
-                <div className="top-stars">
+              <div className="dd-top-rating-card" title={`${ratingsSummary.count} reviews`}>
+                <div className="dd-top-stars">
                   {renderStarsInline(ratingsSummary.average, 16)}
                 </div>
-                <div className="top-rating-value">
-                  {ratingsSummary.average?.toFixed(1) ?? "—"} <span className="top-out">/ 5</span>
+                <div className="dd-top-rating-value">
+                  {ratingsSummary.average?.toFixed(1) ?? "—"} <span className="dd-top-out">/ 5</span>
                 </div>
-                <div className="top-review-count">{ratingsSummary.count} reviews</div>
+                <div className="dd-top-review-count">{ratingsSummary.count} reviews</div>
               </div>
             ) : (
-              <div className="top-rating-card empty">
-                <div className="top-no-rating">No ratings yet</div>
+              <div className="dd-top-rating-card empty">
+                <div className="dd-top-no-rating">No ratings yet</div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="dash-grid">
+        <div className="dd-grid">
           <div
-            className="dash-card reveal delay-1"
+            className="dd-card dd-reveal dd-delay-1"
             onClick={() => navigate("/designerexperience")}
           >
-            <div className="dash-icon">
+            <div className="dd-icon">
               <FaPalette />
             </div>
             <h3>My Portfolio</h3>
@@ -172,10 +175,10 @@ const DesignerDashboard = () => {
           </div>
 
           <div
-            className="dash-card reveal delay-2"
+            className="dd-card dd-reveal dd-delay-2"
             onClick={() => navigate("/designerworkreceived")}
           >
-            <div className="dash-icon">
+            <div className="dd-icon">
               <FaHandshake />
             </div>
             <h3>Work Received</h3>
@@ -183,25 +186,25 @@ const DesignerDashboard = () => {
           </div>
 
           <div
-            className="dash-card reveal delay-3"
+            className="dd-card dd-reveal dd-delay-3"
             onClick={() => navigate("/designereditprofile")}
           >
-            <div className="dash-icon">
+            <div className="dd-icon">
               <FaEdit />
             </div>
             <h3>Edit Profile</h3>
             <p>Update your designer details & portfolio links.</p>
           </div>
 
-          <div className="dash-card reveal delay-4">
-            <div className="dash-icon">
+          <div className="dd-card dd-reveal dd-delay-4">
+            <div className="dd-icon">
               <FaUserTie />
             </div>
             <h3>Designer Settings</h3>
             <p>Set availability.</p>
 
-            <div className="setting-card">
-              <div className="setting-info">
+            <div className="dd-setting-card">
+              <div className="dd-setting-info">
                 <h3>Availability</h3>
                 <p>
                   Show clients whether you are currently accepting projects.
@@ -209,14 +212,14 @@ const DesignerDashboard = () => {
               </div>
 
               <button
-                className="toggle-btn"
+                className="dd-toggle-btn"
                 onClick={toggleAvailability}
                 disabled={loadingAvailability}
               >
                 {available ? (
-                  <FaToggleOn className="toggle-icon on" />
+                  <FaToggleOn className="dd-toggle-icon dd-on" />
                 ) : (
-                  <FaToggleOff className="toggle-icon off" />
+                  <FaToggleOff className="dd-toggle-icon dd-off" />
                 )}
               </button>
             </div>
@@ -224,25 +227,25 @@ const DesignerDashboard = () => {
         </div>
 
         {/* REVIEWS SECTION (bottom of page) */}
-        <div className="dashboard-reviews-section">
-          <h2 className="reviews-title">Client reviews & ratings</h2>
+        <div className="dd-reviews-section">
+          <h2 className="dd-reviews-title">Client reviews & ratings</h2>
 
-          {ratingsError && <p className="form-error">{ratingsError}</p>}
+          {ratingsError && <p className="dd-form-error">{ratingsError}</p>}
 
           {!ratingsSummary || (Array.isArray(ratingsSummary.reviews) && ratingsSummary.reviews.length === 0) ? (
-            <p className="empty-text">No reviews yet.</p>
+            <p className="dd-empty-text">No reviews yet.</p>
           ) : (
-            <div className="reviews-list">
+            <div className="dd-reviews-list">
               {ratingsSummary.reviews.map((r, idx) => (
-                <div className="review-row" key={idx}>
-                  <div className="review-left">
-                    <strong className="reviewer-name">{r.name}</strong>
-                    <div className="review-date">{new Date(r.createdAt).toLocaleDateString()}</div>
+                <div className="dd-review-row" key={idx}>
+                  <div className="dd-review-left">
+                    <strong className="dd-reviewer-name" data-initial={r.name?.[0] ?? ""}>{r.name}</strong>
+                    <div className="dd-review-date">{new Date(r.createdAt).toLocaleDateString()}</div>
                   </div>
 
-                  <div className="review-right">
-                    <div className="review-stars-inline">{renderStarsInline(r.stars, 14)}</div>
-                    <div className="review-text">{r.review || <em>No comment</em>}</div>
+                  <div className="dd-review-right">
+                    <div className="dd-review-stars-inline">{renderStarsInline(r.stars, 14)}</div>
+                    <div className="dd-review-text">{r.review || <em>No comment</em>}</div>
                   </div>
                 </div>
               ))}

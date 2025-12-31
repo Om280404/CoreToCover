@@ -109,7 +109,7 @@ const UserProfile = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="profile-input"
+                  className="up-profile-input"
                   placeholder="Enter name"
                 />
 
@@ -117,7 +117,7 @@ const UserProfile = () => {
                   type="email"
                   name="email"
                   value={formData.email}
-                  className="profile-input"
+                  className="up-profile-input"
                   disabled
                 />
 
@@ -126,7 +126,7 @@ const UserProfile = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="profile-input"
+                  className="up-profile-input"
                   placeholder="Enter phone"
                 />
 
@@ -135,44 +135,44 @@ const UserProfile = () => {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="profile-input"
+                  className="up-profile-input"
                   placeholder="Enter address"
                 />
 
                 <button
                   onClick={handleSave}
-                  className="profile-button save"
+                  className="up-profile-button up-save"
                 >
                   Save
                 </button>
               </>
             ) : (
-              <>
-                <div className="user-info">
-                  <p><strong>Name:</strong> {user.name}</p>
-                  <p><strong>Email:</strong> {user.email}</p>
-                  <p><strong>Phone:</strong> {user.phone || "—"}</p>
-                  <p><strong>Address:</strong> {user.address || "—"}</p>
-                </div>
+            <>
+              <div className="user-info">
+                <p><strong>Name:</strong> {user.name}</p>
+                <p><strong>Email:</strong> {user.email}</p>
+                <p><strong>Phone:</strong> {user.phone || "—"}</p>
+                <p><strong>Address:</strong> {user.address || "—"}</p>
+              </div>
 
-                <hr />
+              <hr />
 
-                <div className="button-group">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="profile-button edit"
-                  >
-                    Edit Profile
-                  </button>
+              <div className="button-group">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="profile-button edit"
+                >
+                  Edit Profile
+                </button>
 
-                  <button
-                    onClick={handleLogout}
-                    className="profile-button logout"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </>
+                <button
+                  onClick={handleLogout}
+                  className="profile-button logout"
+                >
+                  Logout
+                </button>
+              </div>
+            </>
             )}
           </div>
         </div>

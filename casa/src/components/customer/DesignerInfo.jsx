@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "./DesignerInfo.css";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import {
   FaArrowLeft,
   FaStar,
@@ -208,9 +209,14 @@ const DesignerInfo = () => {
     if (!designer?.works || index < 0 || index >= designer.works.length) return;
     setSelectedWorkIndex(index);
     setActiveImage(designer.works[index].img);
-    // optional: focus or scroll thumbnail into view
-    const el = document.getElementById(`portfolio-item-${index}`);
-    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", inline: "center" });
+
+    const el = document.getElementById("portfolio-preview");
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    };
   };
 
   const openImagePopup = (src) => {
@@ -375,9 +381,9 @@ const DesignerInfo = () => {
                     <div className="work-card">
                       <img src={w.img} alt={w.title || `Work ${i + 1}`} />
                     </div>
-                      <div className="portfolio-caption">
-                        {w.desc ? <WorkDescription text={w.desc} limit={80} /> : null}
-                      </div>
+                    <div className="portfolio-caption">
+                      {w.desc ? <WorkDescription text={w.desc} limit={80} /> : null}
+                    </div>
                   </div>
 
                 ))}
@@ -507,6 +513,7 @@ const DesignerInfo = () => {
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 };

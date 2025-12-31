@@ -2,7 +2,8 @@
    THEME ROOT — CONSTRUCTIFY (Premium Edition)
 ========================================= */
 :root {
-  --bg-light: #F3F7EC;
+  --casa-bg: #f7f8f5;
+;
   --surface: #FFFFFF;
 
   --green-dark: #606E52;
@@ -32,7 +33,7 @@
    PAGE WRAPPER
 ========================================= */
 .profile{
-  background:var(--bg-light);
+    background: var(--casa-bg, #f7f8f5);
 }
 .profile-page {
   min-height: 100vh;
@@ -153,9 +154,10 @@
 /* =========================================
    INPUTS
 ========================================= */
-.profile-input {
+.up-profile-input {
   width: 100%;
   height: 44px;
+  margin-bottom: 5px;
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -165,7 +167,7 @@
   transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
 }
 
-.profile-input:focus {
+.up-profile-input:focus {
   border-color: var(--green-mid);
   box-shadow: 0 0 0 5px var(--focus);
 }
@@ -173,6 +175,14 @@
 /* =========================================
    BUTTON GROUP
 ========================================= */
+.up-profile-button {
+  padding: 11px 18px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  border: none;
+}
 .button-group {
   display: flex;
   gap: 12px;
@@ -190,22 +200,22 @@
 }
 
 /* Variants */
-.profile-button.edit,
-.profile-button.save {
+.up-profile-button.up-save {
   background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
 
-.profile-button.logout {
-  background: rgba(255,255,255,0.8);
-  border: 1px solid var(--border);
-  color: var(--green-dark);
-}
-
-.profile-button:hover {
+.up-profile-button:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
+}
+
+/* ACCESSIBILITY */
+.up-profile-input:focus,
+.up-profile-button:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
 }
 
 /* =========================================

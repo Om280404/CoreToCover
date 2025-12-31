@@ -610,7 +610,7 @@ body {
   cursor: pointer;
 }
 
-/* image popup */
+/* overlay */
 .img-overlay {
   position: fixed;
   inset: 0;
@@ -619,21 +619,32 @@ body {
   justify-content: center;
   background: rgba(40, 40, 40, 0.6);
   z-index: 6000;
+  padding: 16px; /* prevents edge clipping on small screens */
 }
 
+/* popup container */
 .img-popup {
   background: #fff;
   border-radius: 12px;
-  max-width: 92%;
-  overflow: auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* image itself */
 .img-popup img {
-  width: 100%;
+  max-width: 90vw;   
+  max-height: 90vh;  
+  width: auto;
   height: auto;
-  border-radius: 8px;
+  object-fit: contain;
   display: block;
+  border-radius: 8px;
 }
+
 
 /* small helpers */
 .empty-text {

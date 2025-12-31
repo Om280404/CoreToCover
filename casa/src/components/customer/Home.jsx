@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaShoppingCart,
   FaUser,
-  FaGlobe,
   FaBars,
   FaTimes,
   FaUserGraduate,
@@ -61,14 +60,13 @@ const Home = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/home" className="nav-link">
-              <h1 className="logo">CASA</h1>
+            <Link to="/" className="nav-link">
+              <h1 className="logo">core2cover</h1>
             </Link>
           </div>
 
           <div className="nav-right">
             <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-              <li><FaGlobe /> Language</li>
 
               <li>
                 <Link to="/userprofile" className="nav-link">

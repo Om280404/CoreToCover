@@ -118,7 +118,7 @@ const DesignerEditProfile = () => {
 
   return (
     <>
-      {/* NAVBAR */}
+      {/* NAVBAR — kept unchanged intentionally */}
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
@@ -146,28 +146,28 @@ const DesignerEditProfile = () => {
         </div>
       </header>
 
-      {/* PAGE */}
-      <div className="edit-profile-page">
-        <div className="edit-profile-container reveal">
-          <h1 className="edit-title">Edit Profile</h1>
-          <p className="edit-sub">
+      {/* PAGE — all classes prefixed with dep- */}
+      <div className="dep-page">
+        <div className="dep-container dep-reveal">
+          <h1 className="dep-title">Edit Profile</h1>
+          <p className="dep-sub">
             Update your personal information and designer details.
           </p>
 
-          {error && <p className="form-error">{error}</p>}
+          {error && <p className="dep-error">{error}</p>}
 
           {/* IMAGE */}
-          <div className="profile-image-section">
-            <div className="image-wrapper">
+          <div className="dep-image-section">
+            <div className="dep-image-wrapper">
               {preview ? (
-                <img src={preview} alt="Profile" className="profile-img" />
+                <img src={preview} alt="Profile" className="dep-profile-img" />
               ) : (
-                <div className="placeholder">
-                  <FaCamera className="camera-icon" />
+                <div className="dep-placeholder">
+                  <FaCamera className="dep-camera-icon" />
                 </div>
               )}
 
-              <label className="upload-btn">
+              <label className="dep-upload-btn">
                 Change Photo
                 <input
                   type="file"
@@ -179,43 +179,43 @@ const DesignerEditProfile = () => {
           </div>
 
           {/* FORM */}
-          <form className="edit-form" onSubmit={handleSubmit}>
-            <div className="field">
+          <form className="dep-form" onSubmit={handleSubmit}>
+            <div className="dep-field">
               <label>Full Name</label>
               <input name="fullname" value={form.fullname} onChange={handleChange} required />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Email</label>
               <input type="email" name="email" value={form.email} onChange={handleChange} required />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Mobile Number</label>
               <input name="mobile" value={form.mobile} onChange={handleChange} required />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Location</label>
               <input name="location" value={form.location} onChange={handleChange} />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Experience</label>
               <input type="number" name="experience" value={form.experience} onChange={handleChange} />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Portfolio Link</label>
               <input name="portfolio" value={form.portfolio} onChange={handleChange} />
             </div>
 
-            <div className="field">
+            <div className="dep-field">
               <label>Bio</label>
               <textarea name="bio" value={form.bio} onChange={handleChange} />
             </div>
 
-            <button className="save-btn" disabled={loading}>
+            <button className="dep-save-btn" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </form>

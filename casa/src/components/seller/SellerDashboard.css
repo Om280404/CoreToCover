@@ -6,8 +6,9 @@
   --green-mid: #91A56E;
   --green-light: #C0CCA4;
 
-  --bg-1: #F3F7EC;
-  --bg-2: #EAF1DD;
+  --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
+  /* --bg-1: #F3F7EC;
+  --bg-2: #EAF1DD; */
   --surface: #FFFFFF;
 
   --text-dark: #474747;

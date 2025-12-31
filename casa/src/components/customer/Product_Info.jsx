@@ -8,6 +8,7 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { PiVideoFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import "./Product_Info.css";
 import sample from "../../assets/images/sample.jpg";
 import { addToCart } from "../../utils/cart";
@@ -551,6 +552,7 @@ const ProductInfo = () => {
           </div>
         )}
       </section>
+      <Footer/>
 
     </>
   );

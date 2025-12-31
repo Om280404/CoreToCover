@@ -5,6 +5,7 @@
   --green-dark: #606E52;
   --green-mid: #91A56E;
   --green-light: #C0CCA4;
+  --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
 
   --white: #ffffff;
   --bg-soft: #F3F7EC;
@@ -27,7 +28,7 @@
 .sma-root {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(180deg, var(--bg-soft), #E6EFD6);
+  background: var(--bg);
   font-family: var(--font-ui);
 }
 

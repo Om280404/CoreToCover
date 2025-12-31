@@ -5,7 +5,6 @@ import {
   FaSearch,
   FaShoppingCart,
   FaUser,
-  FaGlobe,
   FaBars,
   FaTimes,
   FaUserGraduate,
@@ -48,7 +47,7 @@ const Navbar = () => {
         <div className="nav-container">
           <div className="nav-left">
             <Link to="/" className="nav-link">
-              <h1 className="logo">CASA</h1>
+              <h1 className="logo">core2cover</h1>
             </Link>
           </div>
 
@@ -74,10 +73,6 @@ const Navbar = () => {
           {/* Right */}
           <div className="nav-right">
             <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-              <li>
-                <FaGlobe /> Language
-              </li>
-
               <li>
                 <Link to="/userprofile" className="nav-link">
                   <FaUser /> Profile

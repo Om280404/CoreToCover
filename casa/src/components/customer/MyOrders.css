@@ -12,7 +12,8 @@
     --border: rgba(96, 110, 82, 0.15);
     --radius: 14px;
 
-    --bg-light: #F3F7EC;
+    --casa-bg: #f7f8f5;
+
     --white: #FFFFFF;
 
     --shadow: 0 10px 24px rgba(96, 110, 82, 0.10);
@@ -26,7 +27,7 @@
    PAGE LAYOUT
 ========================================= */
 .orders-page {
-    background: var(--bg-light);
+    background: var(--casa-bg, #f7f8f5);
     min-height: calc(100vh - 76px);
     padding: 60px 6vw;
     display: flex;
@@ -586,75 +587,75 @@
 ========================= */
 
 .rated-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
 
-  margin-top: 10px;
-  padding: 6px 12px;
+    margin-top: 10px;
+    padding: 6px 12px;
 
-  font-size: 0.85rem;
-  font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 600;
 
-  color: #16a34a;
-  background: #ecfdf5;
-  border: 1px solid #86efac;
-  border-radius: 999px;
+    color: #16a34a;
+    background: #ecfdf5;
+    border: 1px solid #86efac;
+    border-radius: 999px;
 }
 
 .rated-pill {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 8px;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
 .status-return-requested {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
 }
 
 .status-returned {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
 .status-return-rejected {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
 }
 
 .cancel-btn {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  margin-top: 8px;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
 }
 
 .cancel-btn:hover {
-  background: #fecaca;
+    background: #fecaca;
 }
 
 .refund-method {
-  display: flex;
-  gap: 12px;
-  font-size: 13px;
-  margin: 6px 0;
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    margin: 6px 0;
 }
 
 .status-out-for-delivery {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #fdba74;
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fdba74;
 }

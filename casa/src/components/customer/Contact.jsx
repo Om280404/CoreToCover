@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "./Navbar";
 import "./Contact.css";
 import { sendContactMessage } from "../../api/contact";
+import Footer from "./Footer";
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -112,6 +113,7 @@ const Contact = () => {
                     </div>
                 </div>
             </section>
+            <Footer/>
         </>
     );
 };

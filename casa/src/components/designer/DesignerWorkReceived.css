@@ -12,41 +12,104 @@
   font-family: "Helvetica", sans-serif;
 }
 
-/* PAGE */
-.lux-work-page {
+/* ============================
+   NAVBAR (c2c-ddx-*)
+   ============================ */
+.c2c-ddx-navbar {
+  background: var(--white);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.c2c-ddx-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.c2c-ddx-logo {
+  font-family: "Big Caslon", serif;
+  font-size: 1.4rem;
+  color: var(--green-dark);
+  margin: 0;
+}
+
+.c2c-ddx-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.c2c-ddx-nav-links {
+  list-style: none;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.c2c-ddx-seller-btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--green-mid);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.c2c-ddx-hamburger {
+  display: none;
+  cursor: pointer;
+}
+
+/* small open helper */
+.c2c-open {
+  /* used on ul when open */
+}
+
+/* ============================
+   PAGE LAYOUT (c2c-dwrx-*)
+   ============================ */
+.c2c-dwrx-page {
   background: var(--cream-bg);
   min-height: 100vh;
   padding: 50px 7vw;
+  font-family: "Helvetica", sans-serif;
 }
 
-/* HEADER */
-.lux-header {
+/* header */
+.c2c-dwrx-header {
   text-align: left;
   margin-bottom: 40px;
 }
 
-.lux-title {
+.c2c-dwrx-title {
   font-family: "Big Caslon", serif;
   font-size: 2.8rem;
   color: var(--green-dark);
   margin-bottom: 10px;
 }
 
-.lux-sub {
+.c2c-dwrx-sub {
   color: var(--muted);
   font-size: 1.1rem;
   max-width: 560px;
 }
 
-/* JOB LIST */
-.lux-job-list {
+/* job list */
+.c2c-dwrx-job-list {
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
-/* JOB CARD */
-.lux-job-card {
+/* job card */
+.c2c-dwrx-job-card {
   background: var(--white);
   border-radius: var(--radius);
   padding: 28px;
@@ -58,12 +121,12 @@
   animation: fadeUp 0.6s ease both;
 }
 
-/* LEFT SECTION */
-.lux-card-left {
+/* left */
+.c2c-dwrx-card-left {
   flex: 1;
 }
 
-.lux-client-name {
+.c2c-dwrx-client-name {
   font-size: 1.4rem;
   color: var(--green-dark);
   margin-bottom: 20px;
@@ -72,72 +135,75 @@
   align-items: center;
 }
 
-.lux-field {
+.c2c-dwrx-field {
   margin-bottom: 14px;
 }
 
-.lux-field label {
+.c2c-dwrx-field label {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--muted);
 }
 
-.lux-field p {
+.c2c-dwrx-field p {
   font-size: 1.05rem;
   color: var(--text-dark);
   margin-top: 5px;
 }
 
-.lux-message {
+.c2c-dwrx-message {
   color: var(--muted);
   font-style: italic;
 }
 
-/* RIGHT SECTION */
-.lux-card-right {
+/* right */
+.c2c-dwrx-card-right {
   text-align: right;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 210px;
 }
 
-/* STATUS BADGE */
-.lux-status {
+/* status badge */
+.c2c-dwrx-status {
   padding: 8px 46px;
   border-radius: 14px;
   font-weight: bold;
   font-size: 0.85rem;
 }
 
-.lux-status.new {
+/* map statuses to original colors */
+.c2c-dwrx-status.pending {
   background: var(--green-light);
   color: var(--green-dark);
 }
 
-.lux-status.in-progress {
+.c2c-dwrx-status.accepted {
   background: #ffe8b5;
   color: #8a6b00;
 }
 
-.lux-status.completed {
+.c2c-dwrx-status.completed {
   background: #d5f5d1;
   color: #235d1e;
 }
 
-.lux-status.declined {
+.c2c-dwrx-status.rejected {
   background: #f7c5c5;
   color: #8a2e2e;
 }
 
-/* BUTTONS */
-.lux-buttons {
+/* buttons container */
+.c2c-dwrx-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.lux-btn {
+/* generic button */
+.c2c-dwrx-btn {
   padding: 12px 18px;
   border-radius: 14px;
   border: none;
@@ -146,35 +212,142 @@
   transition: all 0.25s ease;
 }
 
-.lux-btn.accept {
+/* modifiers */
+.c2c-dwrx-btn.c2c-dwrx-accept {
   background: var(--green-mid);
   color: white;
 }
 
-.lux-btn.accept:hover {
+.c2c-dwrx-btn.c2c-dwrx-accept:hover {
   background: var(--green-dark);
 }
 
-.lux-btn.decline {
+.c2c-dwrx-btn.c2c-dwrx-decline {
   background: #f2d3d3;
   color: #8a2e2e;
 }
 
-.lux-btn.complete {
+.c2c-dwrx-btn.c2c-dwrx-complete {
   background: #a8d8a8;
   color: #234d23;
 }
 
-.location-icon {
-  color: var(--green-dark);
-  font-size: 1.3rem;
+.c2c-dwrx-btn.c2c-dwrx-secondary {
+  background: #f3f4f6;
+  color: var(--text-dark);
 }
 
-.location {
-  margin-bottom: 5px;
+/* client info */
+.c2c-dwrx-client-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
 }
 
-/* ANIMATION */
+.c2c-dwrx-client-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.12);
+  color: #234d23;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
+}
+
+.c2c-dwrx-client-value {
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+/* stars */
+.c2c-dwrx-star {
+  color: #e6eef2;
+  font-size: 18px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.c2c-dwrx-star-filled {
+  color: #f59e0b;
+  filter: drop-shadow(0 3px 8px rgba(16, 185, 129, 0.15));
+}
+
+.c2c-dwrx-star-empty {
+  color: #cbd5e1;
+}
+
+/* given rating */
+.c2c-dwrx-given-rating {
+  margin-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.04);
+  padding-top: 10px;
+  width: 100%;
+  text-align: right;
+}
+
+.c2c-dwrx-given-review {
+  margin-top: 6px;
+  color: #0f172a;
+  font-style: italic;
+}
+
+/* modal */
+.c2c-dwrx-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.c2c-dwrx-modal-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 640px;
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.3);
+}
+
+/* star rating button */
+.c2c-dwrx-star-btn:focus {
+  outline: none;
+}
+
+/* tiny active helper (only used on star buttons) */
+.c2c-active {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+/* ============================
+   animation helpers (unique)
+   ============================ */
+.c2c-anim-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: c2cFade 0.6s ease forwards;
+}
+
+.c2c-anim-delay-1 {
+  animation-delay: 0.08s;
+}
+
+@keyframes c2cFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* original fadeUp keyframe kept for compatibility */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -187,171 +360,57 @@
   }
 }
 
-
-.client-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.client-icon.phone {
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(16, 185, 129, 0.12);
-  /* Soft emerald green */
-  color: #234d23;
-  /* Emerald green */
-  border-radius: 10px;
-  font-size: 1.2rem;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
-}
-
-.client-value {
-  font-weight: 700;
-  color: var(--text);
-  font-size: 1rem;
-}
-
-/* stars */
-.star {
-  color: #e6eef2;
-}
-
-.star.filled {
-  color:#f59e0b;
-  filter: drop-shadow(0 3px 8px rgba(16, 185, 129, 0.15));
-}
-
-.star.empty {
-  color: #cbd5e1;
-}
-
-/* client summary */
-.client-summary {
-  text-align: right;
-}
-
-.client-avg {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.client-sub {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.client-count {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 4px;
-}
-
-.client-latest-review {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #334155;
-  opacity: 0.95;
-}
-
-/* given rating */
-.given-rating {
-  margin-top: 12px;
-  border-top: 1px solid rgba(15, 23, 42, 0.04);
-  padding-top: 10px;
-}
-
-.given-review {
-  margin-top: 6px;
-  color: #0f172a;
-  font-style: italic;
-}
-
-/* modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal-box {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 640px;
-  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.3);
-}
-
-.star-btn:focus {
-  outline: none;
-}
-
-/* =========================================
-   RESPONSIVE — TABLET (≤ 1024px)
-========================================= */
+/* responsive */
 @media (max-width: 1024px) {
-  .lux-work-page {
+  .c2c-dwrx-page {
     padding: 40px 5vw;
   }
 
-  .lux-title {
+  .c2c-dwrx-title {
     font-size: 2.3rem;
   }
 
-  .lux-job-card {
+  .c2c-dwrx-job-card {
     gap: 24px;
     padding: 24px;
   }
 
-  .lux-client-name {
+  .c2c-dwrx-client-name {
     font-size: 1.25rem;
   }
 
-  .lux-card-right {
+  .c2c-dwrx-card-right {
     min-width: 220px;
   }
 
-  .lux-status {
+  .c2c-dwrx-status {
     padding: 8px 34px;
   }
 }
 
-/* =========================================
-   RESPONSIVE — SMALL TABLET / LARGE MOBILE
-   (≤ 768px)
-========================================= */
 @media (max-width: 768px) {
-  .lux-work-page {
+  .c2c-dwrx-page {
     padding: 32px 5vw;
   }
 
-  .lux-header {
+  .c2c-dwrx-header {
     margin-bottom: 28px;
   }
 
-  .lux-title {
+  .c2c-dwrx-title {
     font-size: 2rem;
   }
 
-  .lux-sub {
+  .c2c-dwrx-sub {
     font-size: 1rem;
   }
 
-  .lux-job-card {
+  .c2c-dwrx-job-card {
     flex-direction: column;
     gap: 22px;
   }
 
-  .lux-card-right {
+  .c2c-dwrx-card-right {
     text-align: left;
     flex-direction: row;
     align-items: center;
@@ -359,138 +418,110 @@
     gap: 14px;
   }
 
-  .lux-status {
+  .c2c-dwrx-status {
     align-self: flex-start;
     padding: 6px 20px;
     font-size: 0.8rem;
   }
 
-  .lux-buttons {
+  .c2c-dwrx-buttons {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
   }
 
-  .lux-btn {
+  .c2c-dwrx-btn {
     flex: 1;
     min-width: 140px;
   }
-
-  .client-summary {
-    text-align: left;
-    margin-top: 6px;
-  }
-
-  .client-latest-review {
-    font-size: 12.5px;
-  }
 }
 
-/* =========================================
-   RESPONSIVE — MOBILE (≤ 480px)
-========================================= */
 @media (max-width: 480px) {
-  .lux-work-page {
+  .c2c-dwrx-page {
     padding: 24px 4vw;
   }
 
-  .lux-title {
+  .c2c-dwrx-title {
     font-size: 1.75rem;
   }
 
-  .lux-sub {
+  .c2c-dwrx-sub {
     font-size: 0.95rem;
   }
 
-  .lux-job-card {
+  .c2c-dwrx-job-card {
     padding: 20px;
     border-radius: 16px;
   }
 
-  .lux-client-name {
+  .c2c-dwrx-client-name {
     font-size: 1.15rem;
     gap: 8px;
   }
 
-  .lux-field p {
+  .c2c-dwrx-field p {
     font-size: 0.95rem;
   }
 
-  .lux-field label {
+  .c2c-dwrx-field label {
     font-size: 0.7rem;
   }
 
-  .lux-message {
+  .c2c-dwrx-message {
     font-size: 0.9rem;
   }
 
-  .client-info {
+  .c2c-dwrx-client-info {
     gap: 8px;
   }
 
-  .client-icon.phone {
+  .c2c-dwrx-client-icon {
     width: 34px;
     height: 34px;
     font-size: 1rem;
   }
 
-  .client-value {
+  .c2c-dwrx-client-value {
     font-size: 0.95rem;
   }
 
-  .lux-card-right {
+  .c2c-dwrx-card-right {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  .lux-status {
+  .c2c-dwrx-status {
     width: fit-content;
     font-size: 0.75rem;
   }
 
-  .lux-buttons {
+  .c2c-dwrx-buttons {
     flex-direction: column;
   }
 
-  .lux-btn {
+  .c2c-dwrx-btn {
     width: 100%;
     padding: 11px;
     font-size: 0.95rem;
   }
 
-  .client-summary {
-    margin-top: 8px;
-  }
-
-  .client-avg {
-    font-size: 20px;
-  }
-
-  .client-count,
-  .client-sub {
-    font-size: 11px;
-  }
-
-  .modal-box {
+  .c2c-dwrx-modal-box {
     padding: 16px;
     border-radius: 10px;
   }
 }
 
-/* =========================================
-   EXTRA SMALL DEVICES (≤ 360px)
-========================================= */
 @media (max-width: 360px) {
-  .lux-title {
+  .c2c-dwrx-title {
     font-size: 1.6rem;
   }
 
-  .lux-btn {
+  .c2c-dwrx-btn {
     font-size: 0.9rem;
   }
 
-  .client-value {
+  .c2c-dwrx-client-value {
     font-size: 0.9rem;
   }
 }

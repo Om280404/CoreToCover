@@ -37,7 +37,7 @@ const DesignerExperience = () => {
     setWorks((prev) => [
       ...prev,
       {
-        id: `new-${Date.now()}`, // temp id
+        id: `new-${Date.now()}`,
         image: null,
         preview: null,
         description: "",
@@ -55,11 +55,7 @@ const DesignerExperience = () => {
     setWorks((prev) =>
       prev.map((w) =>
         w.id === id
-          ? {
-              ...w,
-              image: file,
-              preview: URL.createObjectURL(file),
-            }
+          ? { ...w, image: file, preview: URL.createObjectURL(file) }
           : w
       )
     );
@@ -92,42 +88,24 @@ const DesignerExperience = () => {
     if (work.image) formData.append("image", work.image);
 
     try {
-      let res;
-      let data;
+      const res = await fetch(
+        work.isNew
+          ? `http://localhost:3001/designer/${designerId}/work`
+          : `http://localhost:3001/designer/work/${work.id}`,
+        {
+          method: work.isNew ? "POST" : "PUT",
+          body: formData,
+        }
+      );
 
-      // ✅ NEW WORK
-      if (work.isNew) {
-        res = await fetch(
-          `http://localhost:3001/designer/${designerId}/work`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-      }
-      // ✅ UPDATE EXISTING WORK
-      else {
-        res = await fetch(
-          `http://localhost:3001/designer/work/${work.id}`,
-          {
-            method: "PUT",
-            body: formData,
-          }
-        );
-      }
-
-      data = await res.json();
-
+      const data = await res.json();
       if (!res.ok) {
         alert(data.message || "Failed to save work");
         return;
       }
 
-      // 🔁 Replace temp or existing work
       setWorks((prev) =>
-        prev.map((w) =>
-          w.id === work.id ? data.work : w
-        )
+        prev.map((w) => (w.id === work.id ? data.work : w))
       );
     } catch (err) {
       console.error(err);
@@ -143,7 +121,6 @@ const DesignerExperience = () => {
   const deleteWork = async (id) => {
     if (!window.confirm("Delete this work?")) return;
 
-    // remove local-only work
     if (String(id).startsWith("new-")) {
       setWorks((prev) => prev.filter((w) => w.id !== id));
       return;
@@ -165,63 +142,68 @@ const DesignerExperience = () => {
     <>
       {/* NAVBAR */}
       <header className="navbar">
-        <div className="nav-container">
-          <div className="nav-left">
-            <Link to="/designerdashboard" className="nav-link">
-              <h1 className="logo">CASA</h1>
-            </Link>
-          </div>
-
-          <div className="nav-right">
-            <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-              <li>
-                <Link to="/login" className="seller-btn">
-                  Login as Customer
-                </Link>
-              </li>
-            </ul>
-
-            <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <FaTimes /> : <FaBars />}
-            </div>
-          </div>
-        </div>
-      </header>
+              <div className="nav-container">
+                <div className="nav-left">
+                  <Link to="/designerdashboard" className="nav-link">
+                    <h1 className="logo">CASA</h1>
+                  </Link>
+                </div>
+      
+                <div className="nav-right">
+                  <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
+                    <li>
+                      <Link to="/login" className="seller-btn">
+                        Login as Customer
+                      </Link>
+                    </li>
+                  </ul>
+      
+                  <div
+                    className="hamburger"
+                    onClick={() => setMenuOpen(!menuOpen)}
+                  >
+                    {menuOpen ? <FaTimes /> : <FaBars />}
+                  </div>
+                </div>
+              </div>
+            </header>
 
       {/* PAGE */}
-      <div className="designer-page">
-        <div className="page-header reveal">
-          <h1 className="title">My Work Experience</h1>
-          <p className="subtitle">
+      <div className="de-page">
+        <div className="de-header de-reveal">
+          <h1 className="de-title">My Work Experience</h1>
+          <p className="de-subtitle">
             Showcase your best interior & product designs.
           </p>
         </div>
 
         {/* EMPTY STATE */}
         {works.length === 0 && (
-          <div className="empty-state reveal">
+          <div className="de-empty de-reveal">
             <img
               src="https://cdn-icons-png.flaticon.com/512/9541/9541430.png"
               alt="Empty"
             />
-            <p>You have not added any work yet</p>
+            <p className="de-empty-text">
+              You have not added any work yet
+            </p>
 
-            <button className="add-work-btn" onClick={addWork}>
+            <button className="de-empty-btn" onClick={addWork}>
               I want to add my work experience
             </button>
           </div>
         )}
 
         {/* LIST */}
-        <div className="experience-list">
+        <div className="de-list">
           {works.map((work) => (
-            <div key={work.id} className="experience-item reveal">
+            <div key={work.id} className="de-item de-reveal">
               {/* IMAGE */}
-              <label className="experience-image">
+              <label className="de-image">
                 {work.preview ? (
                   <img src={work.preview} alt="work" />
                 ) : (
-                  <div className="image-placeholder">
+                  <div className="de-image-placeholder">
                     <FaPlus />
                     <span>Upload Image</span>
                   </div>
@@ -237,9 +219,9 @@ const DesignerExperience = () => {
               </label>
 
               {/* DETAILS */}
-              <div className="experience-details">
+              <div className="de-details">
                 <textarea
-                  className="experience-description"
+                  className="de-description"
                   placeholder="Describe your work..."
                   value={work.description || ""}
                   onChange={(e) =>
@@ -247,9 +229,9 @@ const DesignerExperience = () => {
                   }
                 />
 
-                <div className="actions">
+                <div className="de-actions">
                   <button
-                    className="edit-btn"
+                    className="de-save-btn"
                     onClick={() => saveWork(work)}
                     disabled={savingId === work.id}
                   >
@@ -258,7 +240,7 @@ const DesignerExperience = () => {
                   </button>
 
                   <button
-                    className="delete-btn"
+                    className="de-delete-btn"
                     onClick={() => deleteWork(work.id)}
                   >
                     <FaTrashAlt /> Delete
@@ -271,8 +253,8 @@ const DesignerExperience = () => {
 
         {/* ADD BUTTON */}
         <button
-          className={`add-work-btn big-btn ${
-            works.length >= 5 ? "disabled" : ""
+          className={`de-add-btn ${
+            works.length >= 5 ? "de-disabled" : ""
           }`}
           onClick={addWork}
           disabled={works.length >= 5}

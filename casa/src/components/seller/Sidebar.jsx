@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { FiRotateCcw } from "react-icons/fi";
 import { IoBusinessOutline } from "react-icons/io5";
 import "./Sidebar.css";
+import CCInline from "../customer/CCInline"
 
 const Sidebar = ({ notificationCount = 0 }) => {
   const navigate = useNavigate();

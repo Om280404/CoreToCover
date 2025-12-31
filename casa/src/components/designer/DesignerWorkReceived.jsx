@@ -139,10 +139,6 @@ const DesignerWorkReceived = () => {
     }
   };
 
-
-
-
-
   const closeClientRatings = () => {
     setClientRatingsModalOpen(false);
     setClientRatings([]);
@@ -158,7 +154,7 @@ const DesignerWorkReceived = () => {
 
   return (
     <>
-      {/* NAVBAR */}
+      {/* NAVBAR (unique prefix c2c-ddx-) */}
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
@@ -176,7 +172,10 @@ const DesignerWorkReceived = () => {
               </li>
             </ul>
 
-            <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+            <div
+              className="hamburger"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
               {menuOpen ? <FaTimes /> : <FaBars />}
             </div>
           </div>
@@ -187,8 +186,8 @@ const DesignerWorkReceived = () => {
           REVIEWS SUMMARY MODAL (existing)
       ===================== */}
       {reviewModalOpen && reviewTarget && (
-        <div className="modal-overlay" onClick={closeReviewModal}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="c2c-dwrx-modal-overlay" onClick={closeReviewModal}>
+          <div className="c2c-dwrx-modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>Client Reviews (summary)</h2>
 
             <div style={{ marginBottom: 12 }}>
@@ -225,70 +224,70 @@ const DesignerWorkReceived = () => {
               </div>
             ))}
 
-            <button className="lux-btn decline" onClick={closeReviewModal}>Close</button>
+            <button className="c2c-dwrx-btn c2c-dwrx-decline" onClick={closeReviewModal}>Close</button>
           </div>
         </div>
       )}
 
       {/* PAGE */}
-      <div className="lux-work-page">
-        <div className="lux-header reveal">
-          <h1 className="lux-title">Work Requests</h1>
-          <p className="lux-sub">
+      <div className="c2c-dwrx-page">
+        <div className="c2c-dwrx-header c2c-anim-reveal">
+          <h1 className="c2c-dwrx-title">Work Requests</h1>
+          <p className="c2c-dwrx-sub">
             Premium client leads curated exclusively for you as a CASA Designer.
           </p>
         </div>
 
-        <div className="lux-job-list">
+        <div className="c2c-dwrx-job-list">
           {loading && <p style={{ padding: 20 }}>Loading work requests...</p>}
           {!loading && jobs.length === 0 && (
             <p style={{ padding: 20 }}>No work requests yet.</p>
           )}
 
           {jobs.map((job) => (
-            <div key={job.id} className="lux-job-card reveal delay-1">
-              <div className="lux-card-left">
-                <h2 className="lux-client-name">
+            <div key={job.id} className="c2c-dwrx-job-card c2c-anim-reveal c2c-anim-delay-1">
+              <div className="c2c-dwrx-card-left">
+                <h2 className="c2c-dwrx-client-name">
                   <FaUser /> {job.clientName}
                 </h2>
 
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ flex: 1 }}>
-                    <div className="lux-field">
+                    <div className="c2c-dwrx-field">
                       <label>Project Type</label>
                       <p>{job.type}</p>
                     </div>
-                    <div className="lux-field">
+                    <div className="c2c-dwrx-field">
                       <label>Budget</label>
                       <p><FaRupeeSign /> {job.budget}</p>
                     </div>
-                    <div className="lux-field">
+                    <div className="c2c-dwrx-field">
                       <label>Location</label>
                       <p><LuMapPin /> {job.location}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="lux-field">
+                <div className="c2c-dwrx-field">
                   <label>Estimated Timeline</label>
                   <p><FaCalendarAlt /> {job.timeline}</p>
                 </div>
 
-                <div className="lux-field">
+                <div className="c2c-dwrx-field">
                   <label>Client Message</label>
-                  <p className="lux-message">“{job.message}”</p>
+                  <p className="c2c-dwrx-message">“{job.message}”</p>
                 </div>
 
-                <div className="client-info">
-                  <span className="client-icon">
+                <div className="c2c-dwrx-client-info">
+                  <span className="c2c-dwrx-client-icon">
                     <FaPhoneAlt />
                   </span>
-                  <p className="client-value">+91 {job.mobile}</p>
+                  <p className="c2c-dwrx-client-value">+91 {job.mobile}</p>
                 </div>
               </div>
 
-              <div className="lux-card-right">
-                <span className={`lux-status ${job.status}`}>
+              <div className="c2c-dwrx-card-right">
+                <span className={`c2c-dwrx-status ${job.status}`}>
                   {job.status === "pending" && "New Request"}
                   {job.status === "accepted" && "In Progress"}
                   {job.status === "completed" && "Completed"}
@@ -296,20 +295,20 @@ const DesignerWorkReceived = () => {
                 </span>
 
                 {job.userRating ? (
-                  <div className="given-rating">
+                  <div className="c2c-dwrx-given-rating">
                     <div style={{ marginBottom: 6, fontWeight: 700 }}>You rated this client</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       {Array.from({ length: 5 }).map((_, i) => {
                         const filled = i < job.userRating.stars;
-                        return <FaStar key={i} className={filled ? "star filled" : "star empty"} />;
+                        return <FaStar key={i} className={filled ? "c2c-dwrx-star c2c-dwrx-star-filled" : "c2c-dwrx-star c2c-dwrx-star-empty"} />;
                       })}
                     </div>
-                    {job.userRating.review && <div className="given-review">"{job.userRating.review}"</div>}
+                    {job.userRating.review && <div className="c2c-dwrx-given-review">"{job.userRating.review}"</div>}
                   </div>
                 ) : (
                   job.status === "completed" && (
                     <button
-                      className="lux-btn accept"
+                      className="c2c-dwrx-btn c2c-dwrx-accept"
                       onClick={() => openRateModal(job)}
                       style={{ marginTop: 12 }}
                     >
@@ -318,10 +317,10 @@ const DesignerWorkReceived = () => {
                   )
                 )}
 
-                <div className="lux-buttons">
+                <div className="c2c-dwrx-buttons">
                   {/* NEW: open full client ratings across platform */}
                   <button
-                    className="lux-btn secondary"
+                    className="c2c-dwrx-btn c2c-dwrx-secondary"
                     onClick={() => openClientRatings(job.userId)}
                     style={{ marginTop: 10 }}
                   >
@@ -331,7 +330,7 @@ const DesignerWorkReceived = () => {
                   {job.status === "pending" && (
                     <>
                       <button
-                        className="lux-btn accept"
+                        className="c2c-dwrx-btn c2c-dwrx-accept"
                         onClick={async () => {
                           try {
                             const res = await fetch(
@@ -353,7 +352,7 @@ const DesignerWorkReceived = () => {
                       </button>
 
                       <button
-                        className="lux-btn decline"
+                        className="c2c-dwrx-btn c2c-dwrx-decline"
                         onClick={async () => {
                           try {
                             const res = await fetch(
@@ -378,7 +377,7 @@ const DesignerWorkReceived = () => {
 
                   {job.status === "accepted" && (
                     <button
-                      className="lux-btn complete"
+                      className="c2c-dwrx-btn c2c-dwrx-complete"
                       onClick={async () => {
                         try {
                           const res = await fetch(
@@ -408,8 +407,8 @@ const DesignerWorkReceived = () => {
 
       {/* RATE MODAL */}
       {rateModalOpen && rateTarget && (
-        <div className="modal-overlay" onClick={closeRateModal}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="c2c-dwrx-modal-overlay" onClick={closeRateModal}>
+          <div className="c2c-dwrx-modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>Rate client: {rateTarget.clientName}</h2>
 
             <div style={{ marginTop: 12 }}>
@@ -420,7 +419,7 @@ const DesignerWorkReceived = () => {
                     <button
                       key={n}
                       aria-label={`Rate ${n} star`}
-                      className={`star-btn ${n <= tempStars ? "active" : ""}`}
+                      className={`c2c-dwrx-star-btn ${n <= tempStars ? "c2c-active" : ""}`}
                       onClick={() => handleStarClick(n)}
                       style={{
                         background: "transparent",
@@ -429,7 +428,7 @@ const DesignerWorkReceived = () => {
                         fontSize: 22,
                       }}
                     >
-                      <FaStar className={n <= tempStars ? "star filled" : "star empty"} />
+                      <FaStar className={n <= tempStars ? "c2c-dwrx-star c2c-dwrx-star-filled" : "c2c-dwrx-star c2c-dwrx-star-empty"} />
                     </button>
                   );
                 })}
@@ -443,8 +442,8 @@ const DesignerWorkReceived = () => {
               />
 
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
-                <button className="lux-btn decline" onClick={closeRateModal}>Cancel</button>
-                <button className="lux-btn complete" onClick={submitUserRating} disabled={submitting}>
+                <button className="c2c-dwrx-btn c2c-dwrx-decline" onClick={closeRateModal}>Cancel</button>
+                <button className="c2c-dwrx-btn c2c-dwrx-complete" onClick={submitUserRating} disabled={submitting}>
                   {submitting ? "Submitting..." : "Submit Rating"}
                 </button>
               </div>
@@ -455,8 +454,8 @@ const DesignerWorkReceived = () => {
 
       {/* NEW: CLIENT RATINGS (all designers -> this client) */}
       {clientRatingsModalOpen && (
-        <div className="modal-overlay" onClick={closeClientRatings}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="c2c-dwrx-modal-overlay" onClick={closeClientRatings}>
+          <div className="c2c-dwrx-modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>All Ratings for Client</h2>
 
             {ratingsLoading ? (
@@ -576,7 +575,7 @@ const DesignerWorkReceived = () => {
             )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
-              <button className="lux-btn decline" onClick={closeClientRatings}>
+              <button className="c2c-dwrx-btn c2c-dwrx-decline" onClick={closeClientRatings}>
                 Close
               </button>
             </div>

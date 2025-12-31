@@ -4,6 +4,7 @@
 :root {
   --bg-main: #f4f7ee;
   --bg-card: #ffffff;
+  --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
 
   --green-dark: #5f6d52;
   --green-mid: #8fa070;
@@ -29,7 +30,7 @@
 .bs-layout-root {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(180deg, #f4f7ee, #e8efdc);
+  background: var(--bg);
 }
 
 /* ===============================
