@@ -1,58 +1,116 @@
-// File: src/pages/About.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
-import CCInline from "./CCInline";
+
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2.png";
+import CoreToCoverTitle from "../../assets/logo/CoreToCover_1.png";
 
 export default function About() {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
+  /* =========================
+     VIEWPORT DETECTION
+  ========================= */
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 900px)");
+
+    const handleChange = (e) => setIsMobileOrTablet(e.matches);
+
+    setIsMobileOrTablet(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   return (
     <section className="about-page">
+      {/* =========================
+          HERO
+      ========================= */}
       <header className="about-hero">
         <div className="about-hero-inner">
           <div className="hero-copy">
-            <h1 className="hero-title">
-              <CCInline /> — a premium marketplace for home interiors & materials
-            </h1>
+            {/* ---------- TITLE ---------- */}
+            {isMobileOrTablet ? (
+              /* MOBILE / TABLET: logo LEFT, text RIGHT (inline) */
+              <p className="mobile-brand-text">
+                <img
+                  src={CoreToCoverTitle}
+                  alt="CoreToCover"
+                  className="inline-brand-logo"
+                />
+                A unified platform where customers can discover curated interior products,
+                source high-quality raw materials, and collaborate with skilled freelance
+                interior designers — all in one place.
+              </p>
 
-            <p className="hero-sub">
-              <CCInline /> is a unified platform where customers can discover
-              curated interior products, source high-quality raw materials, and
-              directly collaborate with skilled freelance interior designers —
-              all in one place.
-            </p>
+            ) : (
+              /* DESKTOP: keep original H1 + paragraph */
+              <>
+                <h1 className="hero-title">
+                  <Brand>CoreToCover</Brand> — a premium marketplace for home interiors & materials
+                </h1>
 
+                <p className="hero-sub">
+                  <Brand>CoreToCover</Brand> is a unified platform where customers can discover
+                  curated interior products, source high-quality raw materials, and
+                  directly collaborate with skilled freelance interior designers —
+                  all in one place.
+                </p>
+              </>
+            )}
+
+
+            {/* ---------- CTAs ---------- */}
             <div className="hero-ctas">
-              <Link to="/" className="btn btn-primary" aria-label="Explore Marketplace">
+              <Link to="/" className="btn btn-primary">
                 Explore Marketplace
               </Link>
-              <Link to="/signup" className="btn btn-ghost" aria-label="Create an account">
+              <Link
+                to="/signup"
+                className="btn btn-ghost"
+                aria-label="Create an account"
+              >
                 Create an account
               </Link>
             </div>
           </div>
         </div>
+
+        {/* ---------- DESKTOP HERO LOGO ONLY ---------- */}
+        {!isMobileOrTablet && (
+          <div className="hero-art" aria-hidden>
+            <img src={CoreToCoverLogo} alt="CoreToCover logo" />
+          </div>
+        )}
       </header>
 
+      {/* =========================
+          MAIN CONTENT
+      ========================= */}
       <main className="about-main">
         {/* =========================
-            Vision / Story
+            VISION
         ========================= */}
         <section className="about-story card">
           <div className="card-left">
             <h2>Our vision</h2>
 
             <p>
-              <CCInline /> was built to simplify how people plan, purchase, and
-              execute home interior projects. Instead of navigating fragmented
-              offline markets, customers get access to finished interior products
-              and essential raw materials — seamlessly, on one platform.
+              <Brand>CoreToCover</Brand> was built to simplify how people plan,
+              purchase, and execute home interior projects. Instead of navigating
+              fragmented offline markets, customers get access to finished
+              interior products and essential raw materials — seamlessly, on one
+              platform.
             </p>
 
             <p>
-              Beyond commerce, <CCInline /> enables direct collaboration between
-              customers and verified freelance interior designers, supporting
-              transparent communication, customization, and professional project
-              execution.
+              Beyond commerce, <Brand>CoreToCover</Brand> enables direct
+              collaboration between customers and verified freelance interior
+              designers, supporting transparent communication, customization,
+              and professional project execution.
             </p>
           </div>
 
@@ -73,7 +131,7 @@ export default function About() {
         </section>
 
         {/* =========================
-            Leadership
+            LEADERSHIP
         ========================= */}
         <section className="about-founders card">
           <div className="founders-hero">
@@ -85,42 +143,40 @@ export default function About() {
           </div>
 
           <div className="founders-grid">
-            <div className="founder-feature" role="group" aria-labelledby="founder-om">
+            <div className="founder-feature">
               <div className="founder-info">
-                <div id="founder-om" className="founder-name">Om Karande</div>
+                <div className="founder-name">Om Karande</div>
                 <div className="founder-role">Founder & Product Lead</div>
                 <div className="founder-bio">
                   Om leads the vision, product strategy, and frontend experience,
-                  shaping <CCInline /> as a modern, design-forward platform for
-                  interiors and materials.
+                  shaping <Brand>CoreToCover</Brand> as a modern, design-forward
+                  platform for interiors and materials.
                 </div>
               </div>
             </div>
 
-            <div className="cofounders" aria-label="Co-founders">
+            <div className="cofounders">
               <h3 className="cofounders-title">Co-founders</h3>
 
               <div className="founder-list">
-                <div className="founder" role="group" aria-labelledby="cofounder-atharv">
+                <div className="founder">
                   <div className="founder-info">
-                    <div id="cofounder-atharv" className="founder-name">Atharv Khot</div>
+                    <div className="founder-name">Atharv Khot</div>
                     <div className="founder-role">Backend Engineer</div>
                     <div className="founder-bio">
-                      Atharv designs and maintains scalable backend systems,
-                      APIs, and data models that power <CCInline />’s marketplace
-                      and designer workflows.
+                      Atharv designs scalable backend systems and APIs powering
+                      <Brand>CoreToCover</Brand>’s marketplace.
                     </div>
                   </div>
                 </div>
 
-                <div className="founder" role="group" aria-labelledby="cofounder-soham">
+                <div className="founder">
                   <div className="founder-info">
-                    <div id="cofounder-soham" className="founder-name">Soham Phatak</div>
+                    <div className="founder-name">Soham Phatak</div>
                     <div className="founder-role">Backend Engineer</div>
                     <div className="founder-bio">
-                      Soham focuses on performance, authentication, integrations,
-                      and reliability to ensure smooth transactions and secure
-                      platform operations.
+                      Soham focuses on performance, authentication, and
+                      reliability to ensure secure platform operations.
                     </div>
                   </div>
                 </div>
@@ -130,97 +186,40 @@ export default function About() {
         </section>
 
         {/* =========================
-            Values
+            VALUES
         ========================= */}
         <section className="about-values card">
           <h2>What we stand for</h2>
           <ul className="values-list">
-            <li><strong>Curated quality:</strong> Premium products and materials selected for long-term interior value.</li>
-            <li><strong>Seller & designer empowerment:</strong> Fair tools, clear economics, and growth-oriented features.</li>
-            <li><strong>Customer confidence:</strong> Transparent pricing, trusted professionals, and reliable workflows.</li>
-            <li><strong>Modular ecosystem:</strong> Products, materials, and services designed to work together.</li>
-            <li><strong>Trust by design:</strong> UX decisions that reduce friction and build confidence.</li>
+            <li><strong>Curated quality:</strong> Premium products and materials selected for long-term value.</li>
+            <li><strong>Seller & designer empowerment:</strong> Fair tools and clear economics.</li>
+            <li><strong>Customer confidence:</strong> Transparent pricing and trusted professionals.</li>
+            <li><strong>Modular ecosystem:</strong> Products, materials, and services that work together.</li>
+            <li><strong>Trust by design:</strong> UX decisions that reduce friction.</li>
           </ul>
-        </section>
-
-        {/* =========================
-            Platform Features
-        ========================= */}
-        <section className="about-features card">
-          <h2>Key platform features</h2>
-          <p className="muted">
-            Features designed to create trust, fairness, and clarity for both
-            designers and clients.
-          </p>
-
-          <div className="features-grid" role="list">
-            <article className="feature" role="listitem" aria-labelledby="feat-ratings">
-              <h3 id="feat-ratings">Mutual ratings & reviews</h3>
-              <p>
-                On <CCInline />, both customers and designers can leave verified
-                ratings and reviews for one another — creating a two-way feedback
-                system that raises standards across the platform.
-              </p>
-
-              <ul className="feature-benefits">
-                <li><strong>For designers:</strong> Understand client professionalism, communication style, and reliability before accepting work.</li>
-                <li><strong>For clients:</strong> Choose designers based on verified performance and past project outcomes.</li>
-                <li><strong>For the platform:</strong> Improves matching quality and encourages professional behaviour.</li>
-              </ul>
-            </article>
-
-            <article className="feature" role="listitem" aria-labelledby="feat-subscription">
-              <h3 id="feat-subscription">Subscription-based designer memberships</h3>
-              <p>
-                <CCInline /> does not charge per-project commissions from designers.
-                Instead, designers subscribe to monthly plans that unlock platform
-                access and growth tools.
-              </p>
-
-              <ul className="feature-benefits">
-                <li><strong>Predictable costs:</strong> Simple monthly pricing with no hidden deductions.</li>
-                <li><strong>Higher earnings:</strong> Designers keep their full project fees.</li>
-                <li><strong>Premium perks:</strong> Priority visibility, verified badges, insights, and lead access.</li>
-                <li><strong>Platform sustainability:</strong> Recurring revenue supports long-term product investment.</li>
-              </ul>
-            </article>
-
-            <article className="feature" role="listitem" aria-labelledby="feat-agreements">
-              <h3 id="feat-agreements">Automated legal agreements (PDF)</h3>
-              <p>
-                For every engagement, <CCInline /> can generate a clear,
-                downloadable legal agreement outlining scope, timelines,
-                deliverables, and payment terms.
-              </p>
-
-              <ul className="feature-benefits">
-                <li><strong>Clarity:</strong> Clearly defines what is included and excluded.</li>
-                <li><strong>Payment protection:</strong> Documents milestones and schedules.</li>
-                <li><strong>Dispute reduction:</strong> Acts as a formal reference in case of conflicts.</li>
-                <li><strong>Professional trust:</strong> Elevates designer credibility and client confidence.</li>
-              </ul>
-            </article>
-          </div>
         </section>
 
         {/* =========================
             CTA
         ========================= */}
-        <section className="about-cta card">
-          <h2>Build your space with <CCInline /></h2>
-          <p>
+        <section className="about-cta-section card">
+          <h2 className="cta-title">
+            Build your space with <Brand>CoreToCover</Brand>
+          </h2>
+
+          <p className="cta-description">
             Explore interior products, source raw materials, or collaborate with
             trusted designers — all from one premium platform.
           </p>
 
-          <div className="cta-row">
-            <Link to="/signup" className="btn btn-primary large" aria-label="Create account">
+          <div className="cta-actions">
+            <Link to="/signup" className="cta-button">
               Get started
             </Link>
           </div>
 
-          <div className="credits">
-            <p><strong>Credits</strong></p>
+          <div className="cta-credits">
+            <p className="credits-title">Credits</p>
             <p>Founder & Frontend — Om Karande</p>
             <p>Backend Engineers — Atharv Khot, Soham Phatak</p>
           </div>

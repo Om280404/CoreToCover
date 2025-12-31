@@ -13,7 +13,8 @@
   --transition: all 0.25s ease;
 
   --font-ui: "Helvetica", Arial, sans-serif;
-  --font-heading: "Playfair Display", serif; /* Big Caslon style */
+  --font-heading: "Playfair Display", serif;
+  /* Big Caslon style */
 }
 
 /* =========================================
@@ -170,9 +171,10 @@
 
 /* EXTRA SMALL DEVICES */
 @media (max-width: 480px) {
-  .footer-container{
+  .footer-container {
     height: 50%;
   }
+
   .footer-logo {
     font-size: 1.4rem;
   }
@@ -184,5 +186,26 @@
   .footer-social a {
     width: 34px;
     height: 34px;
+  }
+}
+
+.footer-logo {
+  width: 340px;
+  /* same logic as navbar */
+  height: auto;
+  /* keep original proportions */
+  max-height: 36px;
+  /* prevents footer from growing */
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .footer-logo {
+    width: 340px;
+    max-height: 65px;
+    position: relative;
+    right: 100px;
+
   }
 }

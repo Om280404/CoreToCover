@@ -16,6 +16,7 @@ import Raw2 from "../../assets/images/Raw2.png";
 import Raw3 from "../../assets/images/Raw3.png";
 import Designer1 from "../../assets/images/Designer1.png";
 import Designer2 from "../../assets/images/Designer2.png";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
 import Footer from "./Footer";
 
 // SLIDESHOW CARD
@@ -60,8 +61,14 @@ const Home = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/" className="nav-link">
-              <h1 className="logo">core2cover</h1>
+            <Link to="/" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+              </span>
             </Link>
           </div>
 

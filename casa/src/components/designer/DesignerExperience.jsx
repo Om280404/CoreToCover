@@ -8,6 +8,8 @@ import {
   FaTrashAlt,
   FaSave,
 } from "react-icons/fa";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+
 
 const DesignerExperience = () => {
   const [works, setWorks] = useState([]);
@@ -142,31 +144,37 @@ const DesignerExperience = () => {
     <>
       {/* NAVBAR */}
       <header className="navbar">
-              <div className="nav-container">
-                <div className="nav-left">
-                  <Link to="/designerdashboard" className="nav-link">
-                    <h1 className="logo">CASA</h1>
-                  </Link>
-                </div>
-      
-                <div className="nav-right">
-                  <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-                    <li>
-                      <Link to="/login" className="seller-btn">
-                        Login as Customer
-                      </Link>
-                    </li>
-                  </ul>
-      
-                  <div
-                    className="hamburger"
-                    onClick={() => setMenuOpen(!menuOpen)}
-                  >
-                    {menuOpen ? <FaTimes /> : <FaBars />}
-                  </div>
-                </div>
-              </div>
-            </header>
+        <div className="nav-container">
+          <div className="nav-left">
+            <Link to="/designerdashboard" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+              </span>
+            </Link>
+          </div>
+
+          <div className="nav-right">
+            <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
+              <li>
+                <Link to="/login" className="seller-btn">
+                  Login as Customer
+                </Link>
+              </li>
+            </ul>
+
+            <div
+              className="hamburger"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <FaTimes /> : <FaBars />}
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* PAGE */}
       <div className="de-page">
@@ -253,9 +261,8 @@ const DesignerExperience = () => {
 
         {/* ADD BUTTON */}
         <button
-          className={`de-add-btn ${
-            works.length >= 5 ? "de-disabled" : ""
-          }`}
+          className={`de-add-btn ${works.length >= 5 ? "de-disabled" : ""
+            }`}
           onClick={addWork}
           disabled={works.length >= 5}
         >

@@ -6,6 +6,8 @@ import {
   getDesignerEditProfile,
   updateDesignerEditProfile,
 } from "../../api/designer";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+
 
 const DesignerEditProfile = () => {
   const navigate = useNavigate();
@@ -122,8 +124,14 @@ const DesignerEditProfile = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/designerdashboard" className="nav-link">
-              <h1 className="logo">CASA</h1>
+            <Link to="/designerdashboard" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+              </span>
             </Link>
           </div>
 

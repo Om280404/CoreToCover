@@ -219,7 +219,7 @@
 }
 
 /* Mobile (≤426px) */
-@media (max-width: 426px) {
+@media (max-width: 768px) {
   .nav-container {
     padding: 12px 18px;
   }
@@ -275,3 +275,73 @@
     align-items: center;
   }
 }
+
+/* =========================
+   NAVBAR LOGO
+========================= */
+.nav-logo-wrap {
+  height: 32px;            /* navbar constraint */
+  display: flex;
+  align-items: center;
+  overflow: visible;       /* allow visual overflow */
+}
+
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo {
+  height: auto;           
+  width: 140px;
+  display: block;
+
+  transform: scale(1.35);  
+  transform-origin: left center;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .nav-logo {
+    transform: scale(1.25);
+  }
+
+  .nav-logo-link {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo {
+    transform: scale(1.15);
+  }
+}
+
+/* =========================
+   NAV LEFT (LOGO AREA)
+========================= */
+
+.nav-left {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  flex-shrink: 0;           /* never compress logo */
+  height: 100%;             /* inherit navbar height */
+}
+
+/* clickable logo link */
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;          /* horizontal breathing space */
+  text-decoration: none;
+}
+
+/* logo wrapper (layout anchor) */
+.nav-logo-wrap {
+  height: 32px;             /* navbar constraint */
+  display: flex;
+  align-items: center;
+  overflow: visible;        /* allow scaled logo */
+}
+

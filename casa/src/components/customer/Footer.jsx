@@ -1,6 +1,7 @@
 import React from 'react'
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
 import "./Footer.css";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png";
 
 export default function Footer() {
   return (
@@ -8,9 +9,16 @@ export default function Footer() {
       <div className="footer-container">
         {/* Brand */}
         <div className="footer-brand">
-          <h2 className="footer-logo">CASA</h2>
-          <p className="footer-tagline">Everything your interior project needs, in one place.</p>
+          <img
+            src={CoreToCoverLogo}
+            alt="CoreToCover"
+            className="footer-logo"
+          />
+          <p className="footer-tagline">
+            Everything your interior project needs, in one place.
+          </p>
         </div>
+
 
         {/* Links */}
         <ul className="footer-links">

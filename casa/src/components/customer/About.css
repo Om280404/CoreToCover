@@ -1,447 +1,399 @@
 /* ============================================================
-   ABOUT PAGE — Premium Botanical Editorial Theme  
-   Palette from your image + Typeface: Big Caslon + Helvetica
-   Matches soft luxury interior brand aesthetics
+   CORE TO COVER — ABOUT PAGE (PRODUCTION)
    ============================================================ */
 
+/* =========================
+   ROOT VARIABLES
+========================= */
 :root {
-    /* Botanical Palette */
     --dark-gray: #474747;
-    --warm-gray: #8F8B84;
-    --olive: #606E52;
-    --sage: #91A56E;
-    --light-sage: #C0CCA4;
+    --warm-gray: #8f8b84;
+    --olive: #606e52;
+    --sage: #91a56e;
+    --light-sage: #c0cca4;
     --white: #ffffff;
 
-    /* Backgrounds */
-    --bg-soft: #F5F4EE; /* paper-like beige */
-    --bg-soft-2: #EEEDE7;
+    --paper-base: #f6f5f2;
+    --paper-soft: #efeee9;
 
-    /* Typography */
     --heading-font: "Big Caslon", serif;
     --body-font: "Helvetica", sans-serif;
+    --brand-font: "CaviarDreams", sans-serif;
 
-    /* Layout / FX */
-    --radius: 16px;
-    --shadow-soft: 0 12px 40px rgba(40, 50, 40, 0.08);
-    --shadow-card: 0 14px 50px rgba(60, 80, 60, 0.10);
-    --border-soft: rgba(96, 110, 82, 0.18);
-    --transition: 260ms cubic-bezier(.28, .7, .3, 1);
+    --radius-xl: 28px;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+
+    --shadow-soft: 0 10px 30px rgba(60, 60, 60, 0.08);
+    --shadow-card: 0 30px 80px rgba(60, 60, 60, 0.18);
+
+    --transition: 320ms cubic-bezier(.22, .61, .36, 1);
 }
 
+/* =========================
+   FONT FACE
+========================= */
+@font-face {
+    font-family: "CaviarDreams";
+    src: url("/public/fonts/CaviarDreams.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+}
 
-/* ============================================================
-   PAGE BACKGROUND
-   ============================================================ */
+@font-face {
+    font-family: "CaviarDreams";
+    src: url("/public/fonts/CaviarDreams_Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* =========================
+   BASE
+========================= */
 .about-page {
     min-height: 100vh;
-    background: linear-gradient(180deg, var(--bg-soft), var(--bg-soft-2));
-    padding: 50px 24px;
+    background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(145, 165, 110, 0.08), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(96, 110, 82, 0.06), transparent 55%),
+        linear-gradient(180deg, var(--paper-base), var(--paper-soft));
+    padding: 12px 24px;
     display: flex;
     flex-direction: column;
-    gap: 40px;
     align-items: center;
+    font-family: var(--body-font);
+    color: var(--dark-gray);
 }
 
+/* =========================
+   BRAND INLINE
+========================= */
+.brand {
+    font-family: var(--brand-font);
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--olive);
+}
 
-/* ============================================================
-   HERO AREA
-   ============================================================ */
+/* =========================
+   HERO
+========================= */
 .about-hero {
+    max-width: 1200px;
     width: 100%;
-    max-width: 1180px;
     display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 40px;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 64px;
     align-items: center;
-}
-
-.about-hero-inner {
-    display: flex;
-    gap: 22px;
-}
-
-.hero-copy {
-    max-width: 760px;
+    margin-bottom: 80px;
 }
 
 .hero-title {
-    margin: 0 0 14px;
-    font-size: 2.6rem;
     font-family: var(--heading-font);
-    color: var(--olive);
-    line-height: 1.1;
+    font-size: 3.1rem;
+    line-height: 1.08;
+    letter-spacing: -0.4px;
+    margin-bottom: 18px;
 }
 
 .hero-sub {
-    font-family: var(--body-font);
     font-size: 1.05rem;
     color: var(--warm-gray);
-    margin-bottom: 24px;
-    line-height: 1.55;
+    line-height: 1.85;
+    max-width: 640px;
+    margin-bottom: 36px;
 }
 
-/* Buttons */
-.hero-ctas {
+/* =========================
+   HERO TITLE IMAGE (MOBILE/TABLET)
+========================= */
+.hero-title-image {
+    display: block;
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+    margin-bottom: 18px;
+}
+
+/* =========================
+   HERO LOGO (DESKTOP ONLY)
+========================= */
+.hero-art {
     display: flex;
     align-items: center;
+    justify-content: center;
+}
+
+.hero-art img {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 12px 22px rgba(60, 60, 60, 0.22));
+    transition: transform var(--transition), filter var(--transition);
+}
+
+.hero-art img:hover {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 22px 42px rgba(60, 80, 60, 0.32));
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+    padding: 15px 26px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.btn-primary {
+    background: var(--sage);
+    color: var(--white);
+    box-shadow: 0 10px 26px rgba(96, 110, 82, 0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 42px rgba(96, 110, 82, 0.45);
+}
+
+.btn-ghost {
+    margin-left: 14px;
+    background: transparent;
+    border: 1px solid rgba(96, 110, 82, 0.35);
+    color: var(--olive);
+}
+
+.btn-ghost:hover {
+    background: rgba(96, 110, 82, 0.08);
+}
+
+/* =========================
+   HERO CTAs
+========================= */
+.hero-ctas {
+    display: flex;
     gap: 14px;
 }
 
-.btn {
-    padding: 12px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    border: none;
-    font-family: var(--body-font);
-    font-weight: 700;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    width: 150px;
-}
-
-/* Primary botanical button */
-.btn-primary {
-    background: linear-gradient(90deg, var(--sage), var(--olive));
-    color: var(--white);
-    box-shadow: 0 12px 32px rgba(96, 110, 82, 0.25);
-}
-.btn-primary:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 46px rgba(96, 110, 82, 0.28);
-}
-
-/* Neutral ghost outline */
-.btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border-soft);
-    color: var(--olive);
-}
-.btn-ghost:hover {
-    background: rgba(96,110,82,0.06);
-}
-
-
-/* Illustration */
-.hero-art img {
-    width: 100%;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-soft);
-}
-
-
-/* ============================================================
-   CONTENT SECTIONS
-   ============================================================ */
+/* =========================
+   MAIN CONTENT
+========================= */
 .about-main {
+    max-width: 1200px;
     width: 100%;
-    max-width: 1180px;
     display: grid;
-    gap: 28px;
+    gap: 40px;
 }
 
-/* Cards */
+/* =========================
+   CARD
+========================= */
 .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 30px;
-    border: 1px solid var(--border-soft);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: var(--radius-xl);
+    padding: 44px;
     box-shadow: var(--shadow-card);
-    display: flex;
-    gap: 24px;
-    transition: var(--transition);
+    transition: transform var(--transition), box-shadow var(--transition);
 }
+
 .card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(96,110,82,0.14);
+    box-shadow: 0 40px 100px rgba(60, 60, 60, 0.22);
 }
 
-/* STORY LAYOUT */
-.about-story .card-left {
-    flex: 1;
-}
-.about-story .card-right {
-    width: 260px;
+/* =========================
+   STATS
+========================= */
+.card-right.stats {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
+    gap: 32px;
+    padding: 48px 40px;
 }
 
-/* Stats */
 .stat {
-    background: rgba(96,110,82,0.08);
-    padding: 14px;
-    border-radius: 12px;
-    text-align: center;
+    position: relative;
+    padding-left: 16px;
 }
+
+.stat::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: rgba(96, 110, 82, 0.35);
+}
+
 .stat-num {
-    font-weight: 800;
-    color: var(--olive);
-    font-size: 1.25rem;
-}
-.stat-label {
-    color: var(--warm-gray);
-    font-weight: 600;
-}
-
-
-/* ============================================================
-   FOUNDERS
-   ============================================================ */
-.about-founders {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.founders-grid {
-    display: grid;
-    gap: 22px;
-}
-
-/* Lead Founder */
-.founder-feature {
-    background: var(--white);
-    padding: 22px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-soft);
-    display: flex;
-    gap: 18px;
-    box-shadow: var(--shadow-card);
-}
-
-/* Avatar */
-.avatar.large {
-    width: 90px;
-    height: 90px;
-    border-radius: 16px;
-    background: linear-gradient(90deg, var(--sage), var(--olive));
-    color: var(--white);
-    display: grid;
-    place-items: center;
-    font-size: 1.2rem;
-    font-weight: 800;
-    box-shadow: 0 16px 44px rgba(96,110,82,0.25);
-}
-
-/* Co-founders list */
-.cofounders {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.founder {
-    background: var(--white);
-    padding: 16px;
-    border-radius: 14px;
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-soft);
-    display: flex;
-    gap: 14px;
-}
-
-.avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 14px;
-    background: linear-gradient(90deg, var(--sage), var(--olive));
-    display: grid;
-    place-items: center;
-    color: white;
-    font-weight: 700;
-}
-
-/* Founder text */
-.founder-name {
-    font-weight: 800;
-    font-size: 1rem;
-    color: var(--olive);
-    font-family: var(--body-font);
-}
-.founder-role {
-    color: var(--warm-gray);
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-.founder-bio {
-    color: var(--dark-gray);
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-/* ------------------------------------------------------------ */
-
-.values-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: 12px;
-}
-.values-list li {
-    background: rgba(96,110,82,0.08);
-    padding: 14px;
-    border-radius: 12px;
-    font-weight: 700;
-    color: var(--olive);
-}
-
-
-/* ============================================================
-   CTA SECTION
-   ============================================================ */
-.about-cta {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.cta-row {
-    display: flex;
-    gap: 16px;
-}
-
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
-@media (max-width: 980px) {
-    .about-hero {
-        grid-template-columns: 1fr;
-    }
-    .hero-art {
-        display: none;
-    }
-    .card {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 520px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-    .avatar.large {
-        width: 75px;
-        height: 75px;
-    }
-    .avatar {
-        width: 54px;
-        height: 54px;
-    }
-}
-
-/* ============================================================
-   PLATFORM FEATURES (Mutual Reviews, Subscription, Agreements)
-   ============================================================ */
-
-.about-features {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-}
-
-.about-features > h2 {
-    font-family: var(--heading-font);
-    font-size: 2rem;
-    color: var(--olive);
-    margin: 0;
-}
-
-.about-features .muted {
-    font-family: var(--body-font);
-    font-size: 0.95rem;
-    color: var(--warm-gray);
-    max-width: 720px;
-}
-
-/* Grid */
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-}
-
-/* Individual Feature Card */
-.feature {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 22px;
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-card);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: var(--transition);
-}
-
-.feature:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 22px 64px rgba(96, 110, 82, 0.18);
-}
-
-/* Feature heading */
-.feature h3 {
     font-family: var(--heading-font);
     font-size: 1.4rem;
     color: var(--olive);
-    margin: 0;
 }
 
-/* Feature description */
-.feature p {
-    font-family: var(--body-font);
-    font-size: 0.95rem;
-    line-height: 1.55;
-    color: var(--dark-gray);
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--warm-gray);
 }
 
-/* Benefits list */
-.feature-benefits {
+/* =========================
+   VALUES
+========================= */
+.values-list {
     list-style: none;
-    padding: 0;
-    margin: 6px 0 0;
+    display: grid;
+    gap: 16px;
+}
+
+.values-list li {
+    padding: 20px 24px;
+    background: rgba(145, 165, 110, 0.14);
+    border-radius: var(--radius-md);
+    color: var(--olive);
+    font-weight: 600;
+}
+
+/* =========================
+   FEATURES
+========================= */
+.about-features {
+    padding: 56px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.feature {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
 }
 
-.feature-benefits li {
-    background: rgba(96, 110, 82, 0.08);
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-family: var(--body-font);
-    font-size: 0.9rem;
-    font-weight: 600;
+.feature h3 {
+    font-family: var(--heading-font);
+    font-size: 1.35rem;
     color: var(--olive);
-    line-height: 1.45;
 }
 
-.feature-benefits strong {
-    color: var(--olive);
-    font-weight: 800;
+/* =========================
+   CTA
+========================= */
+.about-cta-section {
+    text-align: center;
+    padding: 64px;
 }
 
-/* ============================================================
-   RESPONSIVE — FEATURES
-   ============================================================ */
+.cta-title {
+    font-family: var(--heading-font);
+    font-size: 2.3rem;
+}
 
-@media (max-width: 980px) {
-    .features-grid {
+.cta-description {
+    max-width: 640px;
+    margin: 0 auto 40px;
+    color: var(--warm-gray);
+}
+
+.cta-button {
+    padding: 16px 36px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--sage), var(--olive));
+    color: var(--white);
+    font-weight: 700;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+    .about-hero {
         grid-template-columns: 1fr;
+        gap: 28px;
     }
 
-    .feature h3 {
-        font-size: 1.3rem;
+    .hero-art {
+        display: none;
+    }
+
+    .card-right.stats {
+        display: none;
     }
 }
 
-@media (max-width: 520px) {
-    .about-features > h2 {
-        font-size: 1.7rem;
+@media (max-width: 768px) {
+    .hero-ctas {
+        flex-direction: column;
+        max-width: 360px;
     }
 
-    .feature {
-        padding: 18px;
+    .btn {
+        width: 100%;
+    }
+
+    .about-features {
+        padding: 32px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title-image {
+        max-width: 220px;
+    }
+}
+
+/* =========================
+   MOBILE / TABLET BRAND LINE
+========================= */
+
+
+/* Logo */
+
+
+.inline-brand-logo {
+    display: inline-block;
+    width: 56px; 
+    height: auto;
+
+    vertical-align: baseline;   /* KEY */
+    margin-right: 8px;
+
+    transform: translateY(2px); /* optical tuning */
+}
+
+
+/* Text */
+.mobile-brand-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--warm-gray);
+    margin: 0 0 20px 0;
+}
+
+/* Tablet refinement */
+@media (max-width: 900px) {
+    .inline-brand-logo {
+        width: 244px;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .inline-brand-logo {
+        width: 244px;
+        transform: translateY(1px);
+    }
+
+    .mobile-brand-text {
+        font-size: 0.95rem;
     }
 }

@@ -9,6 +9,7 @@ import {
   FaTimes,
   FaUserGraduate,
 } from "react-icons/fa";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,10 +47,17 @@ const Navbar = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/" className="nav-link">
-              <h1 className="logo">core2cover</h1>
+            <Link to="/" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+              </span>
             </Link>
           </div>
+
 
           {/* Center: Desktop Search */}
           <div className="nav-center">
