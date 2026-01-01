@@ -78,6 +78,7 @@
   }
 }
 
+
 /* ===============================
    CARDS
 =============================== */
@@ -336,4 +337,123 @@
 /* helpers */
 .muted {
   color: var(--warm-gray);
+}
+
+/* ---------------------------
+   Responsive tweaks
+   --------------------------- */
+
+/* reduce gaps & card padding on small devices */
+@media (max-width: 900px) {
+  .container {
+    padding: 20px 14px;
+  }
+
+  .checkout-card {
+    padding: 16px;
+  }
+}
+
+/* stack payment options vertically on narrow screens */
+@media (max-width: 700px) {
+  .payment-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .payment-option {
+    min-width: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px;
+  }
+
+  .payment-option img {
+    width: 44px;
+    height: 32px;
+  }
+}
+
+/* item card — move image above content on very small devices */
+@media (max-width: 640px) {
+  .checkout-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .checkout-item-img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .checkout-item-top {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .checkout-item-price {
+    margin-top: 2px;
+  }
+
+  .checkout-item-meta {
+    gap: 10px;
+  }
+
+  .checkout-quantity {
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .checkout-quantity input {
+    width: 72px;
+  }
+
+  .checkout-quantity button {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .checkout-item-subtotal {
+    width: 100%;
+    margin-top: 8px;
+    text-align: left;
+  }
+
+  /* keep summary card inline flow on small devices so it sits after left column */
+  .summary-card {
+    position: static;
+    top: auto;
+  }
+}
+
+/* very small devices — tighten typography */
+@media (max-width: 420px) {
+  .checkout-title {
+    font-size: 1.6rem;
+  }
+
+  .checkout-item-title {
+    font-size: 15px;
+  }
+
+  .payment-option span {
+    font-size: 13px;
+  }
+
+  .place-order-btn {
+    padding: 12px;
+    font-size: 15px;
+  }
+}
+
+/* small visual improvement for disabled/muted payment area on small screens */
+.payment-options.muted {
+  transition: opacity 200ms ease, transform 200ms ease;
+  transform-origin: top left;
 }

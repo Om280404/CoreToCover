@@ -390,7 +390,7 @@
     width: 100%;
     flex-direction: row;
     padding-bottom: 0;
-    height: 160px;
+    height: 175px;
     border-radius: 12px;
     position: relative;
     padding: 0;
@@ -459,7 +459,7 @@
 
   /* PRICE */
   .product-price {
-    margin: 0;
+    /* margin: 0; */
     padding-bottom: 0;
     font-size: 1rem;
     font-weight: 700;

@@ -255,9 +255,9 @@ export default function Checkout() {
         </section>
 
         <div className="checkout-grid">
-          <section className="checkout-left">
+          <section className="checkout-left" aria-labelledby="checkout-shipping">
             <div className="checkout-card">
-              <h2>Shipping & Contact</h2>
+              <h2 id="checkout-shipping">Shipping & Contact</h2>
 
               <label className="form-row">
                 <span>Full name</span>
@@ -266,6 +266,8 @@ export default function Checkout() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  inputMode="text"
+                  autoComplete="name"
                 />
               </label>
 
@@ -276,6 +278,8 @@ export default function Checkout() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  inputMode="email"
+                  autoComplete="email"
                 />
               </label>
 
@@ -286,6 +290,7 @@ export default function Checkout() {
                   onChange={(e) => setAddress(e.target.value)}
                   rows={3}
                   required
+                  autoComplete="street-address"
                 />
               </label>
             </div>
@@ -293,47 +298,38 @@ export default function Checkout() {
             <div className="checkout-card">
               <h2>Payment</h2>
 
-              <div className={`payment-options ${useCreditForFullAmount ? "muted" : ""}`} aria-hidden={useCreditForFullAmount}>
-                <button
-                  type="button"
-                  className={`payment-option ${paymentMethod === "gpay" ? "active" : ""}`}
-                  onClick={() => setPaymentMethod("gpay")}
-                >
-                  <img src={GooglePay} alt="Google Pay" />
-                  <span>Google Pay</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`payment-option ${paymentMethod === "phonepe" ? "active" : ""}`}
-                  onClick={() => setPaymentMethod("phonepe")}
-                >
-                  <img src={PhonePe} alt="PhonePe" />
-                  <span>PhonePe</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`payment-option ${paymentMethod === "paytm" ? "active" : ""}`}
-                  onClick={() => setPaymentMethod("paytm")}
-                >
-                  <img src={Paytm} alt="Paytm" />
-                  <span>Paytm</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`payment-option ${paymentMethod === "cod" ? "active" : ""}`}
-                  onClick={() => setPaymentMethod("cod")}
-                >
-                  <img src={COD} alt="Cash on Delivery" />
-                  <span>Cash on Delivery</span>
-                </button>
+              {/* treat payment options like a radio group for accessibility */}
+              <div
+                className={`payment-options ${useCreditForFullAmount ? "muted" : ""}`}
+                role="radiogroup"
+                aria-disabled={useCreditForFullAmount}
+                aria-hidden={useCreditForFullAmount}
+              >
+                {[
+                  { id: "gpay", label: "Google Pay", img: GooglePay },
+                  { id: "phonepe", label: "PhonePe", img: PhonePe },
+                  { id: "paytm", label: "Paytm", img: Paytm },
+                  { id: "cod", label: "Cash on Delivery", img: COD },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={paymentMethod === opt.id}
+                    aria-pressed={paymentMethod === opt.id}
+                    className={`payment-option ${paymentMethod === opt.id ? "active" : ""}`}
+                    onClick={() => setPaymentMethod(opt.id)}
+                  >
+                    <img src={opt.img} alt={opt.label} loading="lazy" />
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="checkout-card">
               <h2>Items</h2>
+
               {items.length === 0 ? (
                 <p className="muted">No items to checkout.</p>
               ) : (
@@ -349,25 +345,69 @@ export default function Checkout() {
                           : "/assets/images/sample.jpg"
                       }
                       alt={it.name || "item"}
+                      loading="lazy"
+                      width="240"
+                      height="180"
                     />
+
                     <div className="checkout-item-main">
                       <div className="checkout-item-top">
                         <div className="checkout-item-title">{it.name}</div>
-                        <div className="checkout-item-price">{formatINR(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0))}</div>
+                        <div className="checkout-item-price">
+                          {formatINR(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0))}
+                        </div>
                       </div>
 
                       <div className="checkout-item-meta">
                         <div>Seller: {it.supplier || it.supplierName || "—"}</div>
-                        <div>Shipping: {it.shippingChargeType === "free" ? "Free" : `₹${it.shippingCharge ?? 0}`}</div>
-                        <div>Installation: {it.installationAvailable === "yes" ? (it.installationCharge > 0 ? `₹${it.installationCharge}` : "Free") : "No"}</div>
+                        <div>
+                          Shipping: {it.shippingChargeType === "free" ? "Free" : `₹${it.shippingCharge ?? 0}`}
+                        </div>
+                        <div>
+                          Installation:{" "}
+                          {it.installationAvailable === "yes"
+                            ? it.installationCharge > 0
+                              ? `₹${it.installationCharge}`
+                              : "Free"
+                            : "No"}
+                        </div>
                       </div>
 
                       <div className="checkout-quantity">
-                        <button onClick={() => decrement(idx)} aria-label="Decrease quantity">−</button>
-                        <input type="number" min="1" value={it.quantity} onChange={(e) => updateQuantity(idx, e.target.value)} aria-label="Quantity" />
-                        <button onClick={() => increment(idx)} aria-label="Increase quantity">+</button>
+                        <button
+                          type="button"
+                          onClick={() => decrement(idx)}
+                          aria-label={`Decrease quantity for ${it.name || "item"}`}
+                        >
+                          −
+                        </button>
 
-                        <div className="checkout-item-subtotal">Subtotal: {formatINR(Number(it.amountPerTrip || it.pricePerTrip || it.price || 0) * Number(it.quantity || 1))}</div>
+                        <input
+                          type="number"
+                          min="1"
+                          value={it.quantity}
+                          onChange={(e) => {
+                            const val = Math.max(1, Number(e.target.value) || 1);
+                            updateQuantity(idx, val);
+                          }}
+                          aria-label={`Quantity for ${it.name || "item"}`}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => increment(idx)}
+                          aria-label={`Increase quantity for ${it.name || "item"}`}
+                        >
+                          +
+                        </button>
+
+                        <div className="checkout-item-subtotal">
+                          Subtotal:{" "}
+                          {formatINR(
+                            Number(it.amountPerTrip || it.pricePerTrip || it.price || 0) *
+                            Number(it.quantity || 1)
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -375,6 +415,7 @@ export default function Checkout() {
               )}
             </div>
           </section>
+
 
           <aside className="checkout-right" aria-label="Order summary">
             <div className="summary-card">

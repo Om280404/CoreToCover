@@ -194,7 +194,7 @@
   /* same logic as navbar */
   height: auto;
   /* keep original proportions */
-  max-height: 36px;
+  max-height: 75px;
   /* prevents footer from growing */
   object-fit: contain;
   display: block;

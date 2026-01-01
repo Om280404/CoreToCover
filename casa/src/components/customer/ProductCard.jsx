@@ -100,9 +100,10 @@ const ProductCard = ({
           </span>
         </div>
 
-        <p className="product-description">{description}</p>
 
         <div className="product-meta-row">
+        <p className="product-description">Description: {description}</p>
+
           <span className="product-meta">
             Seller: {typeof seller === "string" ? seller : seller?.name || "Not specified"}
           </span>
