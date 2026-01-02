@@ -7,6 +7,7 @@ import {
   sendDesignerOtp,
   verifyDesignerOtp,
 } from "../../api/designer";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png";
 
 const DesignerSignup = () => {
   const navigate = useNavigate();
@@ -146,7 +147,11 @@ const DesignerSignup = () => {
   return (
     <div className="designer-signup-page">
       <div className="ds-auth-box">
-        <h1 className="ds-logo">Casa Designers</h1>
+        <img
+          src={CoreToCoverLogo}
+          alt="CoreToCover"
+          className="brand-logo"
+        />
         <p className="ds-sub">Join as a Designer</p>
 
         {error && <p className="ds-error" role="alert">{error}</p>}

@@ -4,6 +4,8 @@ import "./SellerLogin.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { sellerLogin } from "../../api/sellerAuth";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
+
 
 
 const SellerLogin = () => {
@@ -44,7 +46,11 @@ const SellerLogin = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2 className="brand-heading">Casa</h2>
+        <img
+          src={CoreToCoverLogo}
+          alt="CoreToCover"
+          className="brand-logo"
+        />
         <h4>Welcome back, Seller</h4>
         <p className="subtitle">Log in to manage your store</p>
 

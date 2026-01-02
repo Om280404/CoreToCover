@@ -16,11 +16,13 @@ import Raw2 from "../../assets/images/Raw2.png";
 import Raw3 from "../../assets/images/Raw3.png";
 import Designer1 from "../../assets/images/Designer1.png";
 import Designer2 from "../../assets/images/Designer2.png";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
 import Footer from "./Footer";
 
 // SLIDESHOW CARD
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 const Card = ({ images, title, onClick }) => {
+
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
 
@@ -68,6 +70,7 @@ const Home = () => {
                   alt="CoreToCover"
                   className="nav-logo"
                 />
+                <Brand>Core2Cover</Brand>
               </span>
             </Link>
           </div>

@@ -1,3 +1,4 @@
+// src/components/Navbar/Navbar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css";
@@ -9,9 +10,11 @@ import {
   FaTimes,
   FaUserGraduate,
 } from "react-icons/fa";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
 
 const Navbar = () => {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -54,15 +57,16 @@ const Navbar = () => {
                   alt="CoreToCover"
                   className="nav-logo"
                 />
+                <Brand>Core2Cover</Brand>
               </span>
             </Link>
           </div>
 
-
           {/* Center: Desktop Search */}
           <div className="nav-center">
-            <form onSubmit={handleSearch} className="search-bar">
+            <form onSubmit={handleSearch} className="search_form">
               <input
+                className="search_input"
                 type="text"
                 placeholder={`Search ${currentPageTitle}...`}
                 value={searchQuery}
@@ -70,10 +74,10 @@ const Navbar = () => {
               />
               <button
                 type="submit"
-                className="search-btn"
+                className="search_button"
                 disabled={!searchQuery.trim()}
               >
-                <FaSearch className="search-icon" />
+                <FaSearch className="search-ico" />
               </button>
             </form>
           </div>
@@ -121,9 +125,10 @@ const Navbar = () => {
 
       {/* Mobile Search */}
       <div className="search-container">
-        <form onSubmit={handleSearch} className="search-bar">
-          <FaSearch className="search-icon" />
+        <form onSubmit={handleSearch} className="search_form mobile">
+          <FaSearch className="search-ico" />
           <input
+            className="search_input"
             type="text"
             placeholder="Search products..."
             value={searchQuery}
@@ -131,7 +136,7 @@ const Navbar = () => {
           />
           <button
             type="submit"
-            className="search-btn"
+            className="search_button"
             disabled={!searchQuery.trim()}
           >
             <FaSearch />

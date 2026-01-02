@@ -7,6 +7,7 @@ import {
   verifyCustomerOtp,
 } from "../../api/auth";
 import "./Signup.css";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -140,8 +141,12 @@ export default function Signup() {
 
   return (
     <div className="signup-page">
-      <div className="signup-box">
-        <h1 className="brand-heading">Casa</h1>
+      <div className="signup-box login-box">
+        <img
+          src={CoreToCoverLogo}
+          alt="CoreToCover"
+          className="brand-logo"
+        />
         <h2 className="signup-title">Create Customer Account</h2>
 
         <form className="signup-form" onSubmit={handleSignup}>

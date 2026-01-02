@@ -321,3 +321,13 @@
 .ds-toggle-visibility:active {
   transform: translateY(-50%) scale(0.95);
 }
+
+/* =========================
+   BRAND LOGO
+========================= */
+.brand-logo {
+  width: 260px;              /* balanced for signup card */
+  margin: 0 auto 18px;       /* center horizontally */
+  display: block;
+  opacity: 0.95;
+}

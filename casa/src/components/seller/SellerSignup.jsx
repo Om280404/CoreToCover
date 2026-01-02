@@ -7,8 +7,13 @@ import {
   sellerSignup,
 } from "../../api/auth";
 import "./SellerSignup.css";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
+
+
 
 const SellerSignup = () => {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -117,9 +122,13 @@ const SellerSignup = () => {
   return (
     <div className="signup-container">
       <div className="signup-card">
-        <h1 className="brand-heading">Casa</h1>
+        <img
+          src={CoreToCoverLogo}
+          alt="CoreToCover"
+          className="brand-logo"
+        />
         <h2>Create Seller Account</h2>
-        <p className="subtitle">Start selling on Casa</p>
+        <p className="subtitle">Start selling on <Brand>Core2Cover</Brand></p>
 
         <form onSubmit={handleSubmit}>
           {/* Full Name */}

@@ -50,11 +50,11 @@ export default function About() {
               /* DESKTOP: keep original H1 + paragraph */
               <>
                 <h1 className="hero-title">
-                  <Brand>CoreToCover</Brand> — a premium marketplace for home interiors & materials
+                  <Brand>Core2Cover</Brand> — a premium marketplace for home interiors & materials
                 </h1>
 
                 <p className="hero-sub">
-                  <Brand>CoreToCover</Brand> is a unified platform where customers can discover
+                  <Brand>Core2Cover</Brand> is a unified platform where customers can discover
                   curated interior products, source high-quality raw materials, and
                   directly collaborate with skilled freelance interior designers —
                   all in one place.
@@ -99,7 +99,7 @@ export default function About() {
             <h2>Our vision</h2>
 
             <p>
-              <Brand>CoreToCover</Brand> was built to simplify how people plan,
+              <Brand>Core2Cover</Brand> was built to simplify how people plan,
               purchase, and execute home interior projects. Instead of navigating
               fragmented offline markets, customers get access to finished
               interior products and essential raw materials — seamlessly, on one
@@ -107,7 +107,7 @@ export default function About() {
             </p>
 
             <p>
-              Beyond commerce, <Brand>CoreToCover</Brand> enables direct
+              Beyond commerce, <Brand>Core2Cover</Brand> enables direct
               collaboration between customers and verified freelance interior
               designers, supporting transparent communication, customization,
               and professional project execution.
@@ -137,24 +137,25 @@ export default function About() {
           <div className="founders-hero">
             <h2>Leadership</h2>
             <p className="muted">
-              A focused team building a modular, trust-driven ecosystem for the
-              future of home interiors.
+              A focused team building a trust-driven ecosystem for home interiors.
             </p>
           </div>
 
           <div className="founders-grid">
+            {/* FOUNDER */}
             <div className="founder-feature">
               <div className="founder-info">
                 <div className="founder-name">Om Karande</div>
-                <div className="founder-role">Founder & Product Lead</div>
+                <div className="founder-role">Founder & CEO</div>
                 <div className="founder-bio">
                   Om leads the vision, product strategy, and frontend experience,
-                  shaping <Brand>CoreToCover</Brand> as a modern, design-forward
-                  platform for interiors and materials.
+                  shaping <Brand>Core2Cover</Brand> as a premium design-forward
+                  platform.
                 </div>
               </div>
             </div>
 
+            {/* CO-FOUNDERS */}
             <div className="cofounders">
               <h3 className="cofounders-title">Co-founders</h3>
 
@@ -162,10 +163,10 @@ export default function About() {
                 <div className="founder">
                   <div className="founder-info">
                     <div className="founder-name">Atharv Khot</div>
-                    <div className="founder-role">Backend Engineer</div>
+                    <div className="founder-role">Co-Founder & CTO</div>
                     <div className="founder-bio">
-                      Atharv designs scalable backend systems and APIs powering
-                      <Brand>CoreToCover</Brand>’s marketplace.
+                      Atharv architects scalable backend systems and APIs
+                      powering <Brand>Core2Cover</Brand>.
                     </div>
                   </div>
                 </div>
@@ -173,10 +174,10 @@ export default function About() {
                 <div className="founder">
                   <div className="founder-info">
                     <div className="founder-name">Soham Phatak</div>
-                    <div className="founder-role">Backend Engineer</div>
+                    <div className="founder-role">Co-Founder & VP</div>
                     <div className="founder-bio">
-                      Soham focuses on performance, authentication, and
-                      reliability to ensure secure platform operations.
+                      Soham oversees platform performance, reliability, and
+                      technical strategy.
                     </div>
                   </div>
                 </div>
@@ -204,12 +205,12 @@ export default function About() {
         ========================= */}
         <section className="about-cta-section card">
           <h2 className="cta-title">
-            Build your space with <Brand>CoreToCover</Brand>
+            Build your space with <Brand>Core2Cover</Brand>
           </h2>
 
           <p className="cta-description">
-            Explore interior products, source raw materials, or collaborate with
-            trusted designers — all from one premium platform.
+            Explore products, source materials, or collaborate with designers —
+            all from one platform.
           </p>
 
           <div className="cta-actions">
@@ -220,8 +221,11 @@ export default function About() {
 
           <div className="cta-credits">
             <p className="credits-title">Credits</p>
-            <p>Founder & Frontend — Om Karande</p>
-            <p>Backend Engineers — Atharv Khot, Soham Phatak</p>
+            <p>Founder & CEO — Om Karande</p>
+            <p>Co-Founder & CTO — Atharv Khot</p>
+            <p>Co-Founder & VP — Soham Phatak</p>
+            <p>Design & Marketing Head — Prathamesh Mali</p>
+            <p>CFO — Om Mali</p>
           </div>
         </section>
       </main>

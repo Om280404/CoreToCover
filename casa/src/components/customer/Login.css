@@ -1,13 +1,6 @@
-/* =========================================
-   CASA — USER LOGIN
-   Theme: Soft Green / Premium
-========================================= */
-
 :root {
   --green-dark: #606e52;
   --green-mid: #91a56e;
-  --green-light: #c0cca4;
-
   --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
   --card-bg: #ffffff;
 
@@ -18,213 +11,205 @@
   --shadow: 0 22px 60px rgba(96, 110, 82, 0.22);
 
   --radius: 14px;
-  --ease: 220ms cubic-bezier(.2,.9,.3,1);
+  --ease: 220ms cubic-bezier(.2, .9, .3, 1);
 
   font-family: "Helvetica", Arial, sans-serif;
+  box-sizing: border-box;
 }
 
-/* =========================================
-   PAGE WRAPPER
-========================================= */
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* PAGE */
 .login-page {
   min-height: 100vh;
   background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
-  box-sizing: border-box;
+  padding: 24px;
 }
 
-/* =========================================
-   LOGIN CARD
-========================================= */
+/* CARD */
 .login-box {
   width: 100%;
   max-width: 420px;
   background: var(--card-bg);
+  padding: 32px 28px;
   border-radius: var(--radius);
-  padding: 30px 26px;
-  box-shadow: var(--shadow);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* BRAND */
+.brand-heading {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--green-dark);
+  margin: 0;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin: 6px 0 20px;
+  font-weight: 600;
+}
+
+/* FORM */
+form {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-/* =========================================
-   BRAND
-========================================= */
-.brand-heading {
-  font-size: 1.9rem;
-  font-weight: 900;
-  color: var(--green-dark);
-  text-align: center;
-  margin-bottom: 4px;
-}
-
-/* =========================================
-   HEADINGS
-========================================= */
-.login-box h2 {
-  text-align: center;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-}
-
-/* =========================================
-   FORM
-========================================= */
-.login-box form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Labels */
-.login-box label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-/* Inputs */
-.login-box input {
-  height: 44px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #fff;
-  font-weight: 600;
-  color: var(--text-dark);
-  outline: none;
-  transition: border-color var(--ease),
-              box-shadow var(--ease),
-              transform var(--ease);
-}
-
-.login-box input::placeholder {
-  color: rgba(71, 71, 71, 0.45);
-}
-
-.login-box input:focus {
-  border-color: var(--green-mid);
-  box-shadow: 0 10px 30px rgba(145, 165, 110, 0.35);
-  transform: translateY(-2px);
-}
-
-/* =========================================
-   PASSWORD FIELD
-========================================= */
-.password-wrap {
-  position: relative;
+/* FIELD */
+.field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.password-wrap input {
-  padding-right: 44px;
+label {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
-.password-wrap button {
+input {
+  height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+input::placeholder {
+  color: rgba(71, 71, 71, 0.45);
+}
+
+input:focus {
+  border-color: var(--green-mid);
+  box-shadow: 0 10px 30px rgba(145, 165, 110, 0.25);
+}
+
+/* PASSWORD */
+.password_wrap {
+    position: relative;
+    display: block;
+    align-items: center;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 44px;
+  width: 100%;
+}
+
+.password-input button {
   position: absolute;
   right: 8px;
-  bottom: 8px;
-  background: transparent;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
   border: none;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 1rem;
   padding: 6px;
   border-radius: 8px;
-  transition: color var(--ease), background var(--ease);
 }
 
-.password-wrap button:hover {
+.password-input button:hover {
   color: var(--green-dark);
   background: rgba(145, 165, 110, 0.12);
 }
 
-/* =========================================
-   SUBMIT BUTTON
-========================================= */
-.login-box button[type="submit"] {
+/* BUTTON */
+button[type="submit"] {
   margin-top: 10px;
   height: 48px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(
-    90deg,
-    var(--green-dark),
-    var(--green-mid)
-  );
-  color: #ffffff;
+  background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
+  color: #fff;
   font-weight: 800;
-  font-size: 1rem;
   cursor: pointer;
   box-shadow: 0 14px 40px rgba(96, 110, 82, 0.35);
   transition: transform var(--ease), box-shadow var(--ease);
 }
 
-.login-box button[type="submit"]:hover {
+button[type="submit"]:hover {
   transform: translateY(-3px);
   box-shadow: 0 22px 60px rgba(96, 110, 82, 0.45);
 }
 
-/* =========================================
-   LINKS
-========================================= */
-.login-box p {
+button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ERROR */
+.form-error {
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.2);
+  color: #c0392b;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* LINKS */
+.helper-text {
   text-align: center;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-muted);
-  margin-top: 8px;
 }
 
-.login-box p a {
+.helper-text a {
   color: var(--green-dark);
   font-weight: 800;
   text-decoration: none;
 }
 
-.login-box p a:hover {
+.helper-text a:hover {
   text-decoration: underline;
 }
 
-/* =========================================
-   RESPONSIVE
-========================================= */
-@media (max-width: 480px) {
-  .login-box {
-    padding: 24px 18px;
-  }
-
-  .brand-heading {
-    font-size: 1.65rem;
-  }
-
-  .login-box h2 {
-    font-size: 1.2rem;
-  }
+.brand-logo {
+  width: 180px;
+  margin-bottom: 20px;
+  display: block;
 }
 
-/* =========================================
-   ACCESSIBILITY
-========================================= */
-.login-box :focus-visible {
-  outline: 3px solid rgba(145, 165, 110, 0.45);
-  outline-offset: 4px;
+.login-box h2,
+.login-box form {
+  width: 100%;
 }
 
-/* =========================================
-   REDUCED MOTION
-========================================= */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

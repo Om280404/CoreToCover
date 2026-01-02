@@ -3,6 +3,8 @@ import "./SellerKYC.css";
 import { useNavigate } from "react-router-dom";
 
 const SellerKYC = () => {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -114,7 +116,7 @@ const SellerKYC = () => {
         <h1 className="seller-kyc-title">Seller Verification</h1>
 
         <p className="seller-kyc-subtitle">
-          Verify your identity to maintain trust on Casa
+          Verify your identity to maintain trust on <Brand>Core2Cover</Brand>
         </p>
 
         {/* Aadhaar */}
