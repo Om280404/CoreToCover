@@ -1,9 +1,11 @@
 import React from 'react'
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
 import "./Footer.css";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover.png";
 
 export default function Footer() {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
   return (
     <footer className="footer">
       <div className="footer-container">
