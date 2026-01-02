@@ -18,8 +18,9 @@ import {
   getDesignerBasic,
   updateDesignerAvailability,
 } from "../../api/designer";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
 
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 
 const renderStarsInline = (avg, size = 14) => {
   if (avg == null || Number.isNaN(avg)) {
@@ -116,6 +117,7 @@ const DesignerDashboard = () => {
                   alt="CoreToCover"
                   className="nav-logo"
                 />
+                <Brand>Core2Cover</Brand>
               </span>
             </Link>
           </div>

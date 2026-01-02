@@ -329,3 +329,33 @@
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+
+@media (max-width: 900px) {
+  .nav-logo {
+    width: 48px;
+  }
+
+  .brand {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand {
+    display: none;
+  }
+
+  .nav-logo {
+    width: 46px;
+  }
+
+  .nav-logo-wrap {
+    gap: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-logo {
+    width: 42px;
+  }
+}

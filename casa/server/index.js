@@ -2502,11 +2502,14 @@ app.post("/designer/verify-otp", async (req, res) => {
 ============================ */
 app.post("/designer/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
     }
+
+    // ✅ FIX: normalize email
+    email = email.trim().toLowerCase();
 
     const designer = await prisma.designer.findUnique({
       where: { email },
@@ -2536,6 +2539,7 @@ app.post("/designer/login", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 /* ============================
@@ -3186,13 +3190,10 @@ app.post("/designer/:id/hire", async (req, res) => {
       location,
       budget,
       workType,
-      timelineDays,
+      timelineDate,
       description,
     } = req.body;
 
-    /* ---------------------------
-       BASIC VALIDATION
-    --------------------------- */
     if (!userId) {
       return res.status(401).json({ message: "Login required" });
     }
@@ -3201,20 +3202,20 @@ app.post("/designer/:id/hire", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    /* ---------------------------
-       CREATE HIRE REQUEST
-    --------------------------- */
     const hire = await prisma.designerHireRequest.create({
       data: {
-        userId: Number(userId),       // ✅ FIXED
+        userId: Number(userId),
         designerId,
         fullName,
         email,
         mobile,
         location,
-        budget: Number(budget),       // ✅ SAFE CAST
+        budget: Number(budget),
         workType,
-        timelineDays: timelineDays ? Number(timelineDays) : null,
+
+        // ✅ CORRECT FIELD
+        timelineDate: timelineDate ? new Date(timelineDate) : null,
+
         description: description || null,
       },
     });
@@ -3224,10 +3225,11 @@ app.post("/designer/:id/hire", async (req, res) => {
     console.error("HIRE ERROR:", err);
     res.status(500).json({
       message: "Failed to hire designer",
-      error: err.message, // ✅ helps debugging
+      error: err.message,
     });
   }
 });
+
 
 
 
@@ -3297,7 +3299,7 @@ app.get("/designer/:id/work-requests", async (req, res) => {
         type: r.workType,
         budget: r.budget,
         location: r.location,
-        timeline: r.timelineDays ? `${r.timelineDays} Days` : "Not specified",
+        timelineDate: r.timelineDate,
         status: r.status,
         message: r.description,
 

@@ -6,9 +6,9 @@ import {
   getDesignerEditProfile,
   updateDesignerEditProfile,
 } from "../../api/designer";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
 
-
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 const DesignerEditProfile = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -130,7 +130,7 @@ const DesignerEditProfile = () => {
                   src={CoreToCoverLogo}
                   alt="CoreToCover"
                   className="nav-logo"
-                />
+                /><Brand>Core2Cover</Brand>
               </span>
             </Link>
           </div>

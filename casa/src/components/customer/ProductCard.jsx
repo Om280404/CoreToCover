@@ -70,7 +70,7 @@ const ProductCard = ({
       });
   }, [id]);
 
-  /* ✅ IMAGE FIX (does not change existing data) */
+  /* IMAGE FIX */
   const coverImage =
     images.length
       ? images[0].startsWith("http")

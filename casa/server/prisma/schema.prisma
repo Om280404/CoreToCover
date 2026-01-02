@@ -327,7 +327,7 @@ model DesignerHireRequest {
 
   budget       Int
   workType     String
-  timelineDays Int?
+  timelineDate DateTime?
   description  String?
   status       String  @default("pending")
 

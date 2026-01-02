@@ -8,9 +8,9 @@ import {
   FaTrashAlt,
   FaSave,
 } from "react-icons/fa";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_1.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
 
-
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 const DesignerExperience = () => {
   const [works, setWorks] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -152,7 +152,7 @@ const DesignerExperience = () => {
                   src={CoreToCoverLogo}
                   alt="CoreToCover"
                   className="nav-logo"
-                />
+                /><Brand>Core2Cover</Brand>
               </span>
             </Link>
           </div>

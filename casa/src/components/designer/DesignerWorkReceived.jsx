@@ -12,8 +12,11 @@ import {
   FaStar,
 } from "react-icons/fa";
 import { LuMapPin } from "react-icons/lu";
-import { getDesignerWorkRequests, rateUser, getClientRatings } from "../../api/designer"; // ensure getClientRatings exists
+import { getDesignerWorkRequests, rateUser, getClientRatings } from "../../api/designer";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
 
+
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 const DesignerWorkReceived = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [jobs, setJobs] = useState([]);
@@ -146,11 +149,24 @@ const DesignerWorkReceived = () => {
 
   const formatDate = (iso) => {
     try {
-      return new Date(iso).toLocaleString();
+      return new Date(iso).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
     } catch {
       return iso;
     }
   };
+
+  const daysRemaining = (iso) => {
+    if (!iso) return null;
+    const today = new Date();
+    const target = new Date(iso);
+    const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
+
 
   return (
     <>
@@ -158,8 +174,15 @@ const DesignerWorkReceived = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/designerdashboard" className="nav-link">
-              <h1 className="logo">CASA</h1>
+            <Link to="/designerdashboard" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+                <Brand>Core2Cover</Brand>
+              </span>
             </Link>
           </div>
 
@@ -234,7 +257,7 @@ const DesignerWorkReceived = () => {
         <div className="c2c-dwrx-header c2c-anim-reveal">
           <h1 className="c2c-dwrx-title">Work Requests</h1>
           <p className="c2c-dwrx-sub">
-            Premium client leads curated exclusively for you as a CASA Designer.
+            Premium client leads curated exclusively for you as a <Brand>Core2Cover</Brand> Designer.
           </p>
         </div>
 
@@ -269,9 +292,26 @@ const DesignerWorkReceived = () => {
                 </div>
 
                 <div className="c2c-dwrx-field">
-                  <label>Estimated Timeline</label>
-                  <p><FaCalendarAlt /> {job.timeline}</p>
+                  <label>Target Completion Date</label>
+
+                  {job.timelineDate ? (
+                    <p>
+                      <FaCalendarAlt /> {formatDate(job.timelineDate)}
+                      {daysRemaining(job.timelineDate) !== null && (
+                        <span style={{ marginLeft: 8, color: "#6b7280", fontSize: 13 }}>
+                          (
+                          {daysRemaining(job.timelineDate) >= 0
+                            ? `${daysRemaining(job.timelineDate)} days remaining`
+                            : "Past deadline"}
+                          )
+                        </span>
+                      )}
+                    </p>
+                  ) : (
+                    <p style={{ color: "#9ca3af" }}>No deadline specified</p>
+                  )}
                 </div>
+
 
                 <div className="c2c-dwrx-field">
                   <label>Client Message</label>

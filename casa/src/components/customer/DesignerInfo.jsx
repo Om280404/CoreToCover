@@ -86,7 +86,7 @@ const DesignerInfo = () => {
     location: "",
     budget: "",
     workType: "",
-    timelineDays: "",
+    timelineDate: "",
     description: "",
   });
 
@@ -178,7 +178,7 @@ const DesignerInfo = () => {
         location: hireForm.location,
         budget: Number(hireForm.budget),
         workType: hireForm.workType,
-        timelineDays: hireForm.timelineDays || null,
+        timelineDate: hireForm.timelineDate || null,
         description: hireForm.description || null,
       });
 
@@ -486,9 +486,16 @@ const DesignerInfo = () => {
                 </label>
 
                 <label>
-                  Timeline (days)
-                  <input type="number" name="timelineDays" value={hireForm.timelineDays} onChange={handleHireChange} />
+                  Target Completion Date
+                  <input
+                    type="date"
+                    name="timelineDate"
+                    value={hireForm.timelineDate}
+                    onChange={handleHireChange}
+                    required
+                  />
                 </label>
+
 
                 <label className="desc">
                   Project Description
