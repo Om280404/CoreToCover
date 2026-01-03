@@ -2252,6 +2252,46 @@ app.post("/api/returns/:id/approve", async (req, res) => {
   }
 });
 
+// ===============================
+// ADMIN MARK REFUND COMPLETED
+// ===============================
+app.post("/api/returns/:id/admin/refund-complete", async (req, res) => {
+  try {
+    const returnId = Number(req.params.id);
+
+    const rr = await prisma.returnRequest.findUnique({
+      where: { id: returnId },
+    });
+
+    if (!rr) {
+      return res.status(404).json({ message: "Return not found" });
+    }
+
+    if (rr.adminApprovalStatus !== "APPROVED") {
+      return res.status(400).json({
+        message: "Return not approved by admin yet",
+      });
+    }
+
+    if (rr.refundStatus === "COMPLETED") {
+      return res.status(400).json({
+        message: "Refund already completed",
+      });
+    }
+
+    await prisma.returnRequest.update({
+      where: { id: returnId },
+      data: {
+        refundStatus: "COMPLETED",
+      },
+    });
+
+    res.json({ message: "Refund completed successfully" });
+  } catch (err) {
+    console.error("REFUND COMPLETE ERROR:", err);
+    res.status(500).json({ message: "Failed to complete refund" });
+  }
+});
 
 
 

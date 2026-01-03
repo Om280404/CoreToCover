@@ -659,3 +659,9 @@
     color: #c2410c;
     border: 1px solid #fdba74;
 }
+
+.status-refund-completed {
+  background: #dcfce7;
+  color: #047857;
+  font-weight: 600;
+}

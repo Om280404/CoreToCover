@@ -90,13 +90,21 @@ const getFinalOrderStatus = (orderStatus, returnInfo) => {
       };
 
     case "APPROVED":
+      if (returnInfo.refundStatus === "COMPLETED") {
+        return {
+          text: "Refund Completed",
+          className: "status-refund-completed",
+        };
+      }
+
       return {
         text:
           returnInfo.refundMethod === "STORE_CREDIT"
             ? "Returned (Store Credit)"
-            : "Returned (Refund Processing)",
+            : "Refund Processing",
         className: "status-returned",
       };
+
 
     case "REJECTED":
       return {
