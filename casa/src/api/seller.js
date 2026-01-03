@@ -33,8 +33,8 @@ export const getSellerBusinessDetails = (sellerId) => {
 /* =========================
    UPDATE SELLER BUSINESS DETAILS
 ========================= */
-export const updateSellerBusinessDetails = (sellerId, payload) => {
-  return api.put(`/seller/${sellerId}/business-details`, payload);
+export const updateSellerBusinessDetails = (sellerId, data) => {
+  return api.put(`/seller/${sellerId}/business-details`, data);
 };
 
 /* =========================

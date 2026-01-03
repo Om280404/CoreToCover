@@ -26,8 +26,12 @@ const EditBusinessDetails = () => {
             .then((res) => {
                 setBusiness(res.data);
             })
-            .catch(() => {
-                alert("Failed to load business details");
+            .catch((err) => {
+                if (err.response?.status === 404) {
+                    navigate("/editbusinessdetails");
+                } else {
+                    alert("Failed to load business details");
+                }
             })
             .finally(() => setLoading(false));
     }, [sellerId, navigate]);
@@ -57,7 +61,7 @@ const EditBusinessDetails = () => {
 
     return (
         <div className="sma-root">
-            <Sidebar/>
+            <Sidebar />
             <div className="business_container">
                 <div className="business-card">
                     <h2>Edit Business Details</h2>
