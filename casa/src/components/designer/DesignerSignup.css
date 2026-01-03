@@ -1,0 +1,209 @@
+:root {
+  --green-dark: #606e52;
+  --green: #91a56e;
+  --green-light: #c0cca4;
+  --text-dark: #474747;
+  --muted: #8f8b84;
+  --bg: #f4f6f2;
+  --white: #ffffff;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --ease: 240ms cubic-bezier(.2,.9,.3,1);
+  --font-ui: "Helvetica", "Poppins", sans-serif;
+}
+
+/* ===================================================
+   PAGE WRAPPER (THIS SCOPES EVERYTHING!)
+=================================================== */
+.designer-auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+  padding: 30px;
+  font-family: var(--font-ui);
+}
+
+/* ===================================================
+   AUTH BOX
+=================================================== */
+.designer-auth-page .auth-box {
+  width: 100%;
+  max-width: 760px;      /* ⬆ Wider so form is 2-column */
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 40px 38px;
+  box-shadow: var(--shadow);
+}
+
+/* Logo + Subtitle */
+.designer-auth-page .auth-logo {
+  text-align: center;
+  font-weight: 800;
+  font-size: 2rem;
+  color: var(--green-dark);
+}
+
+.designer-auth-page .auth-sub {
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.designer-auth-page .designer-note {
+  margin: 14px 0 22px;
+  background: var(--green-light);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+/* ===================================================
+   FORM — NOW 2 COLUMNS
+=================================================== */
+.designer-auth-page .auth-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* ⬅ TWO COLUMNS */
+  gap: 20px 26px;
+}
+
+/* Full-width fields */
+.designer-auth-page .auth-form .full {
+  grid-column: span 2;
+}
+
+/* Fields */
+.designer-auth-page .field label {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.designer-auth-page .field input {
+  width: 95%;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--green-light);
+  background: #f9faf8;
+  outline: none;
+  transition: var(--ease);
+}
+
+.designer-auth-page .field input:focus {
+  border-color: var(--green-dark);
+  box-shadow: 0 0 0 2px rgba(96,110,82,0.25);
+}
+
+/* ===================================================
+   PASSWORD FIELDS
+=================================================== */
+.designer-auth-page .password-wrap {
+  position: relative;
+}
+
+.designer-auth-page .toggle-visibility {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--green-dark);
+  cursor: pointer;
+}
+
+/* ===================================================
+   PROFILE IMAGE UPLOAD
+=================================================== */
+.designer-auth-page .profile-upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.designer-auth-page .profile-preview,
+.designer-auth-page .profile-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.designer-auth-page .profile-preview {
+  border: 2px solid var(--green-light);
+}
+
+.designer-auth-page .profile-placeholder {
+  background: #e8eedf;
+  color: var(--green-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+}
+
+.designer-auth-page .profile-input {
+  margin-top: 6px;
+}
+
+.designer-auth-page .disabled-field {
+  background: #f1f5f1;
+  border: 1px solid #dcdcdc;
+  color: #8f8b84;
+}
+
+/* ===================================================
+   BUTTON
+=================================================== */
+.designer-auth-page .auth-btn {
+  grid-column: span 2;       /* BUTTON FULL WIDTH */
+  padding: 14px;
+  background: linear-gradient(90deg, var(--green-dark), var(--green));
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--ease);
+  margin-top: 10px;
+}
+
+.designer-auth-page .auth-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(96, 110, 82, 0.25);
+}
+
+/* Footer */
+.designer-auth-page .auth-footer {
+  grid-column: span 2;
+  text-align: center;
+  margin-top: 18px;
+  color: var(--muted);
+}
+
+.designer-auth-page .auth-link {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+/* ===================================================
+   MOBILE RESPONSIVE
+=================================================== */
+@media (max-width: 760px) {
+  .designer-auth-page .auth-box {
+    max-width: 100%;
+    padding: 30px 24px;
+  }
+
+  .designer-auth-page .auth-form {
+    display: flex;
+  }
+
+  .designer-auth-page .auth-btn,
+  .designer-auth-page .auth-footer {
+    grid-column: span 1;
+  }
+}

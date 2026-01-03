@@ -1,0 +1,122 @@
+:root {
+  --green-dark: #606E52;
+  --green-mid: #91A56E;
+  --green-light: #C0CCA4;
+  --text-dark: #474747;
+  --text-muted: #8F8B84;
+  --white: #ffffff;
+  --bg: #f7f8f3;
+  --radius: 18px;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.07);
+  --transition: 0.25s ease;
+}
+
+/* PAGE */
+.designer-dashboard {
+  padding: 40px 5vw;
+  background: linear-gradient(180deg, #fafcf7, #f0f2ea);
+  min-height: 100vh;
+  font-family: "Helvetica", sans-serif;
+}
+
+/* HEADER */
+.dash-header {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.dash-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin: 0;
+  font-family: "Big Caslon", serif;
+}
+
+.dash-sub {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* GRID */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  margin-top: 20px;
+}
+
+/* CARD */
+.dash-card {
+  background: var(--white);
+  padding: 26px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  border: 1px solid rgba(96, 110, 82, 0.12);
+}
+
+.dash-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.dash-icon {
+  font-size: 1.8rem;
+  color: var(--green-dark);
+  margin-bottom: 14px;
+}
+
+.dash-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.dash-card p {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* ANIMATIONS */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.6s ease-out;
+}
+
+.reveal.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+
+
+/* TOGGLE BUTTON */
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.toggle-icon {
+  font-size: 34px;
+}
+
+.on {
+  color: var(--green-dark);
+}
+
+.off {
+  color: var(--muted);
+}

@@ -1,0 +1,76 @@
+:root {
+  /* === Botanical Color Palette === */
+  --olive-dark: #474747;
+  --warm-gray: #8F8B84;
+  --olive: #606E52;
+  --sage: #91A56E;
+  --sage-light: #C0CCA4;
+  --white: #FFFFFF;
+
+  /* === Typography (as in the image) === */
+  --font-ui: "Helvetica", sans-serif;
+  --font-heading: "Big Caslon", serif;
+
+  /* === Font Sizes === */
+  --h1: 38px;        /* Big Caslon */
+  --h2: 28px;
+  --ui-bold: 22px;   /* Helvetica Bold */
+  --ui-regular: 17px;
+  --ui-light: 13px;
+
+  /* === UI Radiuses === */
+  --radius: 14px;
+
+  /* === Shadows === */
+  --shadow-soft: 0 12px 34px rgba(96, 110, 82, 0.18);
+  --shadow-light: 0 6px 18px rgba(0, 0, 0, 0.08);
+
+  /* === Backgrounds === */
+  --bg-texture: #F5F5EF; /* soft wallpaper-style beige */
+  --bg-card: #FFFFFF;
+
+  /* === Buttons === */
+  --btn-main: var(--olive);
+  --btn-hover: #4f5d41;
+  --btn-light: var(--sage-light);
+
+  /* === Text Colors === */
+  --text-dark: var(--olive-dark);
+  --text-muted: var(--warm-gray);
+}
+
+
+
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --nav-height: 64px; /* set to your navbar height */
+  --page-bg:#ffffff;
+}
+
+body {
+  background: linear-gradient(180deg, #f6fff9, #eafef6);
+  overflow-x: hidden;
+}
+
+
+/* Horizontal scroll container */
+.card {
+  margin-top: calc(var(--nav-height) + 30px); /* 30px is your previous spacing */
+  position: relative;
+  display: flex;
+  overflow-x: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+  /* gap: 20px; */
+  scroll-behavior: smooth;
+  background: transparent; /* removes gray strip */
+}
+
+.card::-webkit-scrollbar {
+  display: none;
+}

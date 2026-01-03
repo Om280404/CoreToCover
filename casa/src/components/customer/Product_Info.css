@@ -1,0 +1,390 @@
+/* =========================================
+   GLOBAL THEME COLORS & FONTS
+========================================= */
+:root {
+  --green-dark: #606E52;
+  --green-mid: #91A56E;
+  --green-light: #C0CCA4;
+  --white: #FFFFFF;
+  --text-dark: #474747;
+  --text-muted: #8F8B84;
+
+  --radius: 14px;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --transition: all 0.25s ease;
+
+  --font-ui: "Helvetica", Arial, sans-serif;
+  --font-heading: "Playfair Display", serif;
+}
+
+/* =========================================
+   PAGE LAYOUT (3 COLUMN)
+========================================= */
+.pd-container {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 0.8fr;
+  gap: 32px;
+  padding: 100px 5vw 50px;
+  background: var(--green-light);
+  color: var(--text-dark);
+  font-family: var(--font-ui);
+}
+
+/* =========================================
+   LEFT IMAGE SECTION (Amazon Style)
+========================================= */
+.pd-left {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+
+  /* FIX: prevents thumbnails from drifting upward */
+  padding-top: 20px;  
+}
+
+/* Thumbnail list */
+.pd-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pd-thumb {
+  width: 62px;
+  height: 62px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: var(--white);
+  transition: var(--transition);
+}
+
+.pd-thumb:hover {
+  transform: scale(1.05);
+}
+
+.pd-thumb.active {
+  border: 2px solid var(--green-mid);
+  box-shadow: 0 0 6px rgba(96, 110, 82, 0.3);
+}
+
+/* Main large image */
+.pd-image-box {
+  width: 450px;
+  height: 450px;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid #dbe6c6;
+  box-shadow: var(--shadow);
+}
+
+.pd-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition);
+}
+
+.pd-image:hover {
+  transform: scale(1.04);
+}
+
+/* =========================================
+   CENTER DETAILS CARD
+========================================= */
+.pd-center {
+  background: var(--white);
+  padding: 28px;
+  border-radius: var(--radius);
+  border: 1px solid #dbe6c6;
+  box-shadow: var(--shadow);
+}
+
+/* Title */
+.pd-title {
+  font-size: 2rem;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--green-dark);
+  margin-bottom: 10px;
+}
+
+/* Description + See More */
+.pd-description {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.pd-see-more {
+  color: var(--green-dark);
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.pd-see-more:hover {
+  color: var(--green-mid);
+}
+
+/* Ratings */
+.pd-rating-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.pd-stars {
+  color: #facc15;
+}
+
+.pd-rating-count {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Divider */
+.pd-divider {
+  border: none;
+  height: 1px;
+  background: #e6e6e6;
+  margin: 14px 0;
+}
+
+/* Supplier / Origin */
+.pd-key-details {
+  line-height: 1.9;
+  font-size: 1rem;
+}
+
+.pd-key-details strong {
+  color: var(--green-dark);
+}
+
+/* =========================================
+   PRICE
+========================================= */
+.pd-price-block {
+  margin: 14px 0 20px;
+}
+
+.pd-final-price {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  color: var(--green-dark);
+}
+
+.pd-tax-info {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   TRIPS / QUANTITY
+========================================= */
+.pd-trips {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  background: var(--white);
+  border: 1px solid #dbe6c6;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.pd-trips-label {
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.pd-trips button {
+  background: var(--green-dark);
+  color: var(--white);
+  border: none;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pd-trips button:hover {
+  background: var(--green-mid);
+}
+
+/* =========================================
+   RIGHT BUY BOX
+========================================= */
+.pd-right {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pd-buybox {
+  background: var(--white);
+  padding: 24px 20px;
+  border-radius: var(--radius);
+  border: 1px solid #dbe6c6;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.pd-buybox-title {
+  font-size: 1rem;
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+.pd-price {
+  font-size: 1.7rem;
+  color: var(--green-dark);
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.pd-tax {
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+/* Buttons */
+.pd-btn {
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 8px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+
+/* Buy Now */
+.pd-btn-buy {
+  background: var(--green-dark);
+  color: var(--white);
+}
+.pd-btn-buy:hover {
+  background: var(--green-mid);
+}
+
+/* Add to Cart */
+.pd-btn-cart {
+  background: var(--green-mid);
+  color: var(--white);
+}
+.pd-btn-cart:hover {
+  background: var(--green-dark);
+}
+
+/* Back */
+.pd-btn-back {
+  background: var(--white);
+  border: 1px solid #dbe6c6;
+  color: var(--text-dark);
+}
+.pd-btn-back:hover {
+  background: var(--green-light);
+}
+
+/* =========================================
+   RESPONSIVE — TABLETS
+========================================= */
+@media (max-width: 1100px) {
+  .pd-container {
+    grid-template-columns: 1fr;
+    padding: 80px 5vw;
+  }
+
+  .pd-image-box {
+    width: 100%;
+    height: auto;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .pd-center,
+  .pd-right {
+    max-width: 700px;
+    margin: 20px auto;
+  }
+
+  .pd-left {
+    justify-content: center;
+  }
+}
+
+/* =========================================
+   RESPONSIVE — MOBILE
+========================================= */
+@media (max-width: 750px) {
+  .pd-container {
+    padding: 70px 4vw;
+  }
+
+  /* Thumbnails become horizontal scroll */
+  .pd-thumbnails {
+    flex-direction: row;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 10px;
+  }
+
+  .pd-thumb {
+    width: 58px;
+    height: 58px;
+  }
+
+  /* Layout stacked neatly */
+  .pd-left {
+    flex-direction: column-reverse;
+    align-items: center;
+  }
+
+  .pd-image-box {
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .pd-title {
+    font-size: 1.6rem;
+  }
+
+  .pd-final-price {
+    font-size: 1.6rem;
+  }
+
+  /* Buy box becomes full width */
+  .pd-buybox {
+    max-width: 100%;
+  }
+}
+
+/* =========================================
+   EXTRA SMALL DEVICES
+========================================= */
+@media (max-width: 450px) {
+  .pd-title {
+    font-size: 1.4rem;
+  }
+  .pd-description {
+    font-size: 0.92rem;
+  }
+  .pd-final-price {
+    font-size: 1.4rem;
+  }
+}
