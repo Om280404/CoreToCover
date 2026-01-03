@@ -28,6 +28,12 @@ enum RefundMethod {
   ORIGINAL_PAYMENT
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -55,7 +61,6 @@ model CustomerOtp {
 
   @@index([email])
 }
-
 
 /// =========================
 /// SELLER (ACCOUNT)
@@ -279,7 +284,6 @@ model DesignerOtp {
   @@index([email])
 }
 
-
 model DesignerProfile {
   id         Int @id @default(autoincrement())
   designerId Int @unique
@@ -329,7 +333,7 @@ model DesignerHireRequest {
   workType     String
   timelineDate DateTime?
   description  String?
-  status       String  @default("pending")
+  status       String    @default("pending")
 
   createdAt DateTime @default(now())
 
@@ -381,15 +385,22 @@ model ReturnRequest {
 
   reason String
   note   String?
-  images String[] // optional photo evidence
+  images String[]
 
-  requestedAt  DateTime     @default(now())
-  status       ReturnStatus @default(REQUESTED) // current state of this return request
-  decidedBy    String? // seller/admin name/email who decided
-  decisionNote String?
-  decidedAt    DateTime?
+  requestedAt DateTime @default(now())
 
-  refundMethod RefundMethod?
+  // 🔑 APPROVAL FLOW
+  sellerApprovalStatus ApprovalStatus @default(PENDING)
+  adminApprovalStatus  ApprovalStatus @default(PENDING)
+
+  sellerApprovedAt DateTime?
+  adminApprovedAt  DateTime?
+
+  sellerDecisionNote String?
+  adminDecisionNote  String?
+
+  // 💰 REFUND
+  refundMethod  RefundMethod?
   refundAmount  Float?
   refundStatus  RefundStatus @default(NONE)
   refundDetails String?

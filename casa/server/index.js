@@ -285,11 +285,11 @@ app.post("/seller/signup", async (req, res) => {
     });
 
     if (existingSeller) {
-  return res.status(409).json({
-    message: "Account already exists. Please login.",
-    redirect: "/seller/login",
-  });
-}
+      return res.status(409).json({
+        message: "Account already exists. Please login.",
+        redirect: "/seller/login",
+      });
+    }
 
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -2178,56 +2178,59 @@ app.get("/api/returns/seller", async (req, res) => {
 app.post("/api/returns/:id/approve", async (req, res) => {
   try {
     const returnId = Number(req.params.id);
-
     const sellerEmail = req.headers["x-seller-email"];
-    if (!sellerEmail) return res.status(401).json({ message: "Unauthorized" });
+
+    if (!sellerEmail)
+      return res.status(401).json({ message: "Unauthorized" });
 
     const seller = await prisma.seller.findUnique({
       where: { email: sellerEmail },
     });
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
+
+    if (!seller)
+      return res.status(404).json({ message: "Seller not found" });
 
     const rr = await prisma.returnRequest.findUnique({
       where: { id: returnId },
       include: { orderItem: true },
     });
 
-    if (!rr) return res.status(404).json({ message: "Return request not found" });
+    if (!rr)
+      return res.status(404).json({ message: "Return request not found" });
 
-    if (rr.sellerId !== seller.id) {
+    if (rr.sellerId !== seller.id)
       return res.status(403).json({ message: "Not authorized" });
+
+    // ✅ FIXED CHECK
+    if (rr.sellerApprovalStatus !== "PENDING") {
+      return res.status(400).json({
+        message: "Return already processed by seller",
+      });
     }
 
-    if (rr.status !== "REQUESTED") {
-      return res.status(400).json({ message: "Return already processed" });
-    }
-
-    const refundMethod = rr.refundMethod;
-    const refundAmount = Number(rr.refundAmount ?? rr.orderItem.totalAmount);
+    const refundAmount =
+      rr.refundAmount ?? rr.orderItem.totalAmount;
 
     await prisma.$transaction(async (tx) => {
       await tx.returnRequest.update({
         where: { id: returnId },
         data: {
-          status: "APPROVED",
-          refundStatus:
-            refundMethod === "STORE_CREDIT" ? "COMPLETED" : "PENDING",
-          decidedAt: new Date(),
-          decidedBy: seller.email,
-          decisionNote: "Approved by seller",
+          sellerApprovalStatus: "APPROVED",
+          sellerApprovedAt: new Date(),
+          sellerDecisionNote: "Approved by seller",
         },
       });
 
       await tx.orderItem.update({
         where: { id: rr.orderItemId },
         data: {
-          status: "returned",
           returnStatus: "APPROVED",
           returnResolvedAt: new Date(),
+          status: "fulfilled",
         },
       });
 
-      if (refundMethod === "STORE_CREDIT") {
+      if (rr.refundMethod === "STORE_CREDIT") {
         await tx.user.update({
           where: { id: rr.userId },
           data: {
@@ -2239,16 +2242,16 @@ app.post("/api/returns/:id/approve", async (req, res) => {
 
     res.json({
       message:
-        refundMethod === "STORE_CREDIT"
+        rr.refundMethod === "STORE_CREDIT"
           ? "Return approved & store credit issued"
           : "Return approved & refund initiated",
-      refundMethod,
     });
   } catch (err) {
     console.error("APPROVE RETURN ERROR:", err);
     res.status(500).json({ message: "Failed to approve return" });
   }
 });
+
 
 
 
@@ -2298,12 +2301,12 @@ app.post("/api/returns/:id/reject", async (req, res) => {
     await prisma.returnRequest.update({
       where: { id: returnId },
       data: {
-        status: "REJECTED",
-        decisionNote: decisionNote || "Rejected by seller",
-        decidedAt: new Date(),
-        decidedBy: seller.email,
+        sellerApprovalStatus: "REJECTED",
+        sellerDecisionNote: decisionNote || "Rejected by seller",
+        sellerApprovedAt: new Date(),
       },
     });
+
 
     /* ===============================
        2️⃣ UPDATE ORDER ITEM
@@ -2322,6 +2325,45 @@ app.post("/api/returns/:id/reject", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+app.post("/api/returns/:id/admin/approve", async (req, res) => {
+  const returnId = Number(req.params.id);
+
+  const rr = await prisma.returnRequest.findUnique({
+    where: { id: returnId },
+    include: { orderItem: true },
+  });
+
+  if (!rr) return res.status(404).json({ message: "Not found" });
+
+  if (rr.sellerApprovalStatus !== "APPROVED") {
+    return res.status(400).json({ message: "Seller approval pending" });
+  }
+
+  const refundAmount = rr.refundAmount ?? rr.orderItem.totalAmount;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.returnRequest.update({
+      where: { id: returnId },
+      data: {
+        adminApprovalStatus: "APPROVED",
+        adminApprovedAt: new Date(),
+        refundStatus:
+          rr.refundMethod === "STORE_CREDIT" ? "COMPLETED" : "PENDING",
+      },
+    });
+
+    if (rr.refundMethod === "STORE_CREDIT") {
+      await tx.user.update({
+        where: { id: rr.userId },
+        data: { credit: { increment: refundAmount } },
+      });
+    }
+  });
+
+  res.json({ message: "Return fully approved" });
+});
+
 
 
 

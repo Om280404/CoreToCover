@@ -7,7 +7,6 @@ import api from "../../api/axios";
 import { cancelOrder } from "../../api/order";
 import { GiSandsOfTime } from "react-icons/gi";
 
-
 /* =========================
    🔹 RETURN APIs
 ========================= */
@@ -45,15 +44,49 @@ const getOrderStatusMeta = (status) => {
   }
 };
 
+/* =========================
+   NEW: derive return status from approvals
+   returns one of: REQUESTED, UNDER_REVIEW, APPROVED, REJECTED
+========================= */
+const deriveReturnStatus = (r) => {
+  if (!r) return null;
 
+  const seller = (r.sellerApprovalStatus || "").toUpperCase();
+  const admin = (r.adminApprovalStatus || "").toUpperCase();
+
+  // Immediate rejection if any party rejected
+  if (seller === "REJECTED" || admin === "REJECTED") return "REJECTED";
+
+  // Fully approved only when both approved
+  if (seller === "APPROVED" && admin === "APPROVED") return "APPROVED";
+
+  // Seller approved but waiting for admin
+  if (seller === "APPROVED" && admin !== "APPROVED") return "UNDER_REVIEW";
+
+  // Default: requested (waiting seller decision)
+  return "REQUESTED";
+};
+
+/* =========================
+   Final order status (wraps return-derived state)
+   returnInfo is the returnRequest object (new schema)
+========================= */
 const getFinalOrderStatus = (orderStatus, returnInfo) => {
   if (!returnInfo) return getOrderStatusMeta(orderStatus);
 
-  switch (returnInfo.status) {
+  const derived = deriveReturnStatus(returnInfo);
+
+  switch (derived) {
     case "REQUESTED":
       return {
         text: "Return Requested",
         className: "status-return-requested",
+      };
+
+    case "UNDER_REVIEW":
+      return {
+        text: "Processing Return Request",
+        className: "status-return-under-review",
       };
 
     case "APPROVED":
@@ -65,7 +98,6 @@ const getFinalOrderStatus = (orderStatus, returnInfo) => {
         className: "status-returned",
       };
 
-
     case "REJECTED":
       return {
         text: "Return Rejected",
@@ -76,7 +108,6 @@ const getFinalOrderStatus = (orderStatus, returnInfo) => {
       return getOrderStatusMeta(orderStatus);
   }
 };
-
 
 /* =========================
    RETURN REASONS
@@ -110,8 +141,6 @@ export default function MyOrders() {
   const [returnImages, setReturnImages] = useState({});
   const [refundMethod, setRefundMethod] = useState({});
 
-
-
   /* =========================
      🔹 CREDIT STATE (NEW)
   ========================= */
@@ -134,7 +163,6 @@ export default function MyOrders() {
     return diffDays <= RETURN_LIMIT_DAYS;
   };
 
-
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
@@ -143,22 +171,14 @@ export default function MyOrders() {
 
       // ✅ Update UI immediately
       setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? { ...o, orderStatus: "rejected" }
-            : o
-        )
-
+        prev.map((o) => (o.id === orderId ? { ...o, orderStatus: "rejected" } : o))
       );
-
 
       alert("Order cancelled successfully");
     } catch (err) {
       alert(err?.response?.data?.message || "Failed to cancel order");
     }
   };
-
-
 
   /* =========================
      FETCH USER ORDERS
@@ -169,34 +189,41 @@ export default function MyOrders() {
     api
       .get(`/orders/user/${encodeURIComponent(userEmail)}`)
       .then((res) => {
+        // backend shape: array of order items or orders — keep existing behaviour
         setOrders(Array.isArray(res.data) ? res.data : []);
       })
       .catch(() => setOrders([]));
   }, [userEmail]);
 
   /* =========================
-     FETCH USER RETURNS
+     FETCH USER RETURNS (and build map)
   ========================= */
   useEffect(() => {
     if (!userEmail) return;
 
     getUserReturns()
       .then((res) => {
+        const arr = res.data.returns || [];
         const map = {};
-        (res.data.returns || []).forEach((r) => {
+        arr.forEach((r) => {
           map[r.orderItemId] = r;
         });
         setReturnsMap(map);
 
-        // If any of the user's returns are APPROVED, refresh credit.
-        const anyApproved = (res.data.returns || []).some((r) => r.status === "APPROVED");
-        if (anyApproved) {
-          getUserCredit().then((cRes) => setCredit(Number(cRes.data.credit || 0))).catch(() => { });
+        // If any return is fully approved by both seller & admin, refresh credit.
+        const anyFullyApproved = arr.some(
+          (r) =>
+            (r.sellerApprovalStatus || "").toUpperCase() === "APPROVED" &&
+            (r.adminApprovalStatus || "").toUpperCase() === "APPROVED"
+        );
+        if (anyFullyApproved) {
+          getUserCredit()
+            .then((cRes) => setCredit(Number(cRes.data.credit || 0)))
+            .catch(() => { });
         }
       })
       .catch(() => { });
   }, [userEmail]);
-
 
   /* =========================
      🔹 FETCH USER CREDIT (NEW)
@@ -227,9 +254,7 @@ export default function MyOrders() {
       });
 
       setOrders((prev) =>
-        prev.map((o) =>
-          o.orderItemId === orderItemId ? { ...o, isRated: true } : o
-        )
+        prev.map((o) => (o.orderItemId === orderItemId ? { ...o, isRated: true } : o))
       );
 
       setOpenRating((p) => ({ ...p, [orderItemId]: false }));
@@ -269,7 +294,6 @@ export default function MyOrders() {
     formData.append("reason", reason);
     formData.append("refundMethod", method);
 
-
     (returnImages[order.orderItemId] || []).forEach((file) => {
       formData.append("images", file);
     });
@@ -279,9 +303,12 @@ export default function MyOrders() {
     try {
       const res = await requestReturn(formData);
 
+      // backend should return created returnRequest object
+      const created = res.data.returnRequest || res.data;
+
       setReturnsMap((prev) => ({
         ...prev,
-        [order.orderItemId]: res.data.returnRequest,
+        [order.orderItemId]: created,
       }));
 
       setOpenReturnBox((p) => ({ ...p, [order.orderItemId]: false }));
@@ -292,7 +319,6 @@ export default function MyOrders() {
       setReturnLoading(null);
     }
   };
-
 
   /* =========================
      FILTER ORDERS
@@ -340,7 +366,6 @@ export default function MyOrders() {
         >
           Store Credit: ₹{credit}
         </div>
-
       </div>
 
       <input
@@ -354,21 +379,14 @@ export default function MyOrders() {
         {filteredOrders.map((order) => {
           const returnInfo = returnsMap[order.orderItemId];
 
-          const statusMeta = getFinalOrderStatus(
-            order.orderStatus,
-            returnInfo
-          );
+          const statusMeta = getFinalOrderStatus(order.orderStatus, returnInfo);
 
           const isDelivered = order.orderStatus === "fulfilled";
 
           return (
             <article key={order.orderItemId} className="order-card">
               <img
-                src={
-                  order.imageUrl
-                    ? `http://localhost:3001/${order.imageUrl}`
-                    : sample
-                }
+                src={order.imageUrl ? `http://localhost:3001/${order.imageUrl}` : sample}
                 className="order-img"
                 alt={order.productName}
               />
@@ -382,30 +400,34 @@ export default function MyOrders() {
                 </div>
 
                 <div className="order-meta">
-                  <p><strong>Order ID:</strong> {order.id}</p>
-                  <p><strong>Seller:</strong> {order.sellerName}</p>
-                  <p><strong>Quantity:</strong> {order.quantity}</p>
-                  <p><strong>Total:</strong> ₹{order.totalAmount}</p>
+                  <p>
+                    <strong>Order ID:</strong> {order.id}
+                  </p>
+                  <p>
+                    <strong>Seller:</strong> {order.sellerName}
+                  </p>
+                  <p>
+                    <strong>Quantity:</strong> {order.quantity}
+                  </p>
+                  <p>
+                    <strong>Total:</strong> ₹{order.totalAmount}
+                  </p>
                 </div>
 
                 {/* ===== CANCEL ORDER BUTTON ===== */}
                 {canCancelOrder(order) && (
-                  <button
-                    className="cancel-btn"
-                    onClick={() => handleCancelOrder(order.id)}
-                  >
+                  <button className="cancel-btn" onClick={() => handleCancelOrder(order.id)}>
                     Cancel Order
                   </button>
                 )}
 
-
                 {/* ===== RETURN SECTION (ADDED SAFELY) ===== */}
                 {isDelivered && (
                   <>
-                    {/* ✅ RETURN ALREADY REQUESTED / PROCESSED */}
+                    {/* ===== if a return exists, show derived UI ===== */}
                     {returnInfo ? (
                       <div className="rated-pill">
-                        {returnInfo.status === "REQUESTED" && (
+                        {deriveReturnStatus(returnInfo) === "REQUESTED" && (
                           <span
                             style={{
                               display: "inline-flex",
@@ -420,15 +442,19 @@ export default function MyOrders() {
                           </span>
                         )}
 
-
-
-                        {returnInfo.status === "APPROVED" && (
-                          <span style={{ color: "#047857" }}>
-                            Return approved ✅ Credit added
+                        {deriveReturnStatus(returnInfo) === "UNDER_REVIEW" && (
+                          <span style={{ color: "#2563eb" }}>
+                            Processing Return Request
                           </span>
                         )}
 
-                        {returnInfo.status === "REJECTED" && (
+                        {deriveReturnStatus(returnInfo) === "APPROVED" && (
+                          <span style={{ color: "#047857" }}>
+                            Return approved ✅
+                          </span>
+                        )}
+
+                        {deriveReturnStatus(returnInfo) === "REJECTED" && (
                           <span style={{ color: "#b91c1c" }}>
                             Return rejected
                           </span>
@@ -441,10 +467,7 @@ export default function MyOrders() {
                           className="order-review"
                           value={returnReason[order.orderItemId] || ""}
                           onChange={(e) =>
-                            setReturnReason((p) => ({
-                              ...p,
-                              [order.orderItemId]: e.target.value,
-                            }))
+                            setReturnReason((p) => ({ ...p, [order.orderItemId]: e.target.value }))
                           }
                         >
                           <option value="">Select return reason</option>
@@ -454,6 +477,7 @@ export default function MyOrders() {
                             </option>
                           ))}
                         </select>
+
                         {/* ===== REFUND METHOD ===== */}
                         <div className="refund-method">
                           <label>
@@ -463,10 +487,7 @@ export default function MyOrders() {
                               value="STORE_CREDIT"
                               checked={refundMethod[order.orderItemId] === "STORE_CREDIT"}
                               onChange={() =>
-                                setRefundMethod((p) => ({
-                                  ...p,
-                                  [order.orderItemId]: "STORE_CREDIT",
-                                }))
+                                setRefundMethod((p) => ({ ...p, [order.orderItemId]: "STORE_CREDIT" }))
                               }
                             />
                             Store Credit (Instant)
@@ -479,16 +500,12 @@ export default function MyOrders() {
                               value="ORIGINAL_PAYMENT"
                               checked={refundMethod[order.orderItemId] === "ORIGINAL_PAYMENT"}
                               onChange={() =>
-                                setRefundMethod((p) => ({
-                                  ...p,
-                                  [order.orderItemId]: "ORIGINAL_PAYMENT",
-                                }))
+                                setRefundMethod((p) => ({ ...p, [order.orderItemId]: "ORIGINAL_PAYMENT" }))
                               }
                             />
                             Original Payment
                           </label>
                         </div>
-
 
                         <input
                           type="file"
@@ -496,10 +513,7 @@ export default function MyOrders() {
                           accept="image/*"
                           className="order-review"
                           onChange={(e) =>
-                            setReturnImages((p) => ({
-                              ...p,
-                              [order.orderItemId]: Array.from(e.target.files),
-                            }))
+                            setReturnImages((p) => ({ ...p, [order.orderItemId]: Array.from(e.target.files) }))
                           }
                         />
 
@@ -508,28 +522,20 @@ export default function MyOrders() {
                           disabled={returnLoading === order.orderItemId}
                           onClick={() => handleReturnSubmit(order)}
                         >
-                          {returnLoading === order.orderItemId
-                            ? "Submitting..."
-                            : "Confirm Return"}
+                          {returnLoading === order.orderItemId ? "Submitting..." : "Confirm Return"}
                         </button>
                       </div>
                     ) : (
                       /* ✅ REQUEST BUTTON (ONLY IF NO RETURN EXISTS) */
                       <button
                         className="track-btn"
-                        onClick={() =>
-                          setOpenReturnBox((p) => ({
-                            ...p,
-                            [order.orderItemId]: true,
-                          }))
-                        }
+                        onClick={() => setOpenReturnBox((p) => ({ ...p, [order.orderItemId]: true }))}
                       >
                         Request Return
                       </button>
                     )}
                   </>
                 )}
-
 
                 {/* ===== RATING SECTION (UNCHANGED) ===== */}
                 {isDelivered && (
@@ -544,17 +550,8 @@ export default function MyOrders() {
                               key={star}
                               size={18}
                               style={{ cursor: "pointer", marginRight: 4 }}
-                              color={
-                                (ratings[order.orderItemId] || 0) >= star
-                                  ? "#facc15"
-                                  : "#d1d5db"
-                              }
-                              onClick={() =>
-                                setRatings((p) => ({
-                                  ...p,
-                                  [order.orderItemId]: star,
-                                }))
-                              }
+                              color={(ratings[order.orderItemId] || 0) >= star ? "#facc15" : "#d1d5db"}
+                              onClick={() => setRatings((p) => ({ ...p, [order.orderItemId]: star }))}
                             />
                           ))}
                         </div>
@@ -563,30 +560,17 @@ export default function MyOrders() {
                           className="order-review"
                           placeholder="Write a review (optional)"
                           value={reviews[order.orderItemId] || ""}
-                          onChange={(e) =>
-                            setReviews((p) => ({
-                              ...p,
-                              [order.orderItemId]: e.target.value,
-                            }))
-                          }
+                          onChange={(e) => setReviews((p) => ({ ...p, [order.orderItemId]: e.target.value }))}
                         />
 
-                        <button
-                          className="track-btn"
-                          onClick={() => submitRating(order.orderItemId)}
-                        >
+                        <button className="track-btn" onClick={() => submitRating(order.orderItemId)}>
                           Submit Review
                         </button>
                       </div>
                     ) : (
                       <button
                         className="rate-btn"
-                        onClick={() =>
-                          setOpenRating((p) => ({
-                            ...p,
-                            [order.orderItemId]: true,
-                          }))
-                        }
+                        onClick={() => setOpenRating((p) => ({ ...p, [order.orderItemId]: true }))}
                       >
                         Rate Order
                       </button>
