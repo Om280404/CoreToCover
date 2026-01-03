@@ -41,7 +41,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="footer-bottom">
-        © {new Date().getFullYear()} CASA. All rights reserved.
+        © {new Date().getFullYear()} Core2Cover. All rights reserved.
       </div>
     </footer>
   );
