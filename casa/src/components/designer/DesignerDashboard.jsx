@@ -184,13 +184,9 @@ const DesignerDashboard = () => {
             <p>Upload, edit or manage your best design works.</p>
           </div>
 
-          <div
-            className="dd-card dd-reveal dd-delay-2"
-            onClick={() => navigate("/designerworkreceived")}
-          >
-            <div className="dd-icon">
-              <FaHandshake />
-            </div>
+          {/* Work Received */}
+          <div className="dash-card reveal delay-2" onClick={() => navigate("/designerworkreceived")}>
+            <div className="dash-icon"><FaHandshake /></div>
             <h3>Work Received</h3>
             <p>See customers who hired you & manage their projects.</p>
           </div>
