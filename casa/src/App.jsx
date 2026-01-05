@@ -79,6 +79,7 @@ function App() {
       <Routes>
         {/* The Home is now the root page that loads first */}
         <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/productlisting" element={<ProductListing/>}/>
 
         <Route path="/productinfo" element={<ProductInfo />} />
