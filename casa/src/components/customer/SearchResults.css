@@ -2,7 +2,7 @@
    GLOBAL THEME COLORS & FONTS
 ========================================= */
 :root {
-  --bg: linear-gradient(180deg, #f3f7ec 0%, #e6efd6 100%);
+  --bg: linear-gradient(180deg, #fafaf8, #f1f1ec);
   --panel: #ffffff;
 
   --green-dark: #606E52;
@@ -26,7 +26,7 @@
 
   --btn-danger-bg: linear-gradient(90deg, #c0392b, #e74c3c);
 
-  --container-max: 1180px;
+  --container-max: 100%;
 
   --font-ui: "Helvetica", Arial, sans-serif;
   --font-heading: "Playfair Display", serif;
@@ -37,6 +37,7 @@
 ========================================= */
 .results {
   padding: 2rem 0rem 2rem;
+  background: var(--bg);
   max-width: var(--container-max);
   margin: 0 auto;
   /* background: var(--bg); */
@@ -50,7 +51,7 @@
    HEADER
 ========================================= */
 .results h2 {
-  margin: 0;
+  margin-left: 50px;
   font-size: 1.9rem;
   font-family: var(--font-heading);
   font-weight: 500;
@@ -69,6 +70,7 @@
 
 .results p {
   margin: 8px 0 24px;
+  margin-left: 50px;
   color: var(--muted);
   font-weight: 600;
   font-family: var(--font-ui);
@@ -82,6 +84,7 @@
   border-radius: 6px;
   font-weight: 700;
   border: 1px solid rgba(96, 110, 82, 0.12);
+  width: 25%;
 }
 
 /* Spacing for elements */

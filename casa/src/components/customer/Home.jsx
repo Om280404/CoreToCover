@@ -4,19 +4,25 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaShoppingCart,
   FaUser,
-  FaGlobe,
   FaBars,
   FaTimes,
+  FaUserGraduate,
 } from "react-icons/fa";
+import Sofa from "../../assets/images/Sofa.jpeg";
+import Lamp from "../../assets/images/Lamp.jpg"
+import Bathroom from "../../assets/images/Bathroom.webp"
 import Raw from "../../assets/images/Raw1.png";
 import Raw2 from "../../assets/images/Raw2.png";
 import Raw3 from "../../assets/images/Raw3.png";
 import Designer1 from "../../assets/images/Designer1.png";
 import Designer2 from "../../assets/images/Designer2.png";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
 import Footer from "./Footer";
 
 // SLIDESHOW CARD
+const Brand = ({ children }) => <span className="brand">{children}</span>;
 const Card = ({ images, title, onClick }) => {
+
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
 
@@ -57,18 +63,30 @@ const Home = () => {
       <header className="navbar">
         <div className="nav-container">
           <div className="nav-left">
-            <Link to="/home" className="nav-link">
-              <h1 className="logo">CASA</h1>
+            <Link to="/" className="nav-link nav-logo-link">
+              <span className="nav-logo-wrap">
+                <img
+                  src={CoreToCoverLogo}
+                  alt="CoreToCover"
+                  className="nav-logo"
+                />
+                <Brand>Core2Cover</Brand>
+              </span>
             </Link>
           </div>
 
           <div className="nav-right">
             <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-              <li><FaGlobe /> Language</li>
 
               <li>
                 <Link to="/userprofile" className="nav-link">
                   <FaUser /> Profile
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/myhireddesigners" className="nav-link">
+                  <FaUserGraduate /> My Hired Designers
                 </Link>
               </li>
 
@@ -105,15 +123,15 @@ const Home = () => {
 
           {/* Card 1 */}
           <Card
-            title="Readymade Products"
+            title="Finished Products"
             images={[
-              "https://images.pexels.com/photos/1866149/pexels-photo-1866149.jpeg?auto=compress&cs=tinysrgb&w=800", // sofa interior
-              "https://images.pexels.com/photos/3076899/pexels-photo-3076899.jpeg?auto=compress&cs=tinysrgb&w=800", // luxury lamp + modern interior
-              "https://images.pexels.com/photos/1571461/pexels-photo-1571461.jpeg?auto=compress&cs=tinysrgb&w=800"  // modern wooden chair product
+              Sofa, // sofa interior
+              Lamp, // luxury lamp + modern interior
+              Bathroom  // modern bathroom product
             ]}
 
 
-            onClick={() => navigate("/productlisting", {state: {page: "Readymade Products", desc: "Find the perfect product that enhances your quality of living."}})}
+            onClick={() => navigate("/productlisting", { state: { page: "Finished Products", desc: "Find the perfect product that enhances your quality of living." } })}
           />
 
           {/* Card 2 */}
@@ -124,7 +142,7 @@ const Home = () => {
               Raw2, // raw materials image 2
               Raw3  // raw materials image 3
             ]}
-            onClick={() => navigate("/productlisting", {state: {page: "Raw Materials", desc: "Build better with high-grade interior raw materials."}})}
+            onClick={() => navigate("/productlisting", { state: { page: "Raw Materials", desc: "Build better with high-grade interior raw materials." } })}
           />
 
           {/* Card 3 */}
@@ -136,7 +154,7 @@ const Home = () => {
               "https://images.pexels.com/photos/6474344/pexels-photo-6474344.jpeg?auto=compress&cs=tinysrgb&w=800", // interior designer working
             ]}
 
-            onClick={() => navigate("/designers", {state:{page:"Designers"}})}
+            onClick={() => navigate("/designers", { state: { page: "Designers" } })}
           />
 
         </div>

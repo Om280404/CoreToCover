@@ -2,6 +2,8 @@
   --green-dark: #606E52;
   --green-mid: #91A56E;
   --green-light: #C0CCA4;
+  --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
+
 
   --white: #ffffff;
   --text-dark: #474747;
@@ -19,7 +21,7 @@
 .orders-layout {
   display: flex;
   min-height: 100vh;
-  background: #f4f7ef;
+  background: var(--bg);
   font-family: "Helvetica", Arial, sans-serif;
 }
 
@@ -33,6 +35,7 @@
   min-height: 100vh;
   box-sizing: border-box;
   margin-left: 260px; 
+  margin-top: 50px;
 }
 
 .orders-content h1 {
@@ -281,3 +284,4 @@
     padding-right: 16px;
   }
 }
+

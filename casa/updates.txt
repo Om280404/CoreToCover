@@ -1,0 +1,2 @@
+otp generation (28/12/2025)
+installation : npm install nodemailer dotenv

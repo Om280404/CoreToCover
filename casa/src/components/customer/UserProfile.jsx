@@ -1,20 +1,23 @@
 // File: src/components/UserProfile.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserProfile.css";
 import Navbar from "./Navbar";
 import MyOrders from "./MyOrders";
+import { getUserByEmail, updateUserProfile } from "../../api/user";
+
 
 const UserProfile = () => {
   const navigate = useNavigate();
+
+  const userEmail = localStorage.getItem("userEmail");
 
   /* ==============================
      LOGOUT & NAVIGATION
   ============================== */
   const handleLogout = () => {
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userProfile");
+    localStorage.clear();
     alert("You have been logged out.");
     navigate("/");
   };
@@ -24,24 +27,40 @@ const UserProfile = () => {
   };
 
   /* ==============================
-     LOAD USER (FRONTEND ONLY)
+     USER STATE
   ============================== */
-  const storedProfile = JSON.parse(
-    localStorage.getItem("userProfile")
-  );
-
   const [user, setUser] = useState({
-    name: storedProfile?.name || "Guest User",
-    email:
-      storedProfile?.email ||
-      localStorage.getItem("userEmail") ||
-      "",
-    phone: storedProfile?.phone || "",
-    address: storedProfile?.address || "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
+
+  /* ==============================
+     FETCH USER FROM DB
+  ============================== */
+  useEffect(() => {
+    if (!userEmail) {
+      navigate("/login");
+      return;
+    }
+
+    const loadUser = async () => {
+      try {
+        const res = await getUserByEmail(userEmail);
+        setUser(res.data);
+        setFormData(res.data);
+      } catch {
+        alert("Failed to load user profile");
+      }
+    };
+
+    loadUser();
+  }, [userEmail, navigate]);
+
 
   /* ==============================
      HANDLERS
@@ -54,73 +73,80 @@ const UserProfile = () => {
     }));
   };
 
-  const handleSave = () => {
-    setUser(formData);
-    localStorage.setItem(
-      "userProfile",
-      JSON.stringify(formData)
-    );
-    setIsEditing(false);
-    alert("Profile saved locally.");
+  const handleSave = async () => {
+    try {
+      await updateUserProfile(userEmail, {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+      });
+
+      setUser(formData);
+      setIsEditing(false);
+      alert("Profile updated successfully");
+    } catch (err) {
+      alert(err.message || "Failed to update profile");
+    }
   };
+
 
   return (
     <>
       <Navbar />
+      <div className="profile">
+        <div className="back-button-container">
+          <button onClick={handleBack} className="back-button">
+            ← Back
+          </button>
+        </div>
 
-      <div className="back-button-container">
-        <button onClick={handleBack} className="back-button">
-          ← Back
-        </button>
-      </div>
+        <div className="profile-container">
+          <div className="profile-card">
+            {isEditing ? (
+              <>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="up-profile-input"
+                  placeholder="Enter name"
+                />
 
-      <div className="profile-container">
-        <div className="profile-card">
-          {isEditing ? (
-            <>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="profile-input"
-                placeholder="Enter name"
-              />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  className="up-profile-input"
+                  disabled
+                />
 
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                className="profile-input"
-                disabled
-              />
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="up-profile-input"
+                  placeholder="Enter phone"
+                />
 
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="profile-input"
-                placeholder="Enter phone"
-              />
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="up-profile-input"
+                  placeholder="Enter address"
+                />
 
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="profile-input"
-                placeholder="Enter address"
-              />
-
-              <button
-                onClick={handleSave}
-                className="profile-button save"
-              >
-                Save
-              </button>
-            </>
-          ) : (
+                <button
+                  onClick={handleSave}
+                  className="up-profile-button up-save"
+                >
+                  Save
+                </button>
+              </>
+            ) : (
             <>
               <div className="user-info">
                 <p><strong>Name:</strong> {user.name}</p>
@@ -147,13 +173,17 @@ const UserProfile = () => {
                 </button>
               </div>
             </>
-          )}
+            )}
+          </div>
+        </div>
+        <hr />
+
+        {/* ✅ REAL ORDERS FROM DB */}
+        <div className="orders">
+          <MyOrders />
         </div>
       </div>
 
-      <div className="orders">
-        <MyOrders />
-      </div>
     </>
   );
 };

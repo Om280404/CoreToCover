@@ -72,12 +72,12 @@
 /* =========================================
    INPUT GROUPS
 ========================================= */
-.input-group {
+.input-groups {
   text-align: left;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.input-group label {
+.input-groups label {
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--text-dark);
@@ -85,7 +85,7 @@
   margin-bottom: 6px;
 }
 
-.input-group input {
+.input-groups input {
   width: 100%;
   padding: 11px 12px;
   border-radius: var(--radius);
@@ -95,7 +95,7 @@
   transition: border-color var(--ease), box-shadow var(--ease);
 }
 
-.input-group input:focus {
+.input-groups input:focus {
   border-color: var(--green-mid);
   box-shadow: 0 0 0 3px rgba(96,110,82,0.22);
 }

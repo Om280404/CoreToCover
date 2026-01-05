@@ -5,6 +5,7 @@
   --green-dark: #606E52;
   --green-mid: #91A56E;
   --green-light: #C0CCA4;
+  --bg: linear-gradient(180deg, #f4f7ef, #e8efdc);
 
   --white: #ffffff;
   --bg-soft: #F3F7EC;
@@ -27,7 +28,7 @@
 .sma-root {
   min-height: 100vh;
   display: flex;
-  background: linear-gradient(180deg, var(--bg-soft), #E6EFD6);
+  background: var(--bg);
   font-family: var(--font-ui);
 }
 
@@ -50,6 +51,7 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   animation: fadeUp 0.5s ease forwards;
+  margin-left: 220px;
 }
 
 /* TITLE */
@@ -223,4 +225,76 @@ video.sma-preview {
   video.sma-preview {
     height: 180px;
   }
+}
+
+/* =========================================
+   FIX: IMAGE FULLSCREEN FIT
+========================================= */
+
+/* When image container is fullscreen */
+.pd-image-box:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image must fit viewport */
+.pd-image-box:fullscreen .pd-image {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: auto;
+  height: auto;
+  object-fit: contain; /* 🔥 KEY */
+}
+
+/* Prevent overflow caused by inherited styles */
+.pd-image-box:fullscreen img,
+.pd-image-box:fullscreen video {
+  overflow: hidden;
+}
+
+/* =========================================
+   FULLSCREEN VIDEO – PERFECT FIT (AMAZON STYLE)
+========================================= */
+
+/* Fullscreen container */
+.pd-image-box:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Video wrapper takes full screen */
+.pd-image-box:fullscreen .pd-video-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+/* 🔥 VIDEO ITSELF */
+.pd-image-box:fullscreen .pd-video {
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+
+  object-fit: contain; /* ✅ NO CROP, NO STRETCH */
+  background: #000;
+}
+
+/* Prevent overflow */
+.pd-image-box:fullscreen video {
+  overflow: hidden;
 }

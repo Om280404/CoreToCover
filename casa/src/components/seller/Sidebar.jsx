@@ -7,9 +7,13 @@ import {
   FiX,
   FiPackage,
 } from "react-icons/fi";
+import { PiBank } from "react-icons/pi";
 import { AiOutlineProduct } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import { FiRotateCcw } from "react-icons/fi";
+import { IoBusinessOutline } from "react-icons/io5";
 import "./Sidebar.css";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
 
 const Sidebar = ({ notificationCount = 0 }) => {
   const navigate = useNavigate();
@@ -33,6 +37,10 @@ const Sidebar = ({ notificationCount = 0 }) => {
     { icon: <FiUser />, label: "Profile", path: "/sellerprofile" },
     { icon: <FiPackage />, label: "Add Product", path: "/selleraddproduct" },
     { icon: <AiOutlineProduct />, label: "My Products", path: "/sellerproducts" },
+    { icon: <FiUser />, label: "Delivery Settings", path: "/sellerdeliveryupdate" },
+    { icon: <IoBusinessOutline />, label: "Business Details", path: "/editbusinessdetails" },
+    { icon: <PiBank />, label: "Bank Details", path: "/sellerbankdetails" },
+    { icon: <FiRotateCcw />, label: "Return Requests", path: "/sellerreturns" },
   ];
 
   return (
@@ -44,7 +52,14 @@ const Sidebar = ({ notificationCount = 0 }) => {
             <button className="nav-hamburger" onClick={() => setMenuOpen(true)}>
               <FiMenu />
             </button>
-            <div className="nav-logo">Logo</div>
+            <div className="nav-logo">
+              <img
+                src={CoreToCoverLogo}
+                alt="CoreToCover"
+                className="sidebar-logo-img"
+              />
+            </div>
+
             <div className="nav-placeholder" />
           </div>
 
@@ -76,7 +91,14 @@ const Sidebar = ({ notificationCount = 0 }) => {
       ) : (
         // Desktop Sidebar
         <div className="sidebar-panel">
-          <div className="sidebar-logo">Logo</div>
+          <div className="sidebar-logo">
+            <img
+              src={CoreToCoverLogo}
+              alt="CoreToCover"
+              className="sidebar-logo-img"
+            />
+          </div>
+
           <nav className="sidebar-nav">
             {navItems.map((item) => (
               <button

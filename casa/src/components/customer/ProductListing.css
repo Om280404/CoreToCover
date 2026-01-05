@@ -76,7 +76,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 45px;
+  gap: 80px;
   padding: 60px 4vw 40px;
   justify-items: center;
   box-sizing: border-box;
@@ -102,7 +102,7 @@
 @media (max-width: 1024px) {
   .product-grid {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 40px;
+    gap: 80px;
   }
 }
 
@@ -116,9 +116,9 @@
   }
 
   .product-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 40px;
-    padding: 40px 4vw;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
   }
 }
 

@@ -40,6 +40,11 @@
 }
 
 
+/* 🔒 GLOBAL HORIZONTAL OVERFLOW KILL SWITCH */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 
 * {

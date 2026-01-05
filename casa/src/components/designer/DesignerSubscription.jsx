@@ -70,7 +70,7 @@ const navigate = useNavigate();
               ))}
             </ul> */}
 
-            <button className="sub-btn" onClick={() => navigate("/designerprofilesetup")}>{p.button}</button>
+            <button className="sub-btn" onClick={() => navigate("/designer_profile_setup")}>{p.button}</button>
           </div>
         ))}
       </div>

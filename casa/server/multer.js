@@ -4,18 +4,47 @@ import fs from "fs";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { productType } = req.body;
+    const productType = req.body.productType; // finished | material
 
-    const base =
-      productType === "material" ? "raw" : "finished";
+    if (!productType) {
+      return cb(new Error("productType is required"));
+    }
 
-    const folder =
-      file.fieldname === "images"
-        ? `uploads/${base}/images`
-        : `uploads/${base}/videos`;
+    let uploadPath = "uploads";
 
-    fs.mkdirSync(folder, { recursive: true });
-    cb(null, folder);
+    if (file.mimetype.startsWith("image")) {
+      uploadPath += productType === "finished"
+        ? "/finished/images"
+        : "/raw/images";
+    } else if (file.mimetype.startsWith("video")) {
+      uploadPath += productType === "finished"
+        ? "/finished/videos"
+        : "/raw/videos";
+    }
+
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+
+  filename: (req, file, cb) => {
+    const unique =
+      Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+
+
+});
+
+export const upload = multer({ storage });
+
+/* ============================
+   DESIGNER PROFILE UPLOAD
+============================ */
+const designerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/designers/profiles";
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
 
   filename: (req, file, cb) => {
@@ -25,9 +54,56 @@ const storage = multer.diskStorage({
   },
 });
 
-export const upload = multer({
-  storage,
-  limits: {
-    fileSize: 30 * 1024 * 1024, // 30MB
+export const uploadDesignerProfile = multer({
+  storage: designerStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
+
+/* ============================
+   DESIGNER PORTFOLIO UPLOAD
+============================ */
+const designerPortfolioStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/designers/portfolio";
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const unique =
+      Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+
+export const uploadDesignerPortfolio = multer({
+  storage: designerPortfolioStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per image
+});
+
+/* ============================
+   RETURN REQUEST IMAGE UPLOAD
+============================ */
+const returnStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = "uploads/returns/images";
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+
+  filename: (req, file, cb) => {
+    const unique =
+      Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+
+export const uploadReturnImages = multer({
+  storage: returnStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per image
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
   },
 });

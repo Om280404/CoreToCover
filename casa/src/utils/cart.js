@@ -1,63 +1,71 @@
-const CART_KEY = "customerCart";
+// src/utils/cart.js
 
+const CART_KEY = "casa_cart";
+const SINGLE_CHECKOUT_KEY = "singleCheckoutItem";
+
+/* =========================
+   LOAD CART
+========================= */
 export const loadCart = () => {
   try {
-    const raw = JSON.parse(localStorage.getItem(CART_KEY)) || [];
-
-    // ✅ REMOVE INVALID ITEMS
-    return raw.filter(
-      item =>
-        item.materialId !== undefined &&
-        item.supplierId !== undefined
-    );
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 };
 
-
-export const saveCart = (cart) => {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+/* =========================
+   SAVE CART
+========================= */
+const saveCart = (items) => {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
 };
 
-export const addToCart = (product) => {
+/* =========================
+   ADD TO CART
+========================= */
+export const addToCart = (item) => {
   const cart = loadCart();
 
   const index = cart.findIndex(
-    (item) =>
-      item.materialId === product.materialId &&
-      item.supplierId === product.supplierId
+    (c) =>
+      c.materialId === item.materialId &&
+      c.supplierId === item.supplierId
   );
 
-  if (index > -1) {
-    cart[index].trips += product.trips;
-    cart[index].amount =
-      cart[index].amountPerTrip * cart[index].trips;
+  if (index >= 0) {
+    cart[index].trips += Number(item.trips || 1);
   } else {
-    cart.push(product);
+    cart.push({
+      ...item,
+      trips: Number(item.trips || 1),
+      amountPerTrip: Number(item.amountPerTrip || 0),
+      shippingCharge: Number(item.shippingCharge || 0),
+      installationCharge: Number(item.installationCharge || 0),
+    });
   }
 
   saveCart(cart);
-  return cart;
 };
 
+/* =========================
+   UPDATE QUANTITY
+========================= */
 export const updateCartItemQuantity = (materialId, qty) => {
-  const cart = loadCart();
-
-  const index = cart.findIndex(
-    (item) => item.materialId === materialId
+  const cart = loadCart().map((item) =>
+    item.materialId === materialId
+      ? { ...item, trips: qty }
+      : item
   );
 
-  if (index > -1) {
-    cart[index].trips = qty;
-    cart[index].amount =
-      cart[index].amountPerTrip * qty;
-  }
-
   saveCart(cart);
   return cart;
 };
 
+/* =========================
+   REMOVE ITEM
+========================= */
 export const removeFromCart = (materialId) => {
   const cart = loadCart().filter(
     (item) => item.materialId !== materialId
@@ -67,6 +75,34 @@ export const removeFromCart = (materialId) => {
   return cart;
 };
 
+/* =========================
+   CLEAR CART
+========================= */
 export const clearCart = () => {
   localStorage.removeItem(CART_KEY);
 };
+
+/* =========================
+   SINGLE CHECKOUT
+========================= */
+export const setSingleCheckoutItem = (item) => {
+  localStorage.setItem(
+    SINGLE_CHECKOUT_KEY,
+    JSON.stringify(item)
+  );
+};
+
+export const getSingleCheckoutItem = () => {
+  try {
+    const raw = localStorage.getItem(SINGLE_CHECKOUT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const clearSingleCheckoutItem = () => {
+  localStorage.removeItem(SINGLE_CHECKOUT_KEY);
+};
+
+export const getCart = loadCart;

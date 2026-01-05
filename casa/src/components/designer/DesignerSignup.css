@@ -15,7 +15,7 @@
 /* ===================================================
    PAGE WRAPPER (THIS SCOPES EVERYTHING!)
 =================================================== */
-.designer-auth-page {
+.designer-signup-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -28,9 +28,9 @@
 /* ===================================================
    AUTH BOX
 =================================================== */
-.designer-auth-page .auth-box {
+.ds-auth-box {
   width: 100%;
-  max-width: 760px;      /* ⬆ Wider so form is 2-column */
+  max-width: 760px;
   background: var(--white);
   border-radius: var(--radius);
   padding: 40px 38px;
@@ -38,21 +38,21 @@
 }
 
 /* Logo + Subtitle */
-.designer-auth-page .auth-logo {
+.ds-logo {
   text-align: center;
   font-weight: 800;
   font-size: 2rem;
   color: var(--green-dark);
 }
 
-.designer-auth-page .auth-sub {
+.ds-sub {
   text-align: center;
   margin-bottom: 16px;
   color: var(--muted);
   font-size: 1rem;
 }
 
-.designer-auth-page .designer-note {
+.ds-note {
   margin: 14px 0 22px;
   background: var(--green-light);
   padding: 12px 16px;
@@ -61,149 +61,273 @@
   color: var(--green-dark);
 }
 
+/* Auth Error */
+.ds-error {
+  color: #c23b3b;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
 /* ===================================================
-   FORM — NOW 2 COLUMNS
+   FORM — 2 COLUMNS
 =================================================== */
-.designer-auth-page .auth-form {
+.ds-form {
   display: grid;
-  grid-template-columns: 1fr 1fr;   /* ⬅ TWO COLUMNS */
+  grid-template-columns: 1fr 1fr;
   gap: 20px 26px;
 }
 
 /* Full-width fields */
-.designer-auth-page .auth-form .full {
+.ds-field.ds-full {
   grid-column: span 2;
 }
 
 /* Fields */
-.designer-auth-page .field label {
+.ds-field label {
+  display: block;
+  margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-dark);
 }
 
-.designer-auth-page .field input {
-  width: 95%;
+.ds-field input[type="text"],
+.ds-field input[type="email"],
+.ds-field input[type="tel"] {
+  width: 100%;
   padding: 12px 14px;
-  border-radius: var(--radius);
+  border-radius: 12px;
   border: 1px solid var(--green-light);
   background: #f9faf8;
   outline: none;
   transition: var(--ease);
-}
-
-.designer-auth-page .field input:focus {
-  border-color: var(--green-dark);
-  box-shadow: 0 0 0 2px rgba(96,110,82,0.25);
-}
-
-/* ===================================================
-   PASSWORD FIELDS
-=================================================== */
-.designer-auth-page .password-wrap {
-  position: relative;
-}
-
-.designer-auth-page .toggle-visibility {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--green-dark);
-  cursor: pointer;
-}
-
-/* ===================================================
-   PROFILE IMAGE UPLOAD
-=================================================== */
-.designer-auth-page .profile-upload-box {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.designer-auth-page .profile-preview,
-.designer-auth-page .profile-placeholder {
-  width: 120px;
-  height: 120px;
-  border-radius: 14px;
-  object-fit: cover;
-}
-
-.designer-auth-page .profile-preview {
-  border: 2px solid var(--green-light);
-}
-
-.designer-auth-page .profile-placeholder {
-  background: #e8eedf;
-  color: var(--green-dark);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-weight: 600;
+  color: var(--text-dark);
 }
 
-.designer-auth-page .profile-input {
-  margin-top: 6px;
-}
-
-.designer-auth-page .disabled-field {
-  background: #f1f5f1;
-  border: 1px solid #dcdcdc;
-  color: #8f8b84;
+.ds-field input:focus {
+  border-color: var(--green-dark);
+  box-shadow: 0 0 0 2px rgba(96,110,82,0.12);
 }
 
 /* ===================================================
-   BUTTON
+   OTP / ACTION ROW
 =================================================== */
-.designer-auth-page .auth-btn {
-  grid-column: span 2;       /* BUTTON FULL WIDTH */
-  padding: 14px;
+.ds-otp-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ds-otp-input {
+  flex: 1 1 220px;
+  min-width: 150px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--green-light);
+  background: #fff;
+  font-weight: 700;
+}
+
+/* Primary button style (used for main actions) */
+.ds-btn {
+  padding: 12px 16px;
+  border-radius: 12px;
   background: linear-gradient(90deg, var(--green-dark), var(--green));
   color: white;
   border: none;
-  border-radius: var(--radius);
   font-weight: 700;
   cursor: pointer;
-  transition: var(--ease);
-  margin-top: 10px;
+  transition: transform var(--ease), box-shadow var(--ease), filter var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.designer-auth-page .auth-btn:hover {
+.ds-btn:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(96, 110, 82, 0.25);
 }
 
-/* Footer */
-.designer-auth-page .auth-footer {
+.ds-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* a smaller secondary button look */
+.ds-btn.small {
+  padding: 10px 12px;
+  height: 44px;
+}
+
+/* ===================================================
+   PASSWORD / VISIBILITY
+=================================================== */
+.ds-password-wrap {
+  position: relative;
+}
+
+.ds-toggle-visibility {
+  position: absolute;
+  right: 12px;
+  top: 38%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 1.05rem;
+  color: var(--green-dark);
+  cursor: pointer;
+}
+
+/* disabled / placeholder style for readonly input */
+.ds-disabled {
+  background: #f1f5f1;
+  border: 1px solid #dcdcdc;
+  color: var(--muted);
+}
+
+/* ===================================================
+   REVEAL: hidden until email verified
+=================================================== */
+.ds-reveal {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 340ms var(--ease), opacity 260ms var(--ease), margin-top var(--ease);
+  margin-top: 0;
+  pointer-events: none;
+}
+
+.ds-reveal.show {
+  max-height: 1000px; /* big enough to fit content */
+  opacity: 1;
+  margin-top: 14px;
+  pointer-events: auto;
+  display: contents;
+}
+
+/* ensure reveal children spacing */
+.ds-reveal .ds-field {
+  margin-top: 8px;
+}
+
+/* ===================================================
+   FOOTER / LINK
+=================================================== */
+.ds-footer {
   grid-column: span 2;
   text-align: center;
   margin-top: 18px;
   color: var(--muted);
 }
 
-.designer-auth-page .auth-link {
+.ds-link {
   color: var(--green-dark);
   font-weight: 700;
 }
 
 /* ===================================================
-   MOBILE RESPONSIVE
+   RESPONSIVE
 =================================================== */
 @media (max-width: 760px) {
-  .designer-auth-page .auth-box {
+  .ds-auth-box {
     max-width: 100%;
-    padding: 30px 24px;
+    padding: 28px 20px;
   }
 
-  .designer-auth-page .auth-form {
-    display: flex;
+  .ds-form {
+    display: block;
   }
 
-  .designer-auth-page .auth-btn,
-  .designer-auth-page .auth-footer {
-    grid-column: span 1;
+  .ds-field {
+    margin-bottom: 12px;
   }
+
+  .ds-otp-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ds-btn {
+    width: 100%;
+  }
+}
+
+.ds-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ds-password-wrap input {
+  width: 100%;
+  padding: 13px 46px 13px 14px; /* space for eye icon */
+  border-radius: 14px;
+  border: 1.5px solid var(--green-light);
+  background: linear-gradient(180deg, #ffffff, #f7f9f4);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  outline: none;
+
+  transition:
+    border-color var(--ease),
+    box-shadow var(--ease),
+    transform var(--ease);
+}
+
+.ds-password-wrap input:focus {
+  border-color: var(--green-dark);
+  box-shadow:
+    0 0 0 3px rgba(96, 110, 82, 0.18),
+    0 10px 30px rgba(96, 110, 82, 0.25);
+  transform: translateY(-1px);
+}
+
+.ds-toggle-visibility {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.05rem;
+  color: var(--muted);
+  cursor: pointer;
+
+  transition:
+    background var(--ease),
+    color var(--ease),
+    transform var(--ease);
+}
+
+.ds-toggle-visibility:hover {
+  background: rgba(96, 110, 82, 0.12);
+  color: var(--green-dark);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.ds-toggle-visibility:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* =========================
+   BRAND LOGO
+========================= */
+.brand-logo {
+  width: 260px;              /* balanced for signup card */
+  margin: 0 auto 18px;       /* center horizontally */
+  display: block;
+  opacity: 0.95;
 }

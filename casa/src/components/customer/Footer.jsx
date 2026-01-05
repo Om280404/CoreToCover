@@ -1,16 +1,26 @@
 import React from 'react'
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
 import "./Footer.css";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover.png";
 
 export default function Footer() {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
   return (
     <footer className="footer">
       <div className="footer-container">
         {/* Brand */}
         <div className="footer-brand">
-          <h2 className="footer-logo">CASA</h2>
-          <p className="footer-tagline">Reliable materials, delivered fast.</p>
+          <img
+            src={CoreToCoverLogo}
+            alt="CoreToCover"
+            className="footer-logo"
+          />
+          <p className="footer-tagline">
+            Everything your interior project needs, in one place.
+          </p>
         </div>
+
 
         {/* Links */}
         <ul className="footer-links">
@@ -31,7 +41,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="footer-bottom">
-        © {new Date().getFullYear()} CASA. All rights reserved.
+        © {new Date().getFullYear()} Core2Cover. All rights reserved.
       </div>
     </footer>
   );

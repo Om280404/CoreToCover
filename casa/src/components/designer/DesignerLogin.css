@@ -151,3 +151,27 @@
   border-color: var(--green-dark);
   box-shadow: 0 0 0 2px rgba(96, 110, 82, 0.25);
 }
+
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color: #777;
+  font-size: 16px;
+  transition: color 0.2s ease;
+}
+
+.eye-btn:hover {
+  color: #111;
+}

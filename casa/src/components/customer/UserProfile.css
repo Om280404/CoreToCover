@@ -1,18 +1,27 @@
 /* =========================================
-   THEME ROOT — CONSTRUCTIFY (Green Nature Theme)
+   THEME ROOT — CONSTRUCTIFY (Premium Edition)
 ========================================= */
 :root {
-  --page-bg: #F3F7EC;
+  --casa-bg: #f7f8f5;
+;
   --surface: #FFFFFF;
+
   --green-dark: #606E52;
   --green-mid: #91A56E;
   --green-light: #C0CCA4;
 
   --muted: #8F8B84;
-  --border: rgba(96, 110, 82, 0.12);
-  --card-radius: 14px;
-  --shadow: 0 18px 48px rgba(96, 110, 82, 0.08);
-  --focus: rgba(96, 110, 82, 0.22);
+  --border: rgba(96, 110, 82, 0.14);
+
+  --card-radius: 16px;
+
+  /* premium layered shadows */
+  --shadow-sm: 0 8px 20px rgba(96, 110, 82, 0.08);
+  --shadow-md: 0 18px 48px rgba(96, 110, 82, 0.12);
+  --shadow-lg: 0 30px 80px rgba(96, 110, 82, 0.18);
+
+  --focus: rgba(96, 110, 82, 0.25);
+
   --container: 1100px;
   --ease: cubic-bezier(.16, .9, .32, 1);
 
@@ -23,10 +32,13 @@
 /* =========================================
    PAGE WRAPPER
 ========================================= */
+.profile{
+    background: var(--casa-bg, #f7f8f5);
+}
 .profile-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--page-bg), var(--green-light));
-  padding: 16px;
+  background:var(--bg-light);
+  padding: 20px;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
@@ -34,219 +46,226 @@
 }
 
 /* =========================================
-   MAIN GRID LAYOUT
+   MAIN GRID
 ========================================= */
 .profile-container {
   width: 100%;
   max-width: var(--container);
   display: grid;
-  grid-template-columns: minmax(1, 360px) 1fr;
-  gap: 22px;
-  margin: 12px auto 48px;
+  grid-template-columns: minmax(1px, 96%) 1fr;
+  gap: 26px;
+  margin: 16px auto 56px;
 }
 
-/* Tablet layout */
 @media (max-width: 960px) {
   .profile-container {
     grid-template-columns: 1fr;
-    padding: 0;
   }
 }
 
 /* =========================================
-   BACK BUTTON AREA
+   BACK HEADER
 ========================================= */
 .back-button-container {
   width: 100%;
   max-width: var(--container);
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 16px;
+  gap: 14px;
+  padding: 10px 16px;
+  margin-bottom: 6px;
 }
 
-/* BUTTON */
+/* Button */
 .back-button {
-  background: transparent;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   color: var(--green-dark);
-  padding: 9px 14px;
-  border-radius: 12px;
-  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-weight: 800;
   cursor: pointer;
-  transition: var(--ease);
+  transition: transform 220ms var(--ease), box-shadow 220ms var(--ease);
 }
 
 .back-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(96,110,82,0.15);
+  box-shadow: var(--shadow-md);
 }
 
-/* USER SUMMARY TEXT */
+/* User summary */
 .user-summary {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .user-summary .user-name {
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--green-dark);
 }
 
 .user-summary .user-email {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--muted);
 }
 
-/* Mobile adjustments */
-@media (max-width: 460px) {
-  .user-summary .user-name { font-size: 0.95rem; }
-  .user-summary .user-email { font-size: 0.78rem; }
-}
-
 /* =========================================
-   PROFILE CARD
+   PROFILE CARD (LEFT)
 ========================================= */
 .profile-card {
-  background: var(--surface);
-  padding: 20px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.99));
+  backdrop-filter: blur(12px);
+  padding: 22px;
   border-radius: var(--card-radius);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.profile-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -40% -40% auto;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, var(--green-light), transparent 55%);
+  opacity: 0.18;
+  pointer-events: none;
 }
 
 .profile-card hr {
   border: none;
   height: 1px;
-  margin: 10px 0;
-  background: rgba(96,110,82,0.12);
+  margin: 14px 0;
+  background: rgba(96,110,82,0.18);
 }
 
 .user-info p {
-  margin: 6px 0;
+  margin: 8px 0;
+  font-weight: 800;
   color: var(--green-dark);
-  font-weight: 700;
 }
 
 /* =========================================
-   INPUT FIELDS
+   INPUTS
 ========================================= */
-.profile-input {
+.up-profile-input {
   width: 100%;
-  height: 42px;
-  padding: 10px 12px;
+  height: 44px;
+  margin-bottom: 5px;
+  padding: 10px 14px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  font-weight: 600;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.96);
+  font-weight: 700;
   color: var(--green-dark);
-  transition: var(--ease);
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
 }
 
-.profile-input:focus {
+.up-profile-input:focus {
   border-color: var(--green-mid);
-  box-shadow: 0 0 0 4px var(--focus);
-}
-
-/* Small screen input fix */
-@media (max-width: 420px) {
-  .profile-input {
-    height: 38px;
-    font-size: 0.9rem;
-  }
+  box-shadow: 0 0 0 5px var(--focus);
 }
 
 /* =========================================
    BUTTON GROUP
 ========================================= */
+.up-profile-button {
+  padding: 11px 18px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  border: none;
+}
 .button-group {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .profile-button {
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 11px 18px;
+  border-radius: 14px;
+  font-weight: 800;
   cursor: pointer;
-  transition: var(--ease);
-  font-weight: 700;
-  border: 1px solid transparent;
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  border: none;
 }
 
-.profile-button.edit {
+/* Variants */
+.up-profile-button.up-save {
   background: linear-gradient(90deg, var(--green-dark), var(--green-mid));
-  color: var(--surface);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
-.profile-button.logout {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--green-dark);
+.up-profile-button:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
-.profile-button.save {
-  background: linear-gradient(90deg, var(--green-mid), var(--green-dark));
-  color: var(--surface);
+/* ACCESSIBILITY */
+.up-profile-input:focus,
+.up-profile-button:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
 }
 
 /* =========================================
-   ORDERS COLUMN
+   ORDERS COLUMN (RIGHT)
 ========================================= */
 .orders {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .orders-scroll {
   max-height: 65vh;
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 10px;
 }
 
-/* Mobile fix */
-@media (max-width: 960px) {
-  .orders-scroll {
-    max-height: none;
-    overflow-y: visible;
-  }
+.orders-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.orders-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--green-mid), var(--green-dark));
+  border-radius: 10px;
 }
 
 .myorders-card {
-  background: var(--surface);
-  padding: 14px;
-  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.99));
+  padding: 16px;
+  border-radius: 14px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
 }
 
 /* =========================================
-   SMALL / EXTRA-SMALL RESPONSIVENESS
+   RESPONSIVE
 ========================================= */
 @media (max-width: 600px) {
   .profile-container {
-    gap: 18px;
+    gap: 20px;
   }
 
   .profile-card,
   .myorders-card {
-    padding: 16px;
-  }
-
-  .back-button-container {
-    padding: 0 0;
+    padding: 18px;
   }
 }
 
 @media (max-width: 360px) {
-  .profile-page {
-    padding: 6px;
-  }
-
   .profile-button {
     width: 100%;
     text-align: center;
@@ -264,5 +283,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

@@ -1,38 +1,50 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DesignerPortfolio.css";
+import { saveDesignerPortfolio } from "../../api/designer";
 
 const DesignerPortfolio = () => {
   const navigate = useNavigate();
+  const designerId = localStorage.getItem("designerId");
 
   const [works, setWorks] = useState([
     { image: null, preview: null, description: "" },
   ]);
 
-  // explicit derived state so UI never lags behind
   const [isFormEmpty, setIsFormEmpty] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  /* =========================
+     CHECK EMPTY STATE
+  ========================= */
   useEffect(() => {
     const empty = works.every(
       (w) =>
-        (w.image === null || w.image === undefined) &&
+        !w.image &&
         (typeof w.description !== "string" || w.description.trim() === "")
     );
     setIsFormEmpty(empty);
   }, [works]);
 
+  /* =========================
+     ADD WORK
+  ========================= */
   const addWork = () => {
     if (works.length >= 5) return;
     setWorks((s) => [...s, { image: null, preview: null, description: "" }]);
   };
 
+  /* =========================
+     IMAGE CHANGE
+  ========================= */
   const handleImageChange = (index, file) => {
     if (!file) return;
+
     setWorks((prev) => {
       const updated = [...prev];
-      // revoke old preview if present
       if (updated[index].preview) {
-        try { URL.revokeObjectURL(updated[index].preview); } catch {}
+        URL.revokeObjectURL(updated[index].preview);
       }
       updated[index] = {
         ...updated[index],
@@ -43,6 +55,9 @@ const DesignerPortfolio = () => {
     });
   };
 
+  /* =========================
+     DESCRIPTION CHANGE
+  ========================= */
   const handleDescriptionChange = (index, value) => {
     setWorks((prev) => {
       const updated = [...prev];
@@ -51,44 +66,83 @@ const DesignerPortfolio = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  /* =========================
+     SUBMIT PORTFOLIO
+  ========================= */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isFormEmpty) return; // fail-safe
-    // TODO: upload logic
-    navigate("/designer-dashboard");
+    setError("");
+
+    if (!designerId) {
+      setError("Designer not found. Please sign up again.");
+      return;
+    }
+
+    if (isFormEmpty) {
+      navigate("/designerdashboard");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("designerId", designerId);
+
+      works.forEach((w) => {
+        if (w.image) {
+          formData.append("images", w.image);
+          formData.append("descriptions", w.description || "");
+        }
+      });
+
+      await saveDesignerPortfolio(formData);
+      navigate("/designerdashboard");
+    } catch (err) {
+      console.error("PORTFOLIO ERROR:", err);
+      if (err.response?.status === 400 || err.response?.status === 404) {
+        setError(err.response.data.message);
+      } else {
+        setError("Server error. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // cleanup object URLs on unmount
+  /* =========================
+     CLEANUP PREVIEWS
+  ========================= */
   useEffect(() => {
     return () => {
       works.forEach((w) => {
-        if (w.preview) {
-          try { URL.revokeObjectURL(w.preview); } catch {}
-        }
+        if (w.preview) URL.revokeObjectURL(w.preview);
       });
     };
   }, [works]);
 
   return (
-    <div className="portfolio-page">
-      <div className="portfolio-box reveal">
-        <h1 className="portfolio-title">Show Your Best Work</h1>
-        <p className="portfolio-sub">
+    <div className="dp-page">
+      <div className="dp-box dp-reveal">
+        <h1 className="dp-title">Show Your Best Work</h1>
+        <p className="dp-subtitle">
           Add 4–5 examples of your previous designs. <strong>(Optional)</strong>
         </p>
 
-        <form onSubmit={handleSubmit} className="portfolio-form">
+        {error && <p className="dp-error">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="dp-form">
           {works.map((item, index) => (
-            <div key={index} className="work-block">
-              <div className="image-upload">
+            <div key={index} className="dp-work">
+              <div className="dp-image-upload">
                 {item.preview ? (
                   <img
                     src={item.preview}
                     alt="Preview"
-                    className="work-preview"
+                    className="dp-preview"
                   />
                 ) : (
-                  <label className="upload-placeholder">
+                  <label className="dp-upload-placeholder">
                     <input
                       type="file"
                       accept="image/*"
@@ -102,37 +156,36 @@ const DesignerPortfolio = () => {
               </div>
 
               <textarea
-                className="work-desc"
+                className="dp-description"
                 placeholder="Write something about this work..."
                 value={item.description}
-                onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                onChange={(e) =>
+                  handleDescriptionChange(index, e.target.value)
+                }
               />
             </div>
           ))}
 
           {works.length < 5 && (
-            <button
-              type="button"
-              className="add-more-btn"
-              onClick={addWork}
-            >
+            <button type="button" className="dp-add-btn" onClick={addWork}>
               + Add Another Work
             </button>
           )}
 
-          <div className="actions-row">
+          <div className="dp-actions">
             <button
               type="submit"
-              className={`submit-portfolio-btn ${isFormEmpty ? "disabled" : ""}`}
-              disabled={isFormEmpty}
-              onClick={() => navigate("/designerdashboard")}
+              className={`dp-submit ${
+                isFormEmpty ? "dp-disabled" : ""
+              }`}
+              disabled={loading}
             >
-              Save & Continue
+              {loading ? "Saving..." : "Save & Continue"}
             </button>
 
             <button
               type="button"
-              className="skip-btn"
+              className="dp-skip"
               onClick={() => navigate("/designerdashboard")}
             >
               Skip for Now →

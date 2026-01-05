@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BusinessDetails.css";
+import { createSellerBusinessDetails } from "../../api/seller";
+
 
 const BusinessDetails = () => {
   const navigate = useNavigate();
@@ -31,52 +33,41 @@ const BusinessDetails = () => {
       return;
     }
 
-    const sellerId = localStorage.getItem("SellerId");
+    // ✅ FIXED KEY
+    const sellerId = localStorage.getItem("sellerId");
 
     if (!sellerId) {
       alert("Seller not logged in. Please sign up again.");
+      navigate("/sellerlogin");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "http://localhost:3001/seller/business-details",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sellerId,
-            businessName: business.businessName,
-            sellerType: business.sellerType,
-            address: business.address,
-            city: business.city,
-            state: business.state,
-            pincode: business.pincode,
-            gst: business.gst,
-          }),
-        }
+      await createSellerBusinessDetails({
+        sellerId: Number(sellerId),
+        businessName: business.businessName,
+        sellerType: business.sellerType,
+        address: business.address,
+        city: business.city,
+        state: business.state,
+        pincode: business.pincode,
+        gst: business.gst,
+      });
+
+      alert("Business details saved successfully ✅");
+      navigate("/sellerKYC");
+    } catch (err) {
+      alert(
+        err?.response?.data?.message ||
+        "Failed to save business details"
       );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to save business details");
-        return;
-      }
-
-      alert("Business details saved successfully");
-      navigate("/sellerdashboard");
-    } catch (error) {
-      console.error("Business details error:", error);
-      alert("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="business-container">

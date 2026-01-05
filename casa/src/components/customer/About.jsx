@@ -1,70 +1,116 @@
-// File: src/pages/About.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2.png";
+import CoreToCoverTitle from "../../assets/logo/CoreToCover_1.png";
+
 export default function About() {
+  const Brand = ({ children }) => <span className="brand">{children}</span>;
+
+  /* =========================
+     VIEWPORT DETECTION
+  ========================= */
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 900px)");
+
+    const handleChange = (e) => setIsMobileOrTablet(e.matches);
+
+    setIsMobileOrTablet(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   return (
     <section className="about-page">
+      {/* =========================
+          HERO
+      ========================= */}
       <header className="about-hero">
         <div className="about-hero-inner">
           <div className="hero-copy">
-            <h1 className="hero-title">
-              Casa — premium marketplace for home interiors & materials
-            </h1>
-            <p className="hero-sub">
-              Casa is an e-commerce platform for curated home interior products,
-              raw materials used to craft interiors, and a freelancing hub where
-              customers can hire skilled interior designers directly.
-            </p>
+            {/* ---------- TITLE ---------- */}
+            {isMobileOrTablet ? (
+              /* MOBILE / TABLET: logo LEFT, text RIGHT (inline) */
+              <p className="mobile-brand-text">
+                <img
+                  src={CoreToCoverTitle}
+                  alt="CoreToCover"
+                  className="inline-brand-logo"
+                />
+                A unified platform where customers can discover curated interior products,
+                source high-quality raw materials, and collaborate with skilled freelance
+                interior designers — all in one place.
+              </p>
 
+            ) : (
+              /* DESKTOP: keep original H1 + paragraph */
+              <>
+                <h1 className="hero-title">
+                  <Brand>Core2Cover</Brand> — a premium marketplace for home interiors & materials
+                </h1>
+
+                <p className="hero-sub">
+                  <Brand>Core2Cover</Brand> is a unified platform where customers can discover
+                  curated interior products, source high-quality raw materials, and
+                  directly collaborate with skilled freelance interior designers —
+                  all in one place.
+                </p>
+              </>
+            )}
+
+
+            {/* ---------- CTAs ---------- */}
             <div className="hero-ctas">
-              <Link to="/home" className="btn btn-primary" aria-label="Explore Marketplace">
+              <Link to="/" className="btn btn-primary">
                 Explore Marketplace
               </Link>
-              <Link to="/signup" className="btn btn-ghost" aria-label="Create an account">
+              <Link
+                to="/signup"
+                className="btn btn-ghost"
+                aria-label="Create an account"
+              >
                 Create an account
               </Link>
             </div>
           </div>
         </div>
 
-        <figure className="hero-art" aria-hidden>
-          <svg viewBox="0 0 800 400" className="art-svg" role="img" aria-hidden>
-            <defs>
-              <linearGradient id="g1" x1="0" x2="1">
-                <stop offset="0" stopColor="#dffaf0" />
-                <stop offset="1" stopColor="#e8fff6" />
-              </linearGradient>
-              <linearGradient id="g2" x1="0" x2="1">
-                <stop offset="0" stopColor="#a7f3d0" />
-                <stop offset="1" stopColor="#34d399" />
-              </linearGradient>
-            </defs>
-
-            <rect width="800" height="400" fill="url(#g1)" />
-            <g transform="translate(40,40)">
-              <ellipse cx="560" cy="260" rx="240" ry="100" fill="url(#g2)" opacity="0.22" />
-              <rect x="40" y="40" width="420" height="180" rx="18" fill="#fff" opacity="0.9" stroke="#e6f6ee" />
-            </g>
-          </svg>
-        </figure>
+        {/* ---------- DESKTOP HERO LOGO ONLY ---------- */}
+        {!isMobileOrTablet && (
+          <div className="hero-art" aria-hidden>
+            <img src={CoreToCoverLogo} alt="CoreToCover logo" />
+          </div>
+        )}
       </header>
 
+      {/* =========================
+          MAIN CONTENT
+      ========================= */}
       <main className="about-main">
+        {/* =========================
+            VISION
+        ========================= */}
         <section className="about-story card">
           <div className="card-left">
             <h2>Our vision</h2>
+
             <p>
-              Casa was built to simplify how people discover, purchase, and
-              execute home interior projects. From finished interior products to
-              raw materials like wood, stone, fittings, and hardware — everything
-              lives in one seamless marketplace.
+              <Brand>Core2Cover</Brand> was built to simplify how people plan,
+              purchase, and execute home interior projects. Instead of navigating
+              fragmented offline markets, customers get access to finished
+              interior products and essential raw materials — seamlessly, on one
+              platform.
             </p>
+
             <p>
-              Beyond products, Casa connects customers directly with verified
-              freelance interior designers, enabling transparent collaboration,
-              customization, and execution.
+              Beyond commerce, <Brand>Core2Cover</Brand> enables direct
+              collaboration between customers and verified freelance interior
+              designers, supporting transparent communication, customization,
+              and professional project execution.
             </p>
           </div>
 
@@ -84,49 +130,54 @@ export default function About() {
           </aside>
         </section>
 
+        {/* =========================
+            LEADERSHIP
+        ========================= */}
         <section className="about-founders card">
           <div className="founders-hero">
             <h2>Leadership</h2>
             <p className="muted">
-              A focused team building a premium, modular ecosystem that empowers
-              sellers and delights customers.
+              A focused team building a trust-driven ecosystem for home interiors.
             </p>
           </div>
 
           <div className="founders-grid">
-            <div className="founder-feature" role="group" aria-labelledby="founder-om">
+            {/* FOUNDER */}
+            <div className="founder-feature">
               <div className="founder-info">
-                <div id="founder-om" className="founder-name">Om Karande</div>
-                <div className="founder-role">Founder & Product Lead</div>
+                <div className="founder-name">Om Karande</div>
+                <div className="founder-role">Founder & CEO</div>
                 <div className="founder-bio">
-                  Om leads the vision, product design, and frontend experience,
-                  shaping Casa as a modern e-commerce platform for interiors.
+                  Om leads the vision, product strategy, and frontend experience,
+                  shaping <Brand>Core2Cover</Brand> as a premium design-forward
+                  platform.
                 </div>
               </div>
             </div>
 
-            <div className="cofounders" aria-label="Co-founders">
+            {/* CO-FOUNDERS */}
+            <div className="cofounders">
               <h3 className="cofounders-title">Co-founders</h3>
 
               <div className="founder-list">
-                <div className="founder" role="group" aria-labelledby="cofounder-atharv">
+                <div className="founder">
                   <div className="founder-info">
-                    <div id="cofounder-atharv" className="founder-name">Atharv Khot</div>
-                    <div className="founder-role">Backend Engineer</div>
+                    <div className="founder-name">Atharv Khot</div>
+                    <div className="founder-role">Co-Founder & CTO</div>
                     <div className="founder-bio">
-                      Atharv builds scalable backend systems, APIs, and data
-                      architecture powering Casa’s marketplace and services.
+                      Atharv architects scalable backend systems and APIs
+                      powering <Brand>Core2Cover</Brand>.
                     </div>
                   </div>
                 </div>
 
-                <div className="founder" role="group" aria-labelledby="cofounder-soham">
+                <div className="founder">
                   <div className="founder-info">
-                    <div id="cofounder-soham" className="founder-name">Soham Phatak</div>
-                    <div className="founder-role">Backend Engineer</div>
+                    <div className="founder-name">Soham Phatak</div>
+                    <div className="founder-role">Co-Founder & VP</div>
                     <div className="founder-bio">
-                      Soham focuses on performance, authentication, and
-                      integrations to ensure reliable transactions and workflows.
+                      Soham oversees platform performance, reliability, and
+                      technical strategy.
                     </div>
                   </div>
                 </div>
@@ -135,33 +186,46 @@ export default function About() {
           </div>
         </section>
 
+        {/* =========================
+            VALUES
+        ========================= */}
         <section className="about-values card">
           <h2>What we stand for</h2>
           <ul className="values-list">
-            <li><strong>Curated quality:</strong> Carefully selected products and materials for premium interiors.</li>
-            <li><strong>Seller empowerment:</strong> Tools that help sellers and designers grow sustainably.</li>
-            <li><strong>Customer delight:</strong> Clear pricing, rich choice, and smooth buying experiences.</li>
-            <li><strong>Modular ecosystem:</strong> Products, materials, and services working together.</li>
-            <li><strong>Trust & design:</strong> Thoughtful UX that builds confidence at every step.</li>
+            <li><strong>Curated quality:</strong> Premium products and materials selected for long-term value.</li>
+            <li><strong>Seller & designer empowerment:</strong> Fair tools and clear economics.</li>
+            <li><strong>Customer confidence:</strong> Transparent pricing and trusted professionals.</li>
+            <li><strong>Modular ecosystem:</strong> Products, materials, and services that work together.</li>
+            <li><strong>Trust by design:</strong> UX decisions that reduce friction.</li>
           </ul>
         </section>
 
-        <section className="about-cta card">
-          <h2>Build your space with Casa</h2>
-          <p>
-            Explore interior products, source raw materials, or hire skilled
-            designers — all from one premium platform.
+        {/* =========================
+            CTA
+        ========================= */}
+        <section className="about-cta-section card">
+          <h2 className="cta-title">
+            Build your space with <Brand>Core2Cover</Brand>
+          </h2>
+
+          <p className="cta-description">
+            Explore products, source materials, or collaborate with designers —
+            all from one platform.
           </p>
-          <div className="cta-row">
-            <Link to="/signup" className="btn btn-primary large" aria-label="Create account">
+
+          <div className="cta-actions">
+            <Link to="/signup" className="cta-button">
               Get started
             </Link>
           </div>
 
-          <div className="credits">
-            <p><strong>Credits</strong></p>
-            <p>Founder & Frontend — Om Karande</p>
-            <p>Backend Engineers — Atharv Khot, Soham Phatak</p>
+          <div className="cta-credits">
+            <p className="credits-title">Credits</p>
+            <p>Founder & CEO — Om Karande</p>
+            <p>Co-Founder & CTO — Atharv Khot</p>
+            <p>Co-Founder & VP — Soham Phatak</p>
+            <p>Design & Marketing Head — Prathamesh Mali</p>
+            <p>CFO — Om Mali</p>
           </div>
         </section>
       </main>
