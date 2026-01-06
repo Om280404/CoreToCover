@@ -195,3 +195,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 426px){
+  .bs-profile-shell{
+    margin-left: 0%;
+  }
+}
