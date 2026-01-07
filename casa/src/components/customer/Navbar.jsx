@@ -1,6 +1,6 @@
 // src/components/Navbar/Navbar.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";  
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css";
 import {
   FaSearch,
@@ -34,16 +34,36 @@ const Navbar = () => {
 
   /* =========================
      HANDLE SEARCH
+     - include category slug in querystring so SearchResults can filter
   ========================= */
   const handleSearch = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const query = searchQuery.trim();
-    if (!query) return;
+  const params = new URLSearchParams(location.search);
+  const query = searchQuery.trim();
+  if (!query) return;
 
-    navigate(`/searchresults?search=${encodeURIComponent(query)}`);
-    setMenuOpen(false);
-  };
+  let category = null;
+
+  // 1️⃣ If already on searchresults → preserve category
+  if (location.pathname === "/searchresults") {
+    category = params.get("category");
+  }
+
+  // 2️⃣ If coming from designers page → force designers category
+  else if (
+    location.pathname.includes("designer") ||
+    location.state?.page === "Designers"
+  ) {
+    category = "designers";
+  }
+
+  navigate(
+    `/searchresults?search=${encodeURIComponent(query)}${
+      category ? `&category=${category}` : ""
+    }`
+  );
+};
 
   return (
     <>
@@ -126,11 +146,10 @@ const Navbar = () => {
       {/* Mobile Search */}
       <div className="search-container">
         <form onSubmit={handleSearch} className="search_form mobile">
-          {/* <FaSearch className="search-ico" /> */}
           <input
             className="search_input"
             type="text"
-            placeholder="Search products..."
+            placeholder={`Search ${currentPageTitle}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

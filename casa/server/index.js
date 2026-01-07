@@ -3735,6 +3735,132 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
+/* ============================
+   SEARCH DESIGNERS
+============================ */
+app.get("/designers/search", async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+    if (!q) return res.json([]);
+
+    const designers = await prisma.designer.findMany({
+      where: {
+        availability: "Available",
+        OR: [
+          { fullname: { contains: q, mode: "insensitive" } },
+          { location: { contains: q, mode: "insensitive" } },
+          {
+            profile: {
+              OR: [
+                { bio: { contains: q, mode: "insensitive" } },
+                { designerType: { contains: q, mode: "insensitive" } },
+              ],
+            },
+          },
+        ],
+      },
+      include: { profile: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(
+      designers.map((d) => ({
+        id: d.id,
+        name: d.fullname,
+        category: d.profile?.designerType || "Designer",
+        description: d.profile?.bio || "",
+        location: d.location || "",
+        availability: d.availability,
+        images: d.profile?.profileImage
+          ? [`http://localhost:3001/${d.profile.profileImage}`]
+          : [],
+      }))
+    );
+  } catch (err) {
+    console.error("DESIGNER SEARCH ERROR:", err);
+    res.status(500).json([]);
+  }
+});
+
+// products search (supports optional `type` param for readymade/raw)
+app.get("/products/search", async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+    const type = req.query.type?.trim(); // optional (e.g. "readymade-products" or "raw-materials" or "readymade")
+
+    if (!q) return res.json([]);
+
+    // base where clause
+    const where = {
+      AND: [
+        {
+          availability: {
+            not: "discontinued",
+          },
+        },
+        {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { category: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+          ],
+        },
+      ],
+    };
+
+    // if a "type" was provided, add a filter that tries productType first then category
+    if (type) {
+      where.AND.push({
+        OR: [
+          { productType: { equals: type } }, // exact productType (if you store 'readymade' / 'raw')
+          { category: { contains: type, mode: "insensitive" } }, // or match category text
+        ],
+      });
+    }
+
+    const products = await prisma.product.findMany({
+      where,
+      include: {
+        seller: {
+          select: {
+            name: true,
+            business: { select: { city: true, state: true } },
+          },
+        },
+        ratings: { select: { stars: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const formatted = products.map((p) => {
+      const total = p.ratings.reduce((sum, r) => sum + r.stars, 0);
+      const count = p.ratings.length;
+      const avgRating = count ? total / count : 0;
+
+      return {
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        description: p.description,
+        availability: p.availability,
+        productType: p.productType,
+        images: p.images.map((img) => `http://localhost:3001/${img}`),
+        video: p.video ? `http://localhost:3001/${p.video}` : null,
+        sellerId: p.sellerId,
+        seller: p.seller.name,
+        sellerBusiness: p.seller.business,
+        avgRating: Number(avgRating.toFixed(1)),
+        ratingCount: count,
+      };
+    });
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("SEARCH PRODUCTS ERROR:", err);
+    res.status(500).json([]);
+  }
+});
 
 
 
