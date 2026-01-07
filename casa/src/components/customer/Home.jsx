@@ -21,6 +21,8 @@ import Footer from "./Footer";
 
 // SLIDESHOW CARD
 const Brand = ({ children }) => <span className="brand">{children}</span>;
+const BrandBold = ({ children }) => (<span className="brand brand-bold">{children}</span>);
+
 const Card = ({ images, title, onClick }) => {
 
   const [index, setIndex] = useState(0);
@@ -70,7 +72,7 @@ const Home = () => {
                   alt="CoreToCover"
                   className="nav-logo"
                 />
-                <Brand>Core2Cover</Brand>
+                <BrandBold>Core2Cover</BrandBold>
               </span>
             </Link>
           </div>

@@ -14,6 +14,8 @@ import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
 
 const Navbar = () => {
   const Brand = ({ children }) => <span className="brand">{children}</span>;
+  const BrandBold = ({ children }) => (<span className="brand-bold">{children}</span>);
+
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +79,7 @@ const Navbar = () => {
                   alt="CoreToCover"
                   className="nav-logo"
                 />
-                <Brand>Core2Cover</Brand>
+                <BrandBold>Core2Cover</BrandBold>
               </span>
             </Link>
           </div>

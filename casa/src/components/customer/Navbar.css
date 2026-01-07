@@ -8,11 +8,28 @@
   --white: #FFFFFF;
   --text-dark: #474747;
   --text-muted: #8F8B84;
+  --brand-font-weight: 400;
+  --brand-font-bold-weight: 700;
+
 
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.12);
 
   --font-ui: "Helvetica", Arial, sans-serif;
   --font-heading: "Playfair Display", serif;
+}
+
+@font-face {
+  font-family: "CaviarDreams";
+  src: url("/fonts/CaviarDreams.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CaviarDreams";
+  src: url("/fonts/CaviarDreams_Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
 }
 
 /* =========================================
@@ -42,13 +59,16 @@
 /* =========================================
    LOGO
 ========================================= */
-.logo {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--green-dark);
-  letter-spacing: 1px;
-  white-space: nowrap;
-  font-family: var(--font-heading);
+.brand {
+  font-family: var(--brand-font);
+  font-weight: var(--brand-font-weight);
+  letter-spacing: -0.4px;
+  color: var(--olive);
+}
+
+.brand-bold {
+  font-family: var(--brand-font-bold);
+  font-weight: var(--brand-font-bold-weight);
 }
 
 /* =========================================
