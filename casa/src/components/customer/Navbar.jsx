@@ -126,7 +126,7 @@ const Navbar = () => {
       {/* Mobile Search */}
       <div className="search-container">
         <form onSubmit={handleSearch} className="search_form mobile">
-          <FaSearch className="search-ico" />
+          {/* <FaSearch className="search-ico" /> */}
           <input
             className="search_input"
             type="text"

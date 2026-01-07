@@ -98,7 +98,7 @@ const Contact = () => {
                     <div className="contact-right">
                         <h3>Get in Touch</h3>
                         <p><strong>Email:</strong> team.casa.in@gmail.com</p>
-                        {/* <p><strong>Phone:</strong> +91 98765 43210</p> */}
+                        <p><strong>Phone:</strong> +91 8275922422</p>
                         <p><strong>Office Address:</strong>
                             Vishrambag, Sangli, Maharashtra, India
                         </p>

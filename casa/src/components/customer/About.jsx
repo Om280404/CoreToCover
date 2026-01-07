@@ -7,6 +7,7 @@ import CoreToCoverTitle from "../../assets/logo/CoreToCover_1.png";
 
 export default function About() {
   const Brand = ({ children }) => <span className="brand">{children}</span>;
+  const BrandBold = ({ children }) => (<span className="brand brand-bold">{children}</span>);
 
   /* =========================
      VIEWPORT DETECTION
@@ -50,7 +51,7 @@ export default function About() {
               /* DESKTOP: keep original H1 + paragraph */
               <>
                 <h1 className="hero-title">
-                  <Brand>Core2Cover</Brand> — a premium marketplace for home interiors & materials
+                  <BrandBold>Core2Cover</BrandBold> — a premium marketplace for home interiors & materials
                 </h1>
 
                 <p className="hero-sub">
