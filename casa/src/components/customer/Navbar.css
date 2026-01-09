@@ -10,6 +10,9 @@
   --text-muted: #8F8B84;
   --brand-font-weight: 400;
   --brand-font-bold-weight: 700;
+  --brand-font: var(--font-heading);
+  --brand-font-bold: "CaviarDreams", var(--font-heading);
+
 
 
   --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.12);
@@ -69,6 +72,12 @@
 .brand-bold {
   font-family: var(--brand-font-bold);
   font-weight: var(--brand-font-bold-weight);
+}
+
+@media (max-width: 426px) {
+  .brand {
+    display: none;
+  }
 }
 
 /* =========================================
@@ -281,6 +290,7 @@
 /* =========================================
    LOGO AREA
 ========================================= */
+
 .nav-left {
   display: flex;
   align-items: center;
@@ -290,28 +300,80 @@
 .nav-logo-link {
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0;               /* remove extra padding so alignment is precise */
   text-decoration: none;
+  gap: 8px;
 }
 
+/* wrapper keeps vertical rhythm and spacing */
 .nav-logo-wrap {
   display: flex;
   align-items: center;
-  height: 32px;
-  overflow: visible;
+  gap: 10px;
+  height: 40px;            /* container height = logo height approx */
 }
 
+/* actual logo image — control with height (layout-friendly) */
 .nav-logo {
-  width: 60px;
-  transform: scale(1.35);
-  transform-origin: left center;
+  height: 40px;           /* primary size for desktop */
+  width: auto;
+  display: block;
+  object-fit: contain;
+  /* remove transform entirely */
 }
 
-@media (max-width: 480px) {
-  .nav-logo {
-    transform: scale(1.15);
-  }
+/* brand text (light) */
+.brand {
+  font-family: var(--brand-font);
+  font-weight: var(--brand-font-weight, 400);
+  color: var(--green-dark);
+  font-size: 1.05rem;     /* desktop size */
+  line-height: 1;
+  letter-spacing: -0.4px;
+  display: inline-block;
+  white-space: nowrap;
 }
+
+/* brand bold (used inline next to .brand) */
+.brand-bold {
+  font-family: var(--brand-font-bold);
+  font-weight: var(--brand-font-bold-weight, 700);
+  font-size: 1.05rem;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+/* keep navbar height consistent */
+.navbar {
+  min-height: 64px;
+}
+
+/* RESPONSIVE SIZES */
+@media (max-width: 900px) {
+  .nav-logo-wrap { height: 36px; }
+  .nav-logo { height: 36px; }
+  .brand, .brand-bold { font-size: 0.95rem; }
+}
+
+@media (max-width: 600px) {
+  .nav-logo-wrap { height: 30px; gap: 8px; }
+  .nav-logo { height: 30px; }
+
+  /* brand becomes smaller rather than removed */
+  .brand, .brand-bold {
+    display: none;
+  }
+
+  /* if you still want to hide full text on very small screens, uncomment below */
+  /* .brand { display:none; } */
+}
+
+@media (max-width: 360px) {
+  .nav-logo { height: 26px; }
+  .brand, .brand-bold { font-size: 0.78rem; }
+}
+
+
 
 /* =========================================
    OVERRIDE GLOBAL SUBMIT BUTTON (SEARCH ONLY)
@@ -366,7 +428,7 @@
   }
 
   .nav-logo {
-    width: 46px;
+    width: 56px;
   }
 
   .nav-logo-wrap {
