@@ -300,7 +300,8 @@
 .nav-logo-link {
   display: flex;
   align-items: center;
-  padding: 0;               /* remove extra padding so alignment is precise */
+  padding: 0;
+  /* remove extra padding so alignment is precise */
   text-decoration: none;
   gap: 8px;
 }
@@ -309,13 +310,15 @@
 .nav-logo-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 40px;            /* container height = logo height approx */
+  gap: 4px;        
+  height: 40px;
 }
+
 
 /* actual logo image — control with height (layout-friendly) */
 .nav-logo {
-  height: 40px;           /* primary size for desktop */
+  height: 38px;
+  /* primary size for desktop */
   width: auto;
   display: block;
   object-fit: contain;
@@ -327,7 +330,8 @@
   font-family: var(--brand-font);
   font-weight: var(--brand-font-weight, 400);
   color: var(--green-dark);
-  font-size: 1.05rem;     /* desktop size */
+  font-size: 1.05rem;
+  /* desktop size */
   line-height: 1;
   letter-spacing: -0.4px;
   display: inline-block;
@@ -340,7 +344,7 @@
   font-weight: var(--brand-font-bold-weight, 700);
   font-size: 1.05rem;
   line-height: 1;
-  margin-left: 4px;
+  /* margin-left: 4px; */
 }
 
 /* keep navbar height consistent */
@@ -350,17 +354,33 @@
 
 /* RESPONSIVE SIZES */
 @media (max-width: 900px) {
-  .nav-logo-wrap { height: 36px; }
-  .nav-logo { height: 36px; }
-  .brand, .brand-bold { font-size: 0.95rem; }
+  .nav-logo-wrap {
+    height: 36px;
+  }
+
+  .nav-logo {
+    height: 36px;
+  }
+
+  .brand,
+  .brand-bold {
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 600px) {
-  .nav-logo-wrap { height: 30px; gap: 8px; }
-  .nav-logo { height: 30px; }
+  .nav-logo-wrap {
+    height: 30px;
+    gap: 8px;
+  }
+
+  .nav-logo {
+    height: 30px;
+  }
 
   /* brand becomes smaller rather than removed */
-  .brand, .brand-bold {
+  .brand,
+  .brand-bold {
     display: none;
   }
 
@@ -369,8 +389,14 @@
 }
 
 @media (max-width: 360px) {
-  .nav-logo { height: 26px; }
-  .brand, .brand-bold { font-size: 0.78rem; }
+  .nav-logo {
+    height: 26px;
+  }
+
+  .brand,
+  .brand-bold {
+    font-size: 0.78rem;
+  }
 }
 
 
@@ -414,7 +440,7 @@
 
 @media (max-width: 900px) {
   .nav-logo {
-    width: 48px;
+    width: 36px;
   }
 
   .brand {
@@ -428,7 +454,7 @@
   }
 
   .nav-logo {
-    width: 56px;
+    width: 30px;
   }
 
   .nav-logo-wrap {
@@ -438,6 +464,6 @@
 
 @media (max-width: 360px) {
   .nav-logo {
-    width: 42px;
+    width: 26px;
   }
 }

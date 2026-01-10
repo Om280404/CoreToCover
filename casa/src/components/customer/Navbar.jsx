@@ -10,7 +10,7 @@ import {
   FaTimes,
   FaUserGraduate,
 } from "react-icons/fa";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png";
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2.png";
 
 const Navbar = () => {
   const Brand = ({ children }) => <span className="brand">{children}</span>;
@@ -78,8 +78,8 @@ const Navbar = () => {
                   src={CoreToCoverLogo}
                   alt="CoreToCover"
                   className="nav-logo"
-                />
-                <BrandBold>Core2Cover</BrandBold>
+                  />
+                  <BrandBold>Core2Cover</BrandBold>
               </span>
             </Link>
           </div>

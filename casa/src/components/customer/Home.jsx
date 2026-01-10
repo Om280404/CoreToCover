@@ -16,7 +16,7 @@ import Raw2 from "../../assets/images/Raw2.png";
 import Raw3 from "../../assets/images/Raw3.png";
 import Designer1 from "../../assets/images/Designer1.png";
 import Designer2 from "../../assets/images/Designer2.png";
-import CoreToCoverLogo from "../../assets/logo/CoreToCover_2_.png"
+import CoreToCoverLogo from "../../assets/logo/CoreToCover_2.png"
 import Footer from "./Footer";
 
 // SLIDESHOW CARD
