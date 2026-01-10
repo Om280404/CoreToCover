@@ -88,6 +88,7 @@
 .brand-bold {
   font-family: var(--brand-font-bold);
   font-weight: var(--brand-font-bold-weight);
+  font-size: 3.05rem;
 }
 
 /* =========================

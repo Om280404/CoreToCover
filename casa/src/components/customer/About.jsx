@@ -206,7 +206,7 @@ export default function About() {
         ========================= */}
         <section className="about-cta-section card">
           <h2 className="cta-title">
-            Build your space with <Brand>Core2Cover</Brand>
+            Build your space with <BrandBold>Core2Cover</BrandBold>
           </h2>
 
           <p className="cta-description">
